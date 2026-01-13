@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Plantform"
+rootProject.name = "Digital Diary"
 include(":app")
