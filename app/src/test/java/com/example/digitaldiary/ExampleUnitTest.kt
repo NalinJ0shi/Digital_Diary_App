@@ -1,4 +1,4 @@
-package com.example.plantform
+package com.example.digitaldiary
 
 import org.junit.Test
 

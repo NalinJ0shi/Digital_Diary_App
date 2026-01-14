@@ -1,4 +1,4 @@
-package com.example.plantform
+package com.example.digitaldiary
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow

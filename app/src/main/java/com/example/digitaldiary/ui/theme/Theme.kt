@@ -1,6 +1,5 @@
-package com.example.plantform.ui.theme
+package com.example.digitaldiary.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

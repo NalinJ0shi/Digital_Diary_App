@@ -1,4 +1,4 @@
-package com.example.plantform
+package com.example.digitaldiary
 
 import android.widget.CalendarView
 import android.widget.Toast

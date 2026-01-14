@@ -1,4 +1,4 @@
-package com.example.plantform
+package com.example.digitaldiary
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

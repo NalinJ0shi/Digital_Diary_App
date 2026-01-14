@@ -1,4 +1,4 @@
-package com.example.plantform
+package com.example.digitaldiary
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

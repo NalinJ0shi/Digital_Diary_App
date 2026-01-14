@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.plantform"
+    namespace = "com.example.digitaldiary"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.plantform"
+        applicationId = "com.example.digitaldiary"
         minSdk = 24
         targetSdk = 35
         versionCode = 1

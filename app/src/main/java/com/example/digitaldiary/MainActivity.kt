@@ -1,4 +1,4 @@
-package com.example.plantform
+package com.example.digitaldiary
 
 import android.os.Bundle
 import android.widget.Toast

@@ -1,4 +1,4 @@
-package com.example.plantform.ui.theme
+package com.example.digitaldiary.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

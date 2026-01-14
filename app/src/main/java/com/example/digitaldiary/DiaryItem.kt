@@ -1,4 +1,4 @@
-package com.example.plantform
+package com.example.digitaldiary
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
