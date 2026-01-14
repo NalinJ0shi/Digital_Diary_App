@@ -11,7 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
@@ -26,6 +26,7 @@ fun DiaryItem(
 ) {
     var showDeleteIcon by remember(entry.id) { mutableStateOf(false) }
     val dateStr = SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.getDefault()).format(Date(entry.timestamp))
+
     val moodEmoji = when (entry.mood) {
         "happy" -> "🙂"
         "sad" -> "🙁"
@@ -85,17 +86,14 @@ fun DiaryItem(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = entry.title,
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = Color(0xFF111827)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
                 text = entry.content,
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color(0xFF4B5563),
-                lineHeight = 24.sp
+                lineHeight = 20.sp,
+                maxLines = 3, // Show only the first 3 lines
+                overflow = TextOverflow.Ellipsis // Add "..." if the text is too long
             )
         }
     }
