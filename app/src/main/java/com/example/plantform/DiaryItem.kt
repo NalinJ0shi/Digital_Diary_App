@@ -1,11 +1,13 @@
 package com.example.plantform
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,11 +17,14 @@ import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
 import java.util.*
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DiaryItem(
     entry: DiaryEntry,
-    onEdit: (DiaryEntry) -> Unit
+    onEdit: (DiaryEntry) -> Unit,
+    onDeleteRequest: (DiaryEntry) -> Unit
 ) {
+    var showDeleteIcon by remember(entry.id) { mutableStateOf(false) }
     val dateStr = SimpleDateFormat("EEEE, MMMM dd, yyyy", Locale.getDefault()).format(Date(entry.timestamp))
     val moodEmoji = when (entry.mood) {
         "happy" -> "🙂"
@@ -32,29 +37,50 @@ fun DiaryItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 12.dp)
-            .clickable { onEdit(entry) }, // Tapping the whole card now triggers editing
+            .combinedClickable(
+                onClick = {
+                    if (showDeleteIcon) showDeleteIcon = false
+                    else onEdit(entry)
+                },
+                onLongClick = { showDeleteIcon = true }
+            ),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = MaterialTheme.shapes.medium
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Header: Just Date and Mood now. Clean and simple.
             Row(
                 modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.DateRange,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = Color.Gray
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(text = dateStr, style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(text = dateStr, style = MaterialTheme.typography.labelMedium, color = Color.Gray)
 
-                if (moodEmoji.isNotEmpty()) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = moodEmoji, fontSize = 16.sp)
+                    if (moodEmoji.isNotEmpty()) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = moodEmoji, fontSize = 16.sp)
+                    }
+                }
+
+                if (showDeleteIcon) {
+                    IconButton(
+                        onClick = { onDeleteRequest(entry) },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = Color(0xFFDC2626)
+                        )
+                    }
                 }
             }
 

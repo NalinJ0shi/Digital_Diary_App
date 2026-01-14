@@ -54,6 +54,10 @@ class MainActivity : ComponentActivity() {
                             selectedDate = entry.timestamp // Use entry's date
                             entryToEdit = entry
                             currentScreen = "EDIT"
+                        },
+                        onDeleteEntry = { entry ->
+                            // This is the bridge! We tell the ViewModel to delete the entry
+                            viewModel.delete(entry)
                         }
                     )
                 }
