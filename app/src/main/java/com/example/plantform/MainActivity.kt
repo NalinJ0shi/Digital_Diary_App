@@ -19,21 +19,33 @@ class MainActivity : ComponentActivity() {
             val entries by viewModel.allEntries.collectAsState(initial = emptyList())
             val latestEntry by viewModel.latestEntry.collectAsState(initial = null)
 
-            // Testing Timer: Update 'now' every second to check the 1-minute rule
-            var now by remember { mutableStateOf(System.currentTimeMillis()) }
+            var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
             LaunchedEffect(Unit) {
-                while(true) {
+                while (true) {
                     delay(1000)
                     now = System.currentTimeMillis()
                 }
             }
 
-            // Logic: Can add if NO entries exist OR last entry was > 60s ago
             val canAddNow = latestEntry == null || (now - latestEntry!!.timestamp > 60000)
 
             var currentScreen by remember { mutableStateOf("LIST") }
-            var selectedDate by remember { mutableStateOf(System.currentTimeMillis()) }
+            var selectedDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
             var entryToEdit by remember { mutableStateOf<DiaryEntry?>(null) }
+
+            fun navigateToList() {
+                currentScreen = "LIST"
+            }
+
+            fun navigateToCalendar() {
+                currentScreen = "CALENDAR"
+            }
+
+            fun navigateToEdit(entry: DiaryEntry? = null, date: Long? = null) {
+                entryToEdit = entry
+                selectedDate = date ?: entry?.timestamp ?: System.currentTimeMillis()
+                currentScreen = "EDIT"
+            }
 
             when (currentScreen) {
                 "LIST" -> {
@@ -42,34 +54,22 @@ class MainActivity : ComponentActivity() {
                         canAdd = canAddNow,
                         onAddEntry = {
                             if (canAddNow) {
-                                selectedDate = System.currentTimeMillis() // Reset to Now
-                                entryToEdit = null
-                                currentScreen = "EDIT"
+                                navigateToEdit()
                             } else {
                                 Toast.makeText(this, "Wait! Testing limit active.", Toast.LENGTH_SHORT).show()
                             }
                         },
-                        onOpenCalendar = { currentScreen = "CALENDAR" }, // Go to Calendar
-                        onEditEntry = { entry ->
-                            selectedDate = entry.timestamp // Use entry's date
-                            entryToEdit = entry
-                            currentScreen = "EDIT"
-                        },
-                        onDeleteEntry = { entry ->
-                            // This is the bridge! We tell the ViewModel to delete the entry
-                            viewModel.delete(entry)
-                        }
+                        onOpenCalendar = { navigateToCalendar() },
+                        onEditEntry = { entry -> navigateToEdit(entry) },
+                        onDeleteEntry = { entry -> viewModel.delete(entry) }
                     )
                 }
                 "CALENDAR" -> {
                     CalendarScreen(
-                        onBack = { currentScreen = "LIST" },
+                        onBack = { navigateToList() },
                         onDateSelected = { date ->
-                            // Check if we already have an entry for this date
                             val existing = viewModel.getEntryForDate(date, entries)
-                            selectedDate = date
-                            entryToEdit = existing
-                            currentScreen = "EDIT"
+                            navigateToEdit(existing, date)
                         }
                     )
                 }
@@ -77,18 +77,16 @@ class MainActivity : ComponentActivity() {
                     AddEntryScreen(
                         existingEntry = entryToEdit,
                         onSave = { content ->
-                            // Formatter for the Title
                             val dateTitle = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date(selectedDate))
-
                             viewModel.saveEntry(
                                 title = dateTitle,
                                 content = content,
-                                date = selectedDate, // Use the selected date (past or present)
+                                date = selectedDate,
                                 existingEntry = entryToEdit
                             )
-                            currentScreen = "LIST"
+                            navigateToList()
                         },
-                        onCancel = { currentScreen = "LIST" }
+                        onCancel = { navigateToList() }
                     )
                 }
             }
