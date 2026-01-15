@@ -6,6 +6,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.*
+// THESE IMPORTS FIX YOUR ERRORS
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
@@ -19,7 +23,9 @@ class MainActivity : ComponentActivity() {
             val entries by viewModel.allEntries.collectAsState(initial = emptyList())
             val latestEntry by viewModel.latestEntry.collectAsState(initial = null)
 
+            // Using mutableLongStateOf fixes comparison errors
             var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
+
             LaunchedEffect(Unit) {
                 while (true) {
                     delay(1000)
@@ -27,25 +33,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            val canAddNow = latestEntry == null || (now - latestEntry!!.timestamp > 60000)
+            // 'L' suffix ensures Long comparison
+            val canAddNow = latestEntry == null || (now - latestEntry!!.timestamp > 60000L)
 
             var currentScreen by remember { mutableStateOf("LIST") }
             var selectedDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
             var entryToEdit by remember { mutableStateOf<DiaryEntry?>(null) }
-
-            fun navigateToList() {
-                currentScreen = "LIST"
-            }
-
-            fun navigateToCalendar() {
-                currentScreen = "CALENDAR"
-            }
-
-            fun navigateToEdit(entry: DiaryEntry? = null, date: Long? = null) {
-                entryToEdit = entry
-                selectedDate = date ?: entry?.timestamp ?: System.currentTimeMillis()
-                currentScreen = "EDIT"
-            }
 
             when (currentScreen) {
                 "LIST" -> {
@@ -54,22 +47,39 @@ class MainActivity : ComponentActivity() {
                         canAdd = canAddNow,
                         onAddEntry = {
                             if (canAddNow) {
-                                navigateToEdit()
+                                selectedDate = System.currentTimeMillis()
+                                entryToEdit = null
+                                currentScreen = "EDIT"
                             } else {
                                 Toast.makeText(this, "Wait! Testing limit active.", Toast.LENGTH_SHORT).show()
                             }
                         },
-                        onOpenCalendar = { navigateToCalendar() },
-                        onEditEntry = { entry -> navigateToEdit(entry) },
-                        onDeleteEntry = { entry -> viewModel.delete(entry) }
+                        onOpenCalendar = { currentScreen = "CALENDAR" },
+                        onEditEntry = { entry ->
+                            selectedDate = entry.timestamp
+                            entryToEdit = entry
+                            currentScreen = "EDIT"
+                        },
+                        onDeleteEntry = { entry -> viewModel.delete(entry) },
+                        // BACKUP ACTIONS
+                        onBackup = {
+                            viewModel.exportToDocuments(entries)
+                            Toast.makeText(this, "Backup Saved!", Toast.LENGTH_SHORT).show()
+                        },
+                        onRestore = {
+                            viewModel.importFromDocuments()
+                            Toast.makeText(this, "Restoring...", Toast.LENGTH_SHORT).show()
+                        }
                     )
                 }
                 "CALENDAR" -> {
                     CalendarScreen(
-                        onBack = { navigateToList() },
+                        onBack = { currentScreen = "LIST" },
                         onDateSelected = { date ->
                             val existing = viewModel.getEntryForDate(date, entries)
-                            navigateToEdit(existing, date)
+                            selectedDate = date
+                            entryToEdit = existing
+                            currentScreen = "EDIT"
                         }
                     )
                 }
@@ -84,9 +94,9 @@ class MainActivity : ComponentActivity() {
                                 date = selectedDate,
                                 existingEntry = entryToEdit
                             )
-                            navigateToList()
+                            currentScreen = "LIST"
                         },
-                        onCancel = { navigateToList() }
+                        onCancel = { currentScreen = "LIST" }
                     )
                 }
             }

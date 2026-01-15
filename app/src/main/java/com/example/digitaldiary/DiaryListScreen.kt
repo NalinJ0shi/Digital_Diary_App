@@ -7,6 +7,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,10 +25,11 @@ fun DiaryListScreen(
     onAddEntry: () -> Unit,
     onOpenCalendar: () -> Unit,
     onEditEntry: (DiaryEntry) -> Unit,
-    onDeleteEntry: (DiaryEntry) -> Unit // New callback for the actual deletion logic
+    onDeleteEntry: (DiaryEntry) -> Unit,
+    onBackup: () -> Unit, // New Action
+    onRestore: () -> Unit // New Action
 ) {
     val PurpleDiary = Color(0xFF9333EA)
-    // This state tracks which entry we are thinking about deleting
     var entryToDelete by remember { mutableStateOf<DiaryEntry?>(null) }
 
     Scaffold(
@@ -34,92 +37,64 @@ fun DiaryListScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = null,
-                            tint = PurpleDiary,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        Icon(Icons.Default.Edit, null, tint = PurpleDiary, modifier = Modifier.size(24.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "My Diary",
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold)
-                        )
+                        Text("My Diary", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold))
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onOpenCalendar) {
-                        Icon(
-                            imageVector = Icons.Default.DateRange,
-                            contentDescription = "Open Calendar",
-                            tint = Color.Gray
-                        )
+                        Icon(Icons.Default.DateRange, "Calendar", tint = Color.Gray)
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
-                )
+                actions = {
+                    // BACKUP BUTTON (Upload Arrow)
+                    IconButton(onClick = onBackup) {
+                        Icon(Icons.Default.KeyboardArrowUp, "Backup", tint = PurpleDiary)
+                    }
+                    // RESTORE BUTTON (Download Arrow)
+                    IconButton(onClick = onRestore) {
+                        Icon(Icons.Default.KeyboardArrowDown, "Restore", tint = PurpleDiary)
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White)
             )
         },
         bottomBar = {
-            BottomAppBar(
-                containerColor = Color.White,
-                tonalElevation = 8.dp
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
+            BottomAppBar(containerColor = Color.White, tonalElevation = 8.dp) {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     FloatingActionButton(
                         onClick = { if (canAdd) onAddEntry() },
                         containerColor = if (canAdd) PurpleDiary else Color.LightGray,
                         contentColor = Color.White
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Entry")
+                        Icon(Icons.Default.Add, "Add")
                     }
                 }
             }
         }
     ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp),
             contentPadding = PaddingValues(top = 16.dp, bottom = 100.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // We add 'key = { it.id }' here so Compose can track individual items
             items(entries, key = { it.id }) { entry ->
-                DiaryItem(
-                    entry = entry,
-                    onEdit = onEditEntry,
-                    onDeleteRequest = { entryToDelete = it }
-                )
+                DiaryItem(entry = entry, onEdit = onEditEntry, onDeleteRequest = { entryToDelete = it })
             }
         }
 
-        // The Confirmation Dialog: Only pops up when entryToDelete is NOT null
-        entryToDelete?.let { entry ->
+        if (entryToDelete != null) {
             AlertDialog(
                 onDismissRequest = { entryToDelete = null },
                 title = { Text("Delete Entry?") },
-                text = { Text("Are you sure you want to delete this memory? Once it's gone, it's gone!") },
+                text = { Text("Are you sure?") },
                 confirmButton = {
-                    TextButton(
-                        onClick = {
-                            onDeleteEntry(entry)
-                            entryToDelete = null // Hide the dialog after deleting
-                        }
-                    ) {
-                        Text("Delete", color = Color(0xFFDC2626))
+                    TextButton(onClick = { onDeleteEntry(entryToDelete!!); entryToDelete = null }) {
+                        Text("Delete", color = Color.Red)
                     }
                 },
-                dismissButton = {
-                    TextButton(onClick = { entryToDelete = null }) {
-                        Text("Cancel")
-                    }
-                }
+                dismissButton = { TextButton(onClick = { entryToDelete = null }) { Text("Cancel") } }
             )
         }
     }

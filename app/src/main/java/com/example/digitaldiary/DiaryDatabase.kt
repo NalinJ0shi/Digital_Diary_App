@@ -7,15 +7,14 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [DiaryEntry::class], version = 2) // Bumped from 1 to 2
+@Database(entities = [DiaryEntry::class], version = 2) // VERSION BUMPED TO 2
 abstract class DiaryDatabase : RoomDatabase() {
     abstract fun diaryDao(): DiaryDao
 
     companion object {
-        // The safety manual for Room
+        // MIGRATION: Tells Room how to add the new column without deleting data
         private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                // This adds the new column to your existing data safely
                 database.execSQL("ALTER TABLE diary_entries ADD COLUMN moodEmoji TEXT NOT NULL DEFAULT '😊'")
             }
         }
@@ -28,9 +27,9 @@ abstract class DiaryDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     DiaryDatabase::class.java,
-                    "diary_database" // Must stay exactly the same!
+                    "diary_database"
                 )
-                    .addMigrations(MIGRATION_1_2) // Add this line to use the safety manual
+                    .addMigrations(MIGRATION_1_2) // CRITICAL: Adds the safety manual
                     .build()
                 INSTANCE = instance
                 instance
