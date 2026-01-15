@@ -40,9 +40,4 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun delete(entry: DiaryEntry) { viewModelScope.launch { dao.deleteEntry(entry) } }
-
-    // DEV TOOL: Call this once if you need to wipe the DB!
-    fun nukeAll() { viewModelScope.launch {
-        // This requires a new DAO method, but for now, just uninstalling the app is safer/easier to clear data.
-    }}
 }
