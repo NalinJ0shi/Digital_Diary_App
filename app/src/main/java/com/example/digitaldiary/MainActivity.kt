@@ -60,16 +60,8 @@ class MainActivity : ComponentActivity() {
                             entryToEdit = entry
                             currentScreen = "EDIT"
                         },
-                        onDeleteEntry = { entry -> viewModel.delete(entry) },
-                        // BACKUP ACTIONS
-                        onBackup = {
-                            viewModel.exportToDocuments(entries)
-                            Toast.makeText(this, "Backup Saved!", Toast.LENGTH_SHORT).show()
-                        },
-                        onRestore = {
-                            viewModel.importFromDocuments()
-                            Toast.makeText(this, "Restoring...", Toast.LENGTH_SHORT).show()
-                        }
+                        onDeleteEntry = { entry -> viewModel.delete(entry) }
+                        // No more passing onBackup or onRestore here!
                     )
                 }
                 "CALENDAR" -> {

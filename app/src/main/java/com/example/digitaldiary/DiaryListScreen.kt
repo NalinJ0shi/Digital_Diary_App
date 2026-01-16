@@ -26,9 +26,8 @@ fun DiaryListScreen(
     onOpenCalendar: () -> Unit,
     onEditEntry: (DiaryEntry) -> Unit,
     onDeleteEntry: (DiaryEntry) -> Unit,
-    onBackup: () -> Unit, // New Action
-    onRestore: () -> Unit // New Action
-) {
+)
+{
     val PurpleDiary = Color(0xFF9333EA)
     var entryToDelete by remember { mutableStateOf<DiaryEntry?>(null) }
 
@@ -45,16 +44,6 @@ fun DiaryListScreen(
                 navigationIcon = {
                     IconButton(onClick = onOpenCalendar) {
                         Icon(Icons.Default.DateRange, "Calendar", tint = Color.Gray)
-                    }
-                },
-                actions = {
-                    // BACKUP BUTTON (Upload Arrow)
-                    IconButton(onClick = onBackup) {
-                        Icon(Icons.Default.KeyboardArrowUp, "Backup", tint = PurpleDiary)
-                    }
-                    // RESTORE BUTTON (Download Arrow)
-                    IconButton(onClick = onRestore) {
-                        Icon(Icons.Default.KeyboardArrowDown, "Restore", tint = PurpleDiary)
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White)
