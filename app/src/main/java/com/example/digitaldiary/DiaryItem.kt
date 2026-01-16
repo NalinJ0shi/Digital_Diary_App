@@ -29,17 +29,35 @@ fun DiaryItem(
     onDeleteRequest: (DiaryEntry) -> Unit
 ) {
     var showDeleteIcon by remember(entry.id) { mutableStateOf(false) }
-    // Shows "Monday, January 15"
-    val dateStr = SimpleDateFormat("EEEE, MMMM dd", Locale.getDefault()).format(Date(entry.timestamp))
+
+    // THE MAGIC DATE LOGIC
+    val dateStr = remember(entry.timestamp) {
+        val now = Calendar.getInstance()
+        val entryDate = Calendar.getInstance().apply { timeInMillis = entry.timestamp }
+
+        val isToday = now.get(Calendar.YEAR) == entryDate.get(Calendar.YEAR) &&
+                now.get(Calendar.DAY_OF_YEAR) == entryDate.get(Calendar.DAY_OF_YEAR)
+
+        // Move the 'now' calendar back by one day to check for Yesterday
+        now.add(Calendar.DAY_OF_YEAR, -1)
+        val isYesterday = now.get(Calendar.YEAR) == entryDate.get(Calendar.YEAR) &&
+                now.get(Calendar.DAY_OF_YEAR) == entryDate.get(Calendar.DAY_OF_YEAR)
+
+        when {
+            isToday -> "Today"
+            isYesterday -> "Yesterday"
+            else -> SimpleDateFormat("EEEE, MMMM dd", Locale.getDefault()).format(Date(entry.timestamp))
+        }
+    }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(110.dp) // Adjusted height for one-line content
+            .height(110.dp)
             .padding(bottom = 4.dp, start = 8.dp, end = 8.dp)
             .shadow(
                 elevation = 6.dp,
-                shape = RoundedCornerShape(24.dp), // ROUNDED SHAPE RESTORED
+                shape = RoundedCornerShape(24.dp),
                 ambientColor = Color.Black.copy(alpha = 0.1f),
                 spotColor = Color.Black.copy(alpha = 0.2f)
             )
@@ -52,17 +70,16 @@ fun DiaryItem(
             ),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        shape = RoundedCornerShape(24.dp) // ROUNDED SHAPE RESTORED
+        shape = RoundedCornerShape(24.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 20.dp, vertical = 16.dp),
-                horizontalAlignment = Alignment.Start, // LEFT ALIGNMENT
+                horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Center
             ) {
-                // LEFT-ALIGNED HEADER
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -74,7 +91,7 @@ fun DiaryItem(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = dateStr,
+                        text = dateStr, // UPDATED STRING
                         style = MaterialTheme.typography.titleSmall.copy(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 0.2.sp
@@ -85,19 +102,17 @@ fun DiaryItem(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // LEFT-ALIGNED ONE-LINE CONTENT
                 Text(
                     text = entry.content,
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xFF4B5563),
-                    textAlign = TextAlign.Start, // LEFT ALIGNMENT
-                    maxLines = 1, // LIMITED TO ONE LINE
+                    textAlign = TextAlign.Start,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 20.sp
                 )
             }
 
-            // DELETE BUTTON
             if (showDeleteIcon) {
                 IconButton(
                     onClick = { onDeleteRequest(entry) },
