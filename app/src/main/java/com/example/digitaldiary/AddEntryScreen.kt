@@ -12,20 +12,27 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun AddEntryScreen(
     existingEntry: DiaryEntry? = null,
-    onSave: (String) -> Unit, // Changed: Only accepts Content now!
+    onSave: (String) -> Unit,
     onCancel: () -> Unit
 ) {
-    // No more Title state!
     var content by remember { mutableStateOf(existingEntry?.content ?: "") }
     val PurpleDiary = Color(0xFF9333EA)
 
     Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
 
-        // Title Input is GONE. Just the content now.
+        // CHANGED: Added a Spacer to push the text area down a bit
+        Spacer(modifier = Modifier.height(48.dp))
+
         TextField(
             value = content,
             onValueChange = { content = it },
-            placeholder = { Text("Write about your day...", fontSize = 18.sp) },
+            placeholder = {
+                Text(
+                    text = "\"It's not a bad life, just a bad day.\"",
+                    fontSize = 18.sp,
+                    color = Color.Black.copy(alpha = 0.2f)
+                )
+            },
             modifier = Modifier.fillMaxWidth().weight(1f),
             textStyle = TextStyle(fontSize = 18.sp, lineHeight = 28.sp),
             colors = TextFieldDefaults.colors(
@@ -43,7 +50,6 @@ fun AddEntryScreen(
             TextButton(onClick = onCancel) { Text("Cancel", color = Color.Gray) }
             Spacer(modifier = Modifier.width(16.dp))
             Button(
-                // Only save if content isn't empty
                 onClick = { if (content.isNotBlank()) onSave(content) },
                 colors = ButtonDefaults.buttonColors(containerColor = PurpleDiary),
                 shape = MaterialTheme.shapes.medium
