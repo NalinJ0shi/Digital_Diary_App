@@ -6,9 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
@@ -22,7 +19,6 @@ class MainActivity : ComponentActivity() {
             val entries by viewModel.allEntries.collectAsState(initial = emptyList())
             val latestEntry by viewModel.latestEntry.collectAsState(initial = null)
 
-            // Using mutableLongStateOf fixes comparison errors
             var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
             LaunchedEffect(Unit) {
@@ -32,8 +28,9 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            // 'L' suffix ensures Long comparison
-            val canAddNow = latestEntry == null || (now - latestEntry!!.timestamp > 60000L)
+            // SAFE CHECK: If latestEntry is null, we use 0L as the timestamp
+            val lastTimestamp = latestEntry?.timestamp ?: 0L
+            val canAddNow = (now - lastTimestamp > 60000L)
 
             var currentScreen by remember { mutableStateOf("LIST") }
             var selectedDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -50,7 +47,7 @@ class MainActivity : ComponentActivity() {
                                 entryToEdit = null
                                 currentScreen = "EDIT"
                             } else {
-                                Toast.makeText(this, "Wait! Testing limit active.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this, "Wait! 1-minute limit active.", Toast.LENGTH_SHORT).show()
                             }
                         },
                         onOpenCalendar = { currentScreen = "CALENDAR" },
@@ -60,7 +57,6 @@ class MainActivity : ComponentActivity() {
                             currentScreen = "EDIT"
                         },
                         onDeleteEntry = { entry -> viewModel.delete(entry) }
-                        // No more passing onBackup or onRestore here!
                     )
                 }
                 "CALENDAR" -> {

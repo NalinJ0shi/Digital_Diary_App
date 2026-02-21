@@ -7,8 +7,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,8 +24,7 @@ fun DiaryListScreen(
     onOpenCalendar: () -> Unit,
     onEditEntry: (DiaryEntry) -> Unit,
     onDeleteEntry: (DiaryEntry) -> Unit,
-)
-{
+) {
     val PurpleDiary = Color(0xFF9333EA)
     var entryToDelete by remember { mutableStateOf<DiaryEntry?>(null) }
 
@@ -79,7 +76,10 @@ fun DiaryListScreen(
                 title = { Text("Delete Entry?") },
                 text = { Text("Are you sure?") },
                 confirmButton = {
-                    TextButton(onClick = { onDeleteEntry(entryToDelete!!); entryToDelete = null }) {
+                    TextButton(onClick = {
+                        entryToDelete?.let { onDeleteEntry(it) } // Safe call
+                        entryToDelete = null
+                    }) {
                         Text("Delete", color = Color.Red)
                     }
                 },
