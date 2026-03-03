@@ -1,3 +1,4 @@
+// app/src/main/java/com/example/digitaldiary/MainActivity.kt
 package com.example.digitaldiary
 
 import android.os.Bundle
@@ -5,7 +6,13 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import com.example.digitaldiary.ui.theme.PlantformTheme
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
@@ -16,75 +23,86 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val entries by viewModel.allEntries.collectAsState(initial = emptyList())
-            val latestEntry by viewModel.latestEntry.collectAsState(initial = null)
+            val systemInDark = isSystemInDarkTheme()
+            var isDarkMode by remember { mutableStateOf(systemInDark) }
 
-            var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
+            PlantformTheme(darkTheme = isDarkMode) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    val entries by viewModel.allEntries.collectAsState(initial = emptyList())
+                    val latestEntry by viewModel.latestEntry.collectAsState(initial = null)
 
-            LaunchedEffect(Unit) {
-                while (true) {
-                    delay(1000)
-                    now = System.currentTimeMillis()
-                }
-            }
+                    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
-            // SAFE CHECK: If latestEntry is null, we use 0L as the timestamp
-            val lastTimestamp = latestEntry?.timestamp ?: 0L
-            val canAddNow = (now - lastTimestamp > 60000L)
-
-            var currentScreen by remember { mutableStateOf("LIST") }
-            var selectedDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
-            var entryToEdit by remember { mutableStateOf<DiaryEntry?>(null) }
-
-            when (currentScreen) {
-                "LIST" -> {
-                    DiaryListScreen(
-                        entries = entries,
-                        canAdd = canAddNow,
-                        onAddEntry = {
-                            if (canAddNow) {
-                                selectedDate = System.currentTimeMillis()
-                                entryToEdit = null
-                                currentScreen = "EDIT"
-                            } else {
-                                Toast.makeText(this, "Wait! 1-minute limit active.", Toast.LENGTH_SHORT).show()
-                            }
-                        },
-                        onOpenCalendar = { currentScreen = "CALENDAR" },
-                        onEditEntry = { entry ->
-                            selectedDate = entry.timestamp
-                            entryToEdit = entry
-                            currentScreen = "EDIT"
-                        },
-                        onDeleteEntry = { entry -> viewModel.delete(entry) }
-                    )
-                }
-                "CALENDAR" -> {
-                    CalendarScreen(
-                        onBack = { currentScreen = "LIST" },
-                        onDateSelected = { date ->
-                            val existing = viewModel.getEntryForDate(date, entries)
-                            selectedDate = date
-                            entryToEdit = existing
-                            currentScreen = "EDIT"
+                    LaunchedEffect(Unit) {
+                        while (true) {
+                            delay(1000)
+                            now = System.currentTimeMillis()
                         }
-                    )
-                }
-                "EDIT" -> {
-                    AddEntryScreen(
-                        existingEntry = entryToEdit,
-                        onSave = { content ->
-                            val dateTitle = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date(selectedDate))
-                            viewModel.saveEntry(
-                                title = dateTitle,
-                                content = content,
-                                date = selectedDate,
-                                existingEntry = entryToEdit
+                    }
+
+                    val lastTimestamp = latestEntry?.timestamp ?: 0L
+                    val canAddNow = (now - lastTimestamp > 60000L)
+
+                    var currentScreen by remember { mutableStateOf("LIST") }
+                    var selectedDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
+                    var entryToEdit by remember { mutableStateOf<DiaryEntry?>(null) }
+
+                    when (currentScreen) {
+                        "LIST" -> {
+                            DiaryListScreen(
+                                entries = entries,
+                                canAdd = canAddNow,
+                                isDarkMode = isDarkMode,
+                                onToggleTheme = { isDarkMode = !isDarkMode },
+                                onAddEntry = {
+                                    if (canAddNow) {
+                                        selectedDate = System.currentTimeMillis()
+                                        entryToEdit = null
+                                        currentScreen = "EDIT"
+                                    } else {
+                                        Toast.makeText(this, "Wait! 1-minute limit active.", Toast.LENGTH_SHORT).show()
+                                    }
+                                },
+                                onOpenCalendar = { currentScreen = "CALENDAR" },
+                                onEditEntry = { entry ->
+                                    selectedDate = entry.timestamp
+                                    entryToEdit = entry
+                                    currentScreen = "EDIT"
+                                },
+                                onDeleteEntry = { entry -> viewModel.delete(entry) }
                             )
-                            currentScreen = "LIST"
-                        },
-                        onCancel = { currentScreen = "LIST" }
-                    )
+                        }
+                        "CALENDAR" -> {
+                            CalendarScreen(
+                                onBack = { currentScreen = "LIST" },
+                                onDateSelected = { date ->
+                                    val existing = viewModel.getEntryForDate(date, entries)
+                                    selectedDate = date
+                                    entryToEdit = existing
+                                    currentScreen = "EDIT"
+                                }
+                            )
+                        }
+                        "EDIT" -> {
+                            AddEntryScreen(
+                                existingEntry = entryToEdit,
+                                onSave = { content ->
+                                    val dateTitle = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date(selectedDate))
+                                    viewModel.saveEntry(
+                                        title = dateTitle,
+                                        content = content,
+                                        date = selectedDate,
+                                        existingEntry = entryToEdit
+                                    )
+                                    currentScreen = "LIST"
+                                },
+                                onCancel = { currentScreen = "LIST" }
+                            )
+                        }
+                    }
                 }
             }
         }
