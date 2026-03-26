@@ -1,13 +1,17 @@
 package com.example.digitaldiary
 
+import androidx.compose.foundation.background // Required for background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush // Required for the gradient "brush"
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+
 
 @Composable
 fun AddEntryScreen(
@@ -18,9 +22,22 @@ fun AddEntryScreen(
     var content by remember { mutableStateOf(existingEntry?.content ?: "") }
     val PurpleDiary = Color(0xFF9333EA)
 
-    Column(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+    // Define the colors for your gradient here
+    val gradientBrush = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xFFF3E8FF), // Soft lavender at the top
+            Color(0xFFFFFFFF)  // Pure white at the bottom
+        )
+    )
 
-        // CHANGED: Added a Spacer to push the text area down a bit
+    // We apply the 'background' modifier here using our brush
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(gradientBrush)
+            .padding(24.dp)
+    ) {
+
         Spacer(modifier = Modifier.height(48.dp))
 
         TextField(
