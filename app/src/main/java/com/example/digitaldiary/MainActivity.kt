@@ -46,11 +46,17 @@ class MainActivity : ComponentActivity() {
                     val lastTimestamp = latestEntry?.timestamp ?: 0L
                     val canAddNow = (now - lastTimestamp > 60000L)
 
-                    var currentScreen by remember { mutableStateOf("LIST") }
+                    var currentScreen by remember { mutableStateOf("START") }
                     var selectedDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
                     var entryToEdit by remember { mutableStateOf<DiaryEntry?>(null) }
 
                     when (currentScreen) {
+                        "START" -> {
+                            StartScreen(
+                                isDarkMode = isDarkMode,
+                                onEnter = { currentScreen = "LIST" }
+                            )
+                        }
                         "LIST" -> {
                             DiaryListScreen(
                                 entries = entries,
