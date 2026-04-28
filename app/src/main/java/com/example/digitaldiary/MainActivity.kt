@@ -1,6 +1,6 @@
 // app/src/main/java/com/example/digitaldiary/MainActivity.kt
 package com.example.digitaldiary
-
+import app.rive.runtime.kotlin.core.Rive
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -13,6 +13,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.example.digitaldiary.ui.theme.PlantformTheme
+import com.nalin.my_digitaldiary.MainScreen
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
@@ -22,6 +23,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Rive.init(applicationContext)
+
         setContent {
             val systemInDark = isSystemInDarkTheme()
             var isDarkMode by remember { mutableStateOf(systemInDark) }
@@ -54,8 +57,13 @@ class MainActivity : ComponentActivity() {
                         "START" -> {
                             StartScreen(
                                 isDarkMode = isDarkMode,
+                                // Change the destination here
                                 onEnter = { currentScreen = "LIST" }
                             )
+                        }
+                        // Add the new MAIN screen branch here
+                        "MAIN" -> {
+                            MainScreen(isDarkMode = isDarkMode)
                         }
                         "LIST" -> {
                             DiaryListScreen(

@@ -1,3 +1,4 @@
+// app/src/main/java/com/example/digitaldiary/DiaryItem.kt
 package com.example.digitaldiary
 
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -30,19 +31,14 @@ fun DiaryItem(
 ) {
     var showDeleteIcon by remember(entry.id) { mutableStateOf(false) }
 
-    // THE MAGIC DATE LOGIC
     val dateStr = remember(entry.timestamp) {
         val now = Calendar.getInstance()
         val entryDate = Calendar.getInstance().apply { timeInMillis = entry.timestamp }
-
         val isToday = now.get(Calendar.YEAR) == entryDate.get(Calendar.YEAR) &&
                 now.get(Calendar.DAY_OF_YEAR) == entryDate.get(Calendar.DAY_OF_YEAR)
-
-        // Move the 'now' calendar back by one day to check for Yesterday
         now.add(Calendar.DAY_OF_YEAR, -1)
         val isYesterday = now.get(Calendar.YEAR) == entryDate.get(Calendar.YEAR) &&
                 now.get(Calendar.DAY_OF_YEAR) == entryDate.get(Calendar.DAY_OF_YEAR)
-
         when {
             isToday -> "Today"
             isYesterday -> "Yesterday"
@@ -55,77 +51,51 @@ fun DiaryItem(
             .fillMaxWidth()
             .height(110.dp)
             .padding(bottom = 4.dp, start = 8.dp, end = 8.dp)
-            .shadow(
-                elevation = 6.dp,
-                shape = RoundedCornerShape(24.dp),
-                ambientColor = Color.Black.copy(alpha = 0.1f),
-                spotColor = Color.Black.copy(alpha = 0.2f)
-            )
             .combinedClickable(
-                onClick = {
-                    if (showDeleteIcon) showDeleteIcon = false
-                    else onEdit(entry)
-                },
+                onClick = { if (showDeleteIcon) showDeleteIcon = false else onEdit(entry) },
                 onLongClick = { showDeleteIcon = true }
             ),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        colors = CardDefaults.cardColors(
+            // Glassmorphism effect
+            containerColor = Color.White.copy(alpha = 0.12f)
+        ),
         shape = RoundedCornerShape(24.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.Center
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.DateRange,
                         contentDescription = null,
-                        tint = Color(0xFF6B7280),
+                        tint = Color(0xFF94A3B8),
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = dateStr, // UPDATED STRING
-                        style = MaterialTheme.typography.titleSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.2.sp
-                        ),
-                        color = Color(0xFF1F2937)
+                        text = dateStr,
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        color = Color(0xFFF1F5F9) // Light text
                     )
                 }
-
                 Spacer(modifier = Modifier.height(8.dp))
-
                 Text(
                     text = entry.content,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF4B5563),
-                    textAlign = TextAlign.Start,
+                    color = Color(0xFFCBD5E1), // Softer light text
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    lineHeight = 20.sp
+                    overflow = TextOverflow.Ellipsis
                 )
             }
-
             if (showDeleteIcon) {
                 IconButton(
                     onClick = { onDeleteRequest(entry) },
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(end = 12.dp)
+                    modifier = Modifier.align(Alignment.CenterEnd).padding(end = 12.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        tint = Color(0xFFEF4444),
-                        modifier = Modifier.size(24.dp)
-                    )
+                    Icon(Icons.Default.Delete, "Delete", tint = Color(0xFFF87171))
                 }
             }
         }
