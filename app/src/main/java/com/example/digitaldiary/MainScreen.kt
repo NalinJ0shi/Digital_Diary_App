@@ -62,7 +62,7 @@ fun MainScreen(isDarkMode: Boolean) {
                 factory = { context ->
                     RiveAnimationView(context).apply {
                         setRiveResource(
-                            resId = R.raw.plant,
+                            resId = R.raw.tree2,
                             stateMachineName = "State Machine 1",
                             autoplay = true
                         )

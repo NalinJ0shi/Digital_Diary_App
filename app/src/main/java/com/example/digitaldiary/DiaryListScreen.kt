@@ -74,37 +74,37 @@ fun DiaryListScreen(
                     )
                 }
 
-//                // 2. The Plant (Middle Layer - Left)
-//                AndroidView(
-//                    modifier = Modifier
-//                        .size(80.dp)
-//                        .offset(x = (-100).dp, y = (-100).dp),
-//                    factory = { context ->
-//                        RiveAnimationView(context).apply {
-//                            setRiveResource(
-//                                resId = R.raw.plant2,
-//                                stateMachineName = "State Machine 1",
-//                                autoplay = true
-//                            )
-//                        }
-//                    }
-//                )
-//
-//                // 3. The Tree (Middle Layer - Right)
-//                AndroidView(
-//                    modifier = Modifier
-//                        .size(120.dp)
-//                        .offset(x = 100.dp, y = (-20).dp),
-//                    factory = { context ->
-//                        RiveAnimationView(context).apply {
-//                            setRiveResource(
-//                                resId = R.raw.tree,
-//                                stateMachineName = "State Machine 1",
-//                                autoplay = true
-//                            )
-//                        }
-//                    }
-//                )
+                // 2. The Plant (Middle Layer - Left)
+                AndroidView(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .offset(x = (-100).dp, y = (-100).dp),
+                    factory = { context ->
+                        RiveAnimationView(context).apply {
+                            setRiveResource(
+                                resId = R.raw.plant,
+                                stateMachineName = "State Machine 1",
+                                autoplay = true
+                            )
+                        }
+                    }
+                )
+
+                // 3. The Tree (Middle Layer - Right)
+                AndroidView(
+                    modifier = Modifier
+                        .size(200.dp)
+                        .offset(x = 100.dp, y = (-200).dp),
+                    factory = { context ->
+                        RiveAnimationView(context).apply {
+                            setRiveResource(
+                                resId = R.raw.tree2,
+                                stateMachineName = "State Machine 1",
+                                autoplay = true
+                            )
+                        }
+                    }
+                )
 
                 // 4. THE RIVE BUTTON (Top Layer - Center)
                 AndroidView(
