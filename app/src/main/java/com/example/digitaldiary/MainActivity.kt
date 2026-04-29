@@ -3,6 +3,7 @@ package com.example.digitaldiary
 import app.rive.runtime.kotlin.core.Rive
 import android.os.Bundle
 import android.widget.Toast
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -22,6 +23,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel: DiaryViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         Rive.init(applicationContext)
 
@@ -49,11 +51,19 @@ class MainActivity : ComponentActivity() {
                     val lastTimestamp = latestEntry?.timestamp ?: 0L
                     val canAddNow = (now - lastTimestamp > 60000L)
 
-                    var currentScreen by remember { mutableStateOf("START") }
+                    var currentScreen by remember { mutableStateOf("CUSTOM_SPLASH") }
                     var selectedDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
                     var entryToEdit by remember { mutableStateOf<DiaryEntry?>(null) }
 
                     when (currentScreen) {
+                        "CUSTOM_SPLASH" -> {
+                            CustomSplashScreen(
+                                onTimeout = {
+                                    // After the 2-second delay, it will switch to your "Swipe to enter" screen
+                                    currentScreen = "START"
+                                }
+                            )
+                        }
                         "START" -> {
                             StartScreen(
                                 isDarkMode = isDarkMode,

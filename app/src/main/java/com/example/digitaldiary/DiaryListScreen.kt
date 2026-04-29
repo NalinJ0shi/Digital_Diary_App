@@ -87,75 +87,13 @@ fun DiaryListScreen(
             )
         },
         bottomBar = {
+            // WE FREED THE BOTTOM BAR! Only the Nav Bar and Button live here now.
+            // Notice there is no more fixed 140.dp height limit restricting things.
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(140.dp),
-                contentAlignment = Alignment.Center
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.BottomCenter
             ) {
-                Canvas(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(402f / 204f)
-                        .align(Alignment.BottomCenter)
-                ) {
-                    val scaleX = size.width / 402f
-                    val scaleY = size.height / 204f
-
-                    withTransform({
-                        scale(scaleX, scaleY, Offset.Zero)
-                    }) {
-                        // 1. BACK HILL (Drawn first so it stays behind)
-                        // Note: I shifted this up by 40 pixels so you can see it peeking out.
-                        // Once you paste your real SVG, you can remove this `translate` block!
-                        translate(top = -40f) {
-                            drawPath(
-                                path = hill2Path,
-                                color = hill2Color
-                            )
-                        }
-
-                        // 2. FRONT HILL (Drawn second)
-                        drawPath(
-                            path = hillPath,
-                            color = hillColor
-                        )
-                    }
-                }
-
-//                // 1. The Plant
-//                AndroidView(
-//                    modifier = Modifier
-//                        .size(120.dp)
-//                        .offset(x = (-100).dp, y = (-50).dp),
-//                    factory = { context ->
-//                        RiveAnimationView(context).apply {
-//                            setRiveResource(
-//                                resId = R.raw.plant,
-//                                stateMachineName = "State Machine 1",
-//                                autoplay = true
-//                            )
-//                        }
-//                    }
-//                )
-//
-//                // 2. The Tree
-//                AndroidView(
-//                    modifier = Modifier
-//                        .size(200.dp)
-//                        .offset(x = 100.dp, y = (-120).dp),
-//                    factory = { context ->
-//                        RiveAnimationView(context).apply {
-//                            setRiveResource(
-//                                resId = R.raw.tree2,
-//                                stateMachineName = "State Machine 1",
-//                                autoplay = true
-//                            )
-//                        }
-//                    }
-//                )
-
-                // 3. The Curved Navigation Bar (Bottom Layer)
+                // LAYER 5: CURVED NAVIGATION BAR
                 NavigationBar(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -182,7 +120,6 @@ fun DiaryListScreen(
                         )
                     )
 
-                    // Invisible spacer item to keep the middle clear for your button
                     Spacer(modifier = Modifier.weight(1f))
 
                     NavigationBarItem(
@@ -200,7 +137,7 @@ fun DiaryListScreen(
                     )
                 }
 
-                // 4. THE RIVE BUTTON (Top Layer - Center, floating inside the cutout)
+                // LAYER 6: THE RIVE BUTTON (Top Layer)
                 AndroidView(
                     modifier = Modifier
                         .size(120.dp)
@@ -234,16 +171,96 @@ fun DiaryListScreen(
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().background(gradientBrush).padding(paddingValues)) {
+        // MAIN SCREEN CONTENT
+        Box(modifier = Modifier.fillMaxSize().background(gradientBrush)) {
+
+            // --- THE LANDSCAPE NOW HAS THE WHOLE SCREEN TO GROW ---
+            // Because we don't apply paddingValues here, it anchors to the absolute bottom
+            // of the phone and sits perfectly behind your Navigation Bar.
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                // LAYER 1: BACK HILL
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(402f / 204f)
+                        .align(Alignment.BottomCenter)
+                ) {
+                    val scaleX = size.width / 402f
+                    val scaleY = size.height / 204f
+                    withTransform({ scale(scaleX, scaleY, Offset.Zero) }) {
+                        translate(top = -40f) {
+                            drawPath(path = hill2Path, color = hill2Color)
+                        }
+                    }
+                }
+
+                // LAYER 2: THE TREE
+                AndroidView(
+                    modifier = Modifier
+                        .size(300.dp) // <--- BOOM! Change this size to whatever you want now!
+                        .offset(x = 100.dp, y = (-170).dp), // Adjust Y offset if you make it bigger
+                    factory = { context ->
+                        RiveAnimationView(context).apply {
+                            setRiveResource(
+                                resId = R.raw.tree3,
+                                stateMachineName = "State Machine 1",
+                                autoplay = true
+                            )
+                        }
+                    }
+                )
+
+                // LAYER 3: FRONT HILL
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(402f / 204f)
+                        .align(Alignment.BottomCenter)
+                ) {
+                    val scaleX = size.width / 402f
+                    val scaleY = size.height / 204f
+                    withTransform({ scale(scaleX, scaleY, Offset.Zero) }) {
+                        drawPath(path = hillPath, color = hillColor)
+                    }
+                }
+
+                // LAYER 4: THE PLANT
+//                AndroidView(
+//                    modifier = Modifier
+//                        .size(120.dp)
+//                        .offset(x = (-100).dp, y = (-50).dp),
+//                    factory = { context ->
+//                        RiveAnimationView(context).apply {
+//                            setRiveResource(
+//                                resId = R.raw.plant,
+//                                stateMachineName = "State Machine 1",
+//                                autoplay = true
+//                            )
+//                        }
+//                    }
+//                )
+            }
+
+            // --- THE DIARY ENTRIES ---
+            // We apply paddingValues HERE so your text respects the top/bottom bars and
+            // doesn't get hidden behind the navigation bar.
             if (entries.isEmpty()) {
                 Text(
                     "No entries yet. Tap the friend on the ground!",
-                    modifier = Modifier.align(Alignment.Center),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(paddingValues),
                     color = Color.LightGray
                 )
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues) // Prevents list from hiding behind bottom bar
+                        .padding(horizontal = 16.dp),
                     contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
