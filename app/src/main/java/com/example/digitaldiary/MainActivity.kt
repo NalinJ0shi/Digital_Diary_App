@@ -23,6 +23,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel: DiaryViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         installSplashScreen()
         super.onCreate(savedInstanceState)
         Rive.init(applicationContext)
@@ -59,18 +60,14 @@ class MainActivity : ComponentActivity() {
                         "CUSTOM_SPLASH" -> {
                             CustomSplashScreen(
                                 onTimeout = {
-                                    // After the 2-second delay, it will switch to your "Swipe to enter" screen
-                                    currentScreen = "START"
+                                    // Change this from "START" to "LIST"
+                                    currentScreen = "LIST"
                                 }
                             )
                         }
-                        "START" -> {
-                            StartScreen(
-                                isDarkMode = isDarkMode,
-                                // Change the destination here
-                                onEnter = { currentScreen = "LIST" }
-                            )
-                        }
+
+                        // I have completely removed the "START" block from here!
+
                         // Add the new MAIN screen branch here
                         "MAIN" -> {
                             MainScreen(isDarkMode = isDarkMode)
@@ -87,7 +84,7 @@ class MainActivity : ComponentActivity() {
                                         entryToEdit = null
                                         currentScreen = "EDIT"
                                     } else {
-                                        Toast.makeText(this, "Wait! 1-minute limit active.", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(this@MainActivity, "Wait! 1-minute limit active.", Toast.LENGTH_SHORT).show()
                                     }
                                 },
                                 onOpenCalendar = { currentScreen = "CALENDAR" },

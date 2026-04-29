@@ -160,7 +160,7 @@ fun DiaryListScreen(
                                 v.performClick()
 
                                 coroutineScope.launch {
-                                    delay(150)
+                                    delay(300)
                                     onAddEntry()
                                 }
                             }
