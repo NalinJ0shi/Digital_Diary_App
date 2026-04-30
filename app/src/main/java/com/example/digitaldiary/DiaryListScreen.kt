@@ -82,7 +82,8 @@ fun DiaryListScreen(
             CenterAlignedTopAppBar(
                 title = { Text("My Journey", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold), color = titleColor) },
                 navigationIcon = { IconButton(onClick = onOpenCalendar) { Icon(Icons.Default.DateRange, "Calendar", tint = titleColor) } },
-                actions = { IconButton(onClick = onToggleTheme) { Icon(if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode, "Theme", tint = titleColor) } },
+                // The Theme toggle has been removed from here:
+                actions = { },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
             )
         },
@@ -107,10 +108,14 @@ fun DiaryListScreen(
                     contentColor = groundColor
                 ) {
                     NavigationBarItem(
-                        icon = { Icon(Icons.Default.Home, contentDescription = "Diary") },
-                        label = { Text("Diary") },
+                        // Changed from Home to DateRange
+                        icon = { Icon(Icons.Default.DateRange, contentDescription = "Calendar") },
+                        label = { Text("Calendar") },
                         selected = true,
-                        onClick = { /* Handle Navigation */ },
+                        onClick = {
+                            // This will now open your CalendarScreen when tapped!
+                            onOpenCalendar()
+                        },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = groundColor,
                             selectedTextColor = groundColor,
