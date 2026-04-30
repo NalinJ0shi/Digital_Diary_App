@@ -59,19 +59,14 @@ class MainActivity : ComponentActivity() {
                     when (currentScreen) {
                         "CUSTOM_SPLASH" -> {
                             CustomSplashScreen(
-                                onTimeout = {
-                                    // Change this from "START" to "LIST"
-                                    currentScreen = "LIST"
-                                }
+                                onTimeout = { currentScreen = "LIST" }
                             )
                         }
 
-                        // I have completely removed the "START" block from here!
-
-                        // Add the new MAIN screen branch here
                         "MAIN" -> {
                             MainScreen(isDarkMode = isDarkMode)
                         }
+
                         "LIST" -> {
                             DiaryListScreen(
                                 entries = entries,
@@ -82,7 +77,8 @@ class MainActivity : ComponentActivity() {
                                     if (canAddNow) {
                                         selectedDate = System.currentTimeMillis()
                                         entryToEdit = null
-                                        currentScreen = "EDIT"
+                                        // 1. THIS IS THE CHANGE: Route to your new slider screen!
+                                        currentScreen = "MOOD_SLIDER"
                                     } else {
                                         Toast.makeText(this@MainActivity, "Wait! 1-minute limit active.", Toast.LENGTH_SHORT).show()
                                     }
@@ -96,6 +92,18 @@ class MainActivity : ComponentActivity() {
                                 onDeleteEntry = { entry -> viewModel.delete(entry) }
                             )
                         }
+
+                        // 2. THIS IS THE NEW BLOCK: Add your Mood Slider Screen here
+                        "MOOD_SLIDER" -> {
+                            MoodSliderScreen(
+                                onSaveEntry = { moodValue ->
+                                    // Later you can save this moodValue to your database here.
+                                    // For now, let's route them back to the list when they click save.
+                                    currentScreen = "LIST"
+                                }
+                            )
+                        }
+
                         "CALENDAR" -> {
                             CalendarScreen(
                                 onBack = { currentScreen = "LIST" },
@@ -107,6 +115,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
+
                         "EDIT" -> {
                             AddEntryScreen(
                                 existingEntry = entryToEdit,

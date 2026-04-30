@@ -19,7 +19,7 @@ import kotlinx.coroutines.delay
 fun CustomSplashScreen(onTimeout: () -> Unit) {
     // Keeps the screen active for 2 seconds
     LaunchedEffect(Unit) {
-        delay(3500)
+        delay(2500)
         onTimeout()
     }
 
