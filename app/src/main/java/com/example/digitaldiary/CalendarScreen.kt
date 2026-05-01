@@ -155,11 +155,7 @@ fun CalendarScreen(
                                 modifier = Modifier.fillMaxSize(),
                                 tint = if (hasMoodData) sampleMoodColor else emptyCircleColor
                             )
-
-                            // Draws the face on top
-                            if (hasMoodData) {
-                                Text("🙂", fontSize = 24.sp) // We will replace this with your face vector later!
-                            }
+                            //will put something here later to draw in the face
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
