@@ -35,7 +35,7 @@ fun MoodSliderScreen(
             factory = { context ->
                 RiveAnimationView(context).apply {
                     setRiveResource(
-                        resId = R.raw.mascot, // <-- MAKE SURE THIS MATCHES YOUR FILE NAME
+                        resId = R.raw.mascot1, // <-- MAKE SURE THIS MATCHES YOUR FILE NAME
                         stateMachineName = "State Machine 1" // <-- MUST MATCH EXACTLY
                     )
                 }

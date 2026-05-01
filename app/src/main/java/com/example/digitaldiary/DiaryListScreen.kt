@@ -205,12 +205,12 @@ fun DiaryListScreen(
                 // LAYER 2: THE TREE
                 AndroidView(
                     modifier = Modifier
-                        .size(300.dp) // <--- BOOM! Change this size to whatever you want now!
-                        .offset(x = 100.dp, y = (-170).dp), // Adjust Y offset if you make it bigger
+                        .size(450.dp) // <--- BOOM! Change this size to whatever you want now!
+                        .offset(x = 120.dp, y = (-170).dp), // Adjust Y offset if you make it bigger
                     factory = { context ->
                         RiveAnimationView(context).apply {
                             setRiveResource(
-                                resId = R.raw.tree3,
+                                resId = R.raw.tree4,
                                 stateMachineName = "State Machine 1",
                                 autoplay = true
                             )

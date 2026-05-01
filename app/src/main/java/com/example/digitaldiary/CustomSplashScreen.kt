@@ -26,7 +26,7 @@ fun CustomSplashScreen(onTimeout: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black),
+            .background(Color(0xFFC0C26D)),
         contentAlignment = Alignment.Center
     ) {
         // Loads your Rive animation instead of text
