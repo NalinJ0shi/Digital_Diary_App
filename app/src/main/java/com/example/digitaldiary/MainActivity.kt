@@ -14,6 +14,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Color
 import com.example.digitaldiary.ui.theme.PlantformTheme
 import com.nalin.my_digitaldiary.MainScreen
 import kotlinx.coroutines.delay
@@ -56,83 +65,115 @@ class MainActivity : ComponentActivity() {
                     var selectedDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
                     var entryToEdit by remember { mutableStateOf<DiaryEntry?>(null) }
 
-                    when (currentScreen) {
-                        "CUSTOM_SPLASH" -> {
-                            CustomSplashScreen(onTimeout = { currentScreen = "LIST" })
-                        }
-                        "MAIN" -> {
-                            MainScreen(isDarkMode = isDarkMode)
-                        }
-                        "LIST" -> {
-                            DiaryListScreen(
-                                entries = entries,
-                                canAdd = canAddNow,
-                                isDarkMode = isDarkMode,
-                                onToggleTheme = { isDarkMode = !isDarkMode },
-                                onAddEntry = {
-                                    if (canAddNow) {
-                                        selectedDate = System.currentTimeMillis()
-                                        entryToEdit = null
-                                        currentScreen = "MOOD_SLIDER"
-                                    } else {
-                                        Toast.makeText(this@MainActivity, "Wait! 1-minute limit active.", Toast.LENGTH_SHORT).show()
-                                    }
-                                },
-                                onOpenCalendar = { currentScreen = "CALENDAR" },
-                                onEditEntry = { entry ->
-                                    selectedDate = entry.timestamp
-                                    entryToEdit = entry
-                                    currentScreen = "EDIT"
-                                },
-                                onDeleteEntry = { entry -> viewModel.delete(entry) }
-                            )
-                        }
-                        "MOOD_SLIDER" -> {
-                            MoodSliderScreen(
-                                onSaveEntry = { moodValue ->
-                                    val dateTitle = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date(selectedDate))
+                    // --- NEW BOTTOM NAV LOGIC ---
+                    // Only show the bottom bar on these specific screens
+                    val showBottomNav = currentScreen == "LIST" || currentScreen == "BLANK"
 
-                                    viewModel.saveEntry(
-                                        title = dateTitle,
-                                        content = entryToEdit?.content ?: "",
-                                        date = selectedDate,
-                                        dayRating = moodValue,
-                                        existingEntry = entryToEdit
+                    Scaffold(
+                        bottomBar = {
+                            if (showBottomNav) {
+                                NavigationBar(
+                                    containerColor = Color(0xFF1E1E1E), // Match your app theme
+                                    contentColor = Color.White
+                                ) {
+                                    NavigationBarItem(
+                                        icon = { androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Default.Menu, contentDescription = "Diary") },
+                                        label = { Text("Diary") },
+                                        selected = currentScreen == "LIST",
+                                        onClick = { currentScreen = "LIST" }
                                     )
-                                    currentScreen = "LIST"
-                                }
-                            )
-                        }
-                        "CALENDAR" -> {
-                            CalendarScreen(
-                                entries = entries,
-                                // THE FIX: This properly hooks up the back button
-                                onBack = { currentScreen = "LIST" },
-                                onDateSelected = { date ->
-                                    val existing = viewModel.getEntryForDate(date, entries)
-                                    selectedDate = date
-                                    entryToEdit = existing
-                                    currentScreen = "EDIT"
-                                }
-                            )
-                        }
-                        "EDIT" -> {
-                            AddEntryScreen(
-                                existingEntry = entryToEdit,
-                                onSave = { content ->
-                                    val dateTitle = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date(selectedDate))
-
-                                    viewModel.saveEntry(
-                                        title = dateTitle,
-                                        content = content,
-                                        date = selectedDate,
-                                        dayRating = entryToEdit?.dayRating ?: 5,
-                                        existingEntry = entryToEdit
+                                    NavigationBarItem(
+                                        icon = { androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Default.Star, contentDescription = "Blank") },
+                                        label = { Text("Extras") },
+                                        selected = currentScreen == "BLANK",
+                                        onClick = { currentScreen = "BLANK" }
                                     )
-                                    currentScreen = "LIST"
-                                },
-                                onCancel = { currentScreen = "LIST" }
-                            )
+                                }
+                            }
+                        }
+                    ) { paddingValues ->
+                        // Wrap your existing 'when' statement in a Box to apply the Scaffold padding
+                        androidx.compose.foundation.layout.Box(modifier = Modifier.padding(paddingValues)) {
+                            when (currentScreen) {
+                                "CUSTOM_SPLASH" -> {
+                                    CustomSplashScreen(onTimeout = { currentScreen = "LIST" })
+                                }
+                                "MAIN" -> {
+                                    MainScreen(isDarkMode = isDarkMode)
+                                }
+                                "LIST" -> {
+                                    DiaryListScreen(
+                                        entries = entries,
+                                        canAdd = canAddNow,
+                                        isDarkMode = isDarkMode,
+                                        onToggleTheme = { isDarkMode = !isDarkMode },
+                                        onAddEntry = {
+                                            if (canAddNow) {
+                                                selectedDate = System.currentTimeMillis()
+                                                entryToEdit = null
+                                                currentScreen = "MOOD_SLIDER"
+                                            } else {
+                                                Toast.makeText(this@MainActivity, "Wait! 1-minute limit active.", Toast.LENGTH_SHORT).show()
+                                            }
+                                        },
+                                        onOpenCalendar = { currentScreen = "CALENDAR" },
+                                        onEditEntry = { entry ->
+                                            selectedDate = entry.timestamp
+                                            entryToEdit = entry
+                                            currentScreen = "EDIT"
+                                        },
+                                        onDeleteEntry = { entry -> viewModel.delete(entry) }
+                                    )
+                                }
+                                // --- NEW BLANK SCREEN ROUTE ---
+                                "BLANK" -> {
+                                    BlankScreen()
+                                }
+                                "MOOD_SLIDER" -> {
+                                    MoodSliderScreen(
+                                        onSaveEntry = { moodValue ->
+                                            val dateTitle = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date(selectedDate))
+                                            viewModel.saveEntry(
+                                                title = dateTitle,
+                                                content = entryToEdit?.content ?: "",
+                                                date = selectedDate,
+                                                dayRating = moodValue,
+                                                existingEntry = entryToEdit
+                                            )
+                                            currentScreen = "LIST"
+                                        }
+                                    )
+                                }
+                                "CALENDAR" -> {
+                                    CalendarScreen(
+                                        entries = entries,
+                                        onBack = { currentScreen = "LIST" },
+                                        onDateSelected = { date ->
+                                            val existing = viewModel.getEntryForDate(date, entries)
+                                            selectedDate = date
+                                            entryToEdit = existing
+                                            currentScreen = "EDIT"
+                                        }
+                                    )
+                                }
+                                "EDIT" -> {
+                                    AddEntryScreen(
+                                        existingEntry = entryToEdit,
+                                        onSave = { content ->
+                                            val dateTitle = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date(selectedDate))
+                                            viewModel.saveEntry(
+                                                title = dateTitle,
+                                                content = content,
+                                                date = selectedDate,
+                                                dayRating = entryToEdit?.dayRating ?: 5,
+                                                existingEntry = entryToEdit
+                                            )
+                                            currentScreen = "LIST"
+                                        },
+                                        onCancel = { currentScreen = "LIST" }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
