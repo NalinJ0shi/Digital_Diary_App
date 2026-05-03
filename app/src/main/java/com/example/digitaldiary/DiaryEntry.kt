@@ -12,5 +12,6 @@ data class DiaryEntry(
     val content: String,
     val timestamp: Long = System.currentTimeMillis(),
     val mood: String? = null, // Keeping old field for safety
-    val moodEmoji: String = "😊" // NEW: The emoji field
+    val moodEmoji: String = "😊" ,
+    val dayRating: Int = 5
 )

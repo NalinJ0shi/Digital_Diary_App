@@ -16,7 +16,13 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         list.maxByOrNull { it.timestamp }
     }
 
-    fun saveEntry(title: String, content: String, date: Long, existingEntry: DiaryEntry? = null) {
+    fun saveEntry(
+        title: String,
+        content: String,
+        date: Long,
+        existingEntry: DiaryEntry? = null,
+        dayRating: Int
+    ) {
         viewModelScope.launch {
             val entry = existingEntry?.copy(title = title, content = content, timestamp = date)
                 ?: DiaryEntry(title = title, content = content, timestamp = date)

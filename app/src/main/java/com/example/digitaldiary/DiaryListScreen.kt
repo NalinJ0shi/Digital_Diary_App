@@ -252,26 +252,16 @@ fun DiaryListScreen(
             // --- THE DIARY ENTRIES ---
             // We apply paddingValues HERE so your text respects the top/bottom bars and
             // doesn't get hidden behind the navigation bar.
-            if (entries.isEmpty()) {
-                Text(
-                    "No entries yet. Tap the friend on the ground!",
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(paddingValues),
-                    color = Color.LightGray
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues) // Prevents list from hiding behind bottom bar
-                        .padding(horizontal = 16.dp),
-                    contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(entries, key = { it.id }) { entry ->
-                        DiaryItem(entry = entry, onEdit = onEditEntry, onDeleteRequest = { entryToDelete = it })
-                    }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues) // Prevents list from hiding behind bottom bar
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(entries, key = { it.id }) { entry ->
+                    DiaryItem(entry = entry, onEdit = onEditEntry, onDeleteRequest = { entryToDelete = it })
                 }
             }
         }

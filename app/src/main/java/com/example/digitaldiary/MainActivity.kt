@@ -1,5 +1,6 @@
 // app/src/main/java/com/example/digitaldiary/MainActivity.kt
 package com.example.digitaldiary
+
 import app.rive.runtime.kotlin.core.Rive
 import android.os.Bundle
 import android.widget.Toast
@@ -23,7 +24,6 @@ class MainActivity : ComponentActivity() {
     private val viewModel: DiaryViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         installSplashScreen()
         super.onCreate(savedInstanceState)
         Rive.init(applicationContext)
@@ -58,15 +58,11 @@ class MainActivity : ComponentActivity() {
 
                     when (currentScreen) {
                         "CUSTOM_SPLASH" -> {
-                            CustomSplashScreen(
-                                onTimeout = { currentScreen = "LIST" }
-                            )
+                            CustomSplashScreen(onTimeout = { currentScreen = "LIST" })
                         }
-
                         "MAIN" -> {
                             MainScreen(isDarkMode = isDarkMode)
                         }
-
                         "LIST" -> {
                             DiaryListScreen(
                                 entries = entries,
@@ -77,7 +73,6 @@ class MainActivity : ComponentActivity() {
                                     if (canAddNow) {
                                         selectedDate = System.currentTimeMillis()
                                         entryToEdit = null
-                                        // 1. THIS IS THE CHANGE: Route to your new slider screen!
                                         currentScreen = "MOOD_SLIDER"
                                     } else {
                                         Toast.makeText(this@MainActivity, "Wait! 1-minute limit active.", Toast.LENGTH_SHORT).show()
@@ -92,20 +87,26 @@ class MainActivity : ComponentActivity() {
                                 onDeleteEntry = { entry -> viewModel.delete(entry) }
                             )
                         }
-
-                        // 2. THIS IS THE NEW BLOCK: Add your Mood Slider Screen here
                         "MOOD_SLIDER" -> {
                             MoodSliderScreen(
                                 onSaveEntry = { moodValue ->
-                                    // Later you can save this moodValue to your database here.
-                                    // For now, let's route them back to the list when they click save.
+                                    val dateTitle = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date(selectedDate))
+
+                                    viewModel.saveEntry(
+                                        title = dateTitle,
+                                        content = entryToEdit?.content ?: "",
+                                        date = selectedDate,
+                                        dayRating = moodValue,
+                                        existingEntry = entryToEdit
+                                    )
                                     currentScreen = "LIST"
                                 }
                             )
                         }
-
                         "CALENDAR" -> {
                             CalendarScreen(
+                                entries = entries,
+                                // THE FIX: This properly hooks up the back button
                                 onBack = { currentScreen = "LIST" },
                                 onDateSelected = { date ->
                                     val existing = viewModel.getEntryForDate(date, entries)
@@ -115,16 +116,17 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
-
                         "EDIT" -> {
                             AddEntryScreen(
                                 existingEntry = entryToEdit,
                                 onSave = { content ->
                                     val dateTitle = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date(selectedDate))
+
                                     viewModel.saveEntry(
                                         title = dateTitle,
                                         content = content,
                                         date = selectedDate,
+                                        dayRating = entryToEdit?.dayRating ?: 5,
                                         existingEntry = entryToEdit
                                     )
                                     currentScreen = "LIST"

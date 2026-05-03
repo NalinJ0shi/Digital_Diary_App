@@ -24,12 +24,12 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-// THE FIX: Tells the file where to find your res/drawable/ folder
 import com.nalin.my_digitaldiary.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(
+    entries: List<DiaryEntry>,
     onDateSelected: (Long) -> Unit,
     onBack: () -> Unit
 ) {
@@ -37,27 +37,49 @@ fun CalendarScreen(
     val today = System.currentTimeMillis()
 
     // --- DESIGN COLORS ---
-    val bgColor = Color(0xFF1E1E1E) // Dark grey/black from mockup
-    val emptyCircleColor = Color(0xFF424D58) // The grey placeholder circles
+    val bgColor = Color(0xFF1E1E1E)
+    val emptyCircleColor = Color(0xFF424D58)
     val textColor = Color(0xFFE2E8F0)
     val mutedTextColor = Color(0xFF94A3B8)
 
-    // Placeholder color for a "Happy" day
-    val sampleMoodColor = Color(0xFF4CAF50)
+    val happyColor = Color(0xFF4CAF50)
+    val neutralColor = Color(0xFFFFEB3B)
+    val sadColor = Color(0xFFF44336)
 
-    // --- CALENDAR MATH ---
-    val calendar = Calendar.getInstance()
-    val monthYearFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
-    val currentMonthYear = monthYearFormat.format(calendar.time)
+    // --- CALENDAR MATH (Cached for speed) ---
+    val calendar = remember { Calendar.getInstance() }
+    val currentMonthYear = remember {
+        val monthYearFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+        monthYearFormat.format(calendar.time)
+    }
 
-    calendar.set(Calendar.DAY_OF_MONTH, 1)
-    val firstDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1
-    val daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+    val firstDayOfWeek = remember {
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        calendar.get(Calendar.DAY_OF_WEEK) - 1
+    }
+
+    val daysInMonth = remember {
+        calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+    }
+
+    // --- PRE-PROCESS ENTRIES (Fixes the lag!) ---
+    val entriesByDay = remember(entries) {
+        val map = mutableMapOf<Int, DiaryEntry>()
+        val tempCal = Calendar.getInstance()
+
+        entries.forEach { entry ->
+            tempCal.timeInMillis = entry.timestamp
+            if (tempCal.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) &&
+                tempCal.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)) {
+                map[tempCal.get(Calendar.DAY_OF_MONTH)] = entry
+            }
+        }
+        map
+    }
 
     Scaffold(
         containerColor = bgColor,
         topBar = {
-            // CUSTOM HEADER
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -68,18 +90,11 @@ fun CalendarScreen(
                 IconButton(onClick = onBack) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = textColor)
                 }
-
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = currentMonthYear,
-                        color = textColor,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text(text = currentMonthYear, color = textColor, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.width(4.dp))
                     Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Change Month", tint = textColor)
                 }
-
                 IconButton(onClick = { /* Handle Share */ }) {
                     Icon(Icons.Default.Share, contentDescription = "Share", tint = textColor)
                 }
@@ -92,42 +107,40 @@ fun CalendarScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
-            // --- WEEKDAY LABELS ---
             val weekdays = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 weekdays.forEach { day ->
-                    Text(
-                        text = day,
-                        color = mutedTextColor,
-                        modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Center,
-                        fontSize = 14.sp
-                    )
+                    Text(text = day, color = mutedTextColor, modifier = Modifier.weight(1f), textAlign = TextAlign.Center, fontSize = 14.sp)
                 }
             }
 
-            // --- THE CUSTOM GRID ---
             LazyVerticalGrid(
                 columns = GridCells.Fixed(7),
+                modifier = Modifier.weight(1f), // THE FIX: Prevents blank screen / lag
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // 1. Fill empty spaces before the 1st
                 items(firstDayOfWeek) {
                     Box(modifier = Modifier.size(48.dp))
                 }
 
-                // 2. Draw the days
                 items(daysInMonth) { dayIndex ->
                     val dayNumber = dayIndex + 1
 
-                    // Dummy data: Day 1 is happy, rest are empty
-                    val hasMoodData = (dayNumber == 1)
+                    // Fast Map Lookup
+                    val entryForDay = entriesByDay[dayNumber]
+                    val hasMoodData = entryForDay != null
+                    val moodRating = entryForDay?.dayRating ?: 5
+
+                    val circleColor = when {
+                        !hasMoodData -> emptyCircleColor
+                        moodRating >= 8 -> happyColor
+                        moodRating >= 4 -> neutralColor
+                        else -> sadColor
+                    }
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -143,26 +156,32 @@ fun CalendarScreen(
                             }
                         }
                     ) {
-                        // THE CUSTOM IMPERFECT CIRCLE
                         Box(
                             modifier = Modifier.size(48.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            // Draws your vector background and colors it dynamically
+                            // 1. Background Shape (Your plain imperfect circle)
                             Icon(
                                 painter = painterResource(id = R.drawable.calender_face),
                                 contentDescription = "Day Background",
                                 modifier = Modifier.fillMaxSize(),
-                                tint = if (hasMoodData) sampleMoodColor else emptyCircleColor
+                                tint = circleColor
                             )
-                            //will put something here later to draw in the face
+
+                            // 2. Face Icon (Draws ON TOP of the background)
+                            if (hasMoodData) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.calender_face),
+                                    contentDescription = "Mood Face",
+                                    modifier = Modifier.size(24.dp),
+                                    tint = bgColor
+                                )
+                            }
                         }
-
                         Spacer(modifier = Modifier.height(8.dp))
-
                         Text(
                             text = dayNumber.toString(),
-                            color = if (hasMoodData) sampleMoodColor else textColor,
+                            color = if (hasMoodData) circleColor else textColor,
                             fontSize = 12.sp,
                             fontWeight = if (hasMoodData) FontWeight.Bold else FontWeight.Normal
                         )
