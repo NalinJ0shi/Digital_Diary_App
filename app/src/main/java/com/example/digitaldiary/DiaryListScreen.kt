@@ -81,7 +81,6 @@ fun DiaryListScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("My Journey", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold), color = titleColor) },
-                navigationIcon = { IconButton(onClick = onOpenCalendar) { Icon(Icons.Default.DateRange, "Calendar", tint = titleColor) } },
                 // The Theme toggle has been removed from here:
                 actions = { },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
