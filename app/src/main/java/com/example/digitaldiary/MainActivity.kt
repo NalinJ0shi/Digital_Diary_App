@@ -33,11 +33,13 @@ class MainActivity : ComponentActivity() {
             val systemInDark = isSystemInDarkTheme()
             var isDarkMode by remember { mutableStateOf(systemInDark) }
 
-            PlantformTheme(darkTheme = isDarkMode) {
+            PlantformTheme(darkTheme = isDarkMode)
+            {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
-                ) {
+                )
+                {
                     val entries by viewModel.allEntries.collectAsState(initial = emptyList())
                     val latestEntry by viewModel.latestEntry.collectAsState(initial = null)
 
