@@ -21,12 +21,22 @@ import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * The main entry point of the Digital Diary application.
+ *
+ * This activity manages the top-level navigation state and initializes core dependencies
+ * like Rive and the system splash screen. It handles switching between different screens
+ * such as the splash screen, diary list, mood slider, calendar, and entry editor.
+ */
 class MainActivity : ComponentActivity() {
     private val viewModel: DiaryViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Handle the splash screen transition
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        
+        // Initialize Rive for animations
         Rive.init(applicationContext)
 
         setContent {
@@ -43,6 +53,7 @@ class MainActivity : ComponentActivity() {
                     val entries by viewModel.allEntries.collectAsState(initial = emptyList())
                     val latestEntry by viewModel.latestEntry.collectAsState(initial = null)
 
+                    // Keep track of the current time for the "can add" cooldown logic
                     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
                     LaunchedEffect(Unit) {
@@ -52,20 +63,19 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
+                    // Simple rate-limiting logic: 1 minute between entries
                     val lastTimestamp = latestEntry?.timestamp ?: 0L
                     val canAddNow = (now - lastTimestamp > 60000L)
 
+                    // Navigation state
                     var currentScreen by remember { mutableStateOf("CUSTOM_SPLASH") }
                     var selectedDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
                     var entryToEdit by remember { mutableStateOf<DiaryEntry?>(null) }
 
-                    // --- OUTER SCAFFOLD REMOVED FROM HERE ---
+                    // Navigation Router
                     when (currentScreen) {
                         "CUSTOM_SPLASH" -> {
                             CustomSplashScreen(onTimeout = { currentScreen = "LIST" })
-                        }
-                        "MAIN" -> {
-                            // MainScreen(isDarkMode = isDarkMode)
                         }
                         "LIST" -> {
                             DiaryListScreen(
