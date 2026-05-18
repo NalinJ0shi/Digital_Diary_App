@@ -83,7 +83,7 @@ fun DiaryListScreen(
 
             // --- CONTROL: NAVBAR OVERALL DIMENSIONS ---
             val totalClickableHeight = 100.dp
-            val visualBarHeight = 70.dp
+            val visualBarHeight = 85.dp
 
             // --- CONTROL: CENTER CUTOUT WIDTH & OVERLAP HACK ---
             val centerCutoutWidth = 150.dp
@@ -143,7 +143,7 @@ fun DiaryListScreen(
                                 onOpenCalendar()
                             },
                             // --- CONTROL: ICON 1 POSITIONING ---
-                            modifier = Modifier.offset(x = 5.dp, y = 0.dp)
+                            modifier = Modifier.offset(x = 5.dp, y = -5.dp)
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.calendar_blank),
@@ -155,7 +155,7 @@ fun DiaryListScreen(
                         IconButton(
                             onClick = { selectedTab = 1 },
                             // --- CONTROL: ICON 2 POSITIONING ---
-                            modifier = Modifier.offset(x = 15.dp, y = 0.dp)
+                            modifier = Modifier.offset(x = 15.dp, y = -5.dp)
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.chart_line),
@@ -176,7 +176,7 @@ fun DiaryListScreen(
                         IconButton(
                             onClick = { selectedTab = 2 },
                             // --- CONTROL: ICON 3 POSITIONING ---
-                            modifier = Modifier.offset(x = -15.dp, y = 0.dp)
+                            modifier = Modifier.offset(x = -15.dp, y = -5.dp)
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.game_controller),
@@ -188,7 +188,7 @@ fun DiaryListScreen(
                         IconButton(
                             onClick = { selectedTab = 3 },
                             // --- CONTROL: ICON 4 POSITIONING ---
-                            modifier = Modifier.offset(x = -5.dp, y = 0.dp)
+                            modifier = Modifier.offset(x = -5.dp, y = -5.dp)
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.user),
@@ -205,7 +205,7 @@ fun DiaryListScreen(
                         // --- CONTROL: RIVE BUTTON SIZE & POSITION ---
                         .size(120.dp)
                         .align(Alignment.BottomCenter)
-                        .offset(x = 0.dp, y = (-15).dp),
+                        .offset(x = 0.dp, y = (-25).dp),
                     factory = { context ->
                         RiveAnimationView(context).apply {
                             setRiveResource(
@@ -252,20 +252,20 @@ fun DiaryListScreen(
                     }
                 }
 
-                AndroidView(
-                    modifier = Modifier
-                        .size(450.dp)
-                        .offset(x = 120.dp, y = (-170).dp),
-                    factory = { context ->
-                        RiveAnimationView(context).apply {
-                            setRiveResource(
-                                resId = R.raw.tree4,
-                                stateMachineName = "State Machine 1",
-                                autoplay = true
-                            )
-                        }
-                    }
-                )
+//                AndroidView(
+//                    modifier = Modifier
+//                        .size(450.dp)
+//                        .offset(x = 120.dp, y = (-170).dp),
+//                    factory = { context ->
+//                        RiveAnimationView(context).apply {
+//                            setRiveResource(
+//                                resId = R.raw.tree4,
+//                                stateMachineName = "State Machine 1",
+//                                autoplay = true
+//                            )
+//                        }
+//                    }
+//                )
 
                 Canvas(
                     modifier = Modifier

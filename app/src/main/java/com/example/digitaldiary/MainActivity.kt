@@ -21,6 +21,13 @@ import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * The main entry point of the Digital Diary application.
+ *
+ * This activity manages the top-level navigation state and initializes core dependencies
+ * like Rive and the system splash screen. It handles switching between different screens
+ * such as the splash screen, diary list, mood slider, and calendar.
+ */
 class MainActivity : ComponentActivity() {
     private val viewModel: DiaryViewModel by viewModels()
 
@@ -89,7 +96,7 @@ class MainActivity : ComponentActivity() {
                                 onEditEntry = { entry ->
                                     selectedDate = entry.timestamp
                                     entryToEdit = entry
-                                    currentScreen = "EDIT"
+                                    // Removed navigation to EDIT screen
                                 },
                                 onDeleteEntry = { entry -> viewModel.delete(entry) }
                             )
@@ -120,25 +127,8 @@ class MainActivity : ComponentActivity() {
                                     val existing = viewModel.getEntryForDate(date, entries)
                                     selectedDate = date
                                     entryToEdit = existing
-                                    currentScreen = "EDIT"
+                                    // Removed navigation to EDIT screen
                                 }
-                            )
-                        }
-                        "EDIT" -> {
-                            AddEntryScreen(
-                                existingEntry = entryToEdit,
-                                onSave = { content ->
-                                    val dateTitle = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date(selectedDate))
-                                    viewModel.saveEntry(
-                                        title = dateTitle,
-                                        content = content,
-                                        date = selectedDate,
-                                        dayRating = entryToEdit?.dayRating ?: 5,
-                                        existingEntry = entryToEdit
-                                    )
-                                    currentScreen = "LIST"
-                                },
-                                onCancel = { currentScreen = "LIST" }
                             )
                         }
                     }
