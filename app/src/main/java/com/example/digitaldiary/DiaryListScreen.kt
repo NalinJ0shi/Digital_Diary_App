@@ -4,6 +4,7 @@ package com.example.digitaldiary
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,23 +16,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.drawscope.withTransform
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-
-// RIVE IMPORTS
 import app.rive.runtime.kotlin.RiveAnimationView
 import com.nalin.my_digitaldiary.R
 
@@ -51,7 +46,8 @@ fun DiaryListScreen(
     val coroutineScope = rememberCoroutineScope()
     val density = LocalDensity.current
 
-    // Grounded Theme Colors
+    var selectedTab by remember { mutableIntStateOf(0) }
+
     val topColor = Color(0xFF0F172A)
     val bottomColor = Color(0xFF064E3B)
     val groundColor = Color(0xFF042F2E)
@@ -59,94 +55,157 @@ fun DiaryListScreen(
     val navBarColor = Color(0xFFF8FAFC)
     val gradientBrush = Brush.verticalGradient(colors = listOf(topColor, bottomColor))
 
-    // Front Hill Variables
+    val activeIconColor = groundColor
+    val inactiveIconColor = Color(0xFF94A3B8)
+
     val hillColor = Color(0xFFDAEBC0)
     val hillPathString = "M285 17.4657C203.574 -21.8322 183.5 17.4659 114.5 17.4658L-3 17.4657V203.801H402V27.8015C402 27.8015 352 49.8013 285 17.4657Z"
     val hillPath = remember {
         androidx.compose.ui.graphics.vector.PathParser().parsePathString(hillPathString).toPath()
     }
 
-    // Back Hill Variables
-    val hill2Color = Color(0xFFC6D7AC) // Slightly darker/greyer for depth
+    val hill2Color = Color(0xFFC6D7AC)
     val hill2PathString = "M309.5 15.5557C225.712 -29.7517 192.778 63.778 117 15.5555C62 -19.4445 -3 15.5557 -3 15.5557V264.055H402V45.5552C402 45.5552 328.771 25.9765 309.5 15.5557Z"
     val hill2Path = remember {
         androidx.compose.ui.graphics.vector.PathParser().parsePathString(hill2PathString).toPath()
     }
-
-    // Calculate the radius for the cutout
-    val cutoutRadiusPx = with(density) { 75.dp.toPx() }
 
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("My Journey", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold), color = titleColor) },
-                // The Theme toggle has been removed from here:
                 actions = { },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
             )
         },
         bottomBar = {
-            // WE FREED THE BOTTOM BAR! Only the Nav Bar and Button live here now.
-            // Notice there is no more fixed 140.dp height limit restricting things.
+
+            // --- CONTROL: NAVBAR OVERALL DIMENSIONS ---
+            val totalClickableHeight = 100.dp
+            val visualBarHeight = 70.dp
+
+            // --- CONTROL: CENTER CUTOUT WIDTH & OVERLAP HACK ---
+            val centerCutoutWidth = 150.dp
+            val overlapGapWidth = 100.dp // Keep this exactly 2.dp smaller than centerCutoutWidth to hide the rendering gap
+
+            // --- CONTROL: ICON SIZES ---
+            val icon1Size = 32.dp
+            val icon2Size = 32.dp
+            val icon3Size = 32.dp
+            val icon4Size = 32.dp
+
             Box(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(totalClickableHeight),
                 contentAlignment = Alignment.BottomCenter
             ) {
-                // LAYER 5: CURVED NAVIGATION BAR
-                NavigationBar(
+
+                Box(
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .graphicsLayer {
-                            shape = BottomNavCurveShape(cutoutRadiusPx)
-                            clip = true
-                            shadowElevation = 16f
-                        },
-                    containerColor = navBarColor,
-                    contentColor = groundColor
+                        .height(visualBarHeight)
+                        .align(Alignment.BottomCenter)
                 ) {
-                    NavigationBarItem(
-                        // Changed from Home to DateRange
-                        icon = { Icon(Icons.Default.DateRange, contentDescription = "Calendar") },
-                        label = { Text("Calendar") },
-                        selected = true,
-                        onClick = {
-                            // This will now open your CalendarScreen when tapped!
-                            onOpenCalendar()
-                        },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = groundColor,
-                            selectedTextColor = groundColor,
-                            unselectedIconColor = Color.Gray,
-                            unselectedTextColor = Color.Gray,
-                            indicatorColor = Color.Transparent
-                        )
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Box(modifier = Modifier.weight(1f).fillMaxHeight().background(navBarColor))
+                        Spacer(modifier = Modifier.width(overlapGapWidth))
+                        Box(modifier = Modifier.weight(1f).fillMaxHeight().background(navBarColor))
+                    }
 
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Face, contentDescription = "Moods") },
-                        label = { Text("Moods") },
-                        selected = false,
-                        onClick = { /* Handle Navigation */ },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = groundColor,
-                            selectedTextColor = groundColor,
-                            unselectedIconColor = Color.Gray,
-                            unselectedTextColor = Color.Gray,
-                            indicatorColor = Color.Transparent
-                        )
+                    Image(
+                        painter = painterResource(id = R.drawable.vector_3),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .width(centerCutoutWidth)
+                            .fillMaxHeight()
+                            .align(Alignment.BottomCenter),
+                        contentScale = ContentScale.FillBounds,
+                        colorFilter = ColorFilter.tint(navBarColor)
                     )
                 }
 
-                // LAYER 6: THE RIVE BUTTON (Top Layer)
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = {
+                                selectedTab = 0
+                                onOpenCalendar()
+                            },
+                            // --- CONTROL: ICON 1 POSITIONING ---
+                            modifier = Modifier.offset(x = 5.dp, y = 0.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.calendar_blank),
+                                contentDescription = "Nav Item 1",
+                                modifier = Modifier.size(icon1Size),
+                                tint = if (selectedTab == 0) activeIconColor else inactiveIconColor
+                            )
+                        }
+                        IconButton(
+                            onClick = { selectedTab = 1 },
+                            // --- CONTROL: ICON 2 POSITIONING ---
+                            modifier = Modifier.offset(x = 15.dp, y = 0.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.chart_line),
+                                contentDescription = "Nav Item 2",
+                                modifier = Modifier.size(icon2Size),
+                                tint = if (selectedTab == 1) activeIconColor else inactiveIconColor
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(centerCutoutWidth))
+
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = { selectedTab = 2 },
+                            // --- CONTROL: ICON 3 POSITIONING ---
+                            modifier = Modifier.offset(x = -15.dp, y = 0.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.game_controller),
+                                contentDescription = "Nav Item 3",
+                                modifier = Modifier.size(icon3Size),
+                                tint = if (selectedTab == 2) activeIconColor else inactiveIconColor
+                            )
+                        }
+                        IconButton(
+                            onClick = { selectedTab = 3 },
+                            // --- CONTROL: ICON 4 POSITIONING ---
+                            modifier = Modifier.offset(x = -5.dp, y = 0.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.user),
+                                contentDescription = "Nav Item 4",
+                                modifier = Modifier.size(icon4Size),
+                                tint = if (selectedTab == 3) activeIconColor else inactiveIconColor
+                            )
+                        }
+                    }
+                }
+
                 AndroidView(
                     modifier = Modifier
+                        // --- CONTROL: RIVE BUTTON SIZE & POSITION ---
                         .size(120.dp)
                         .align(Alignment.BottomCenter)
-                        .offset(y = (-15).dp),
+                        .offset(x = 0.dp, y = (-15).dp),
                     factory = { context ->
                         RiveAnimationView(context).apply {
                             setRiveResource(
@@ -159,10 +218,8 @@ fun DiaryListScreen(
                     update = { view ->
                         view.setOnTouchListener { v, event ->
                             v.onTouchEvent(event)
-
                             if (event.action == android.view.MotionEvent.ACTION_UP) {
                                 v.performClick()
-
                                 coroutineScope.launch {
                                     delay(300)
                                     onAddEntry()
@@ -175,17 +232,11 @@ fun DiaryListScreen(
             }
         }
     ) { paddingValues ->
-        // MAIN SCREEN CONTENT
         Box(modifier = Modifier.fillMaxSize().background(gradientBrush)) {
-
-            // --- THE LANDSCAPE NOW HAS THE WHOLE SCREEN TO GROW ---
-            // Because we don't apply paddingValues here, it anchors to the absolute bottom
-            // of the phone and sits perfectly behind your Navigation Bar.
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.BottomCenter
             ) {
-                // LAYER 1: BACK HILL
                 Canvas(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -201,11 +252,10 @@ fun DiaryListScreen(
                     }
                 }
 
-                // LAYER 2: THE TREE
                 AndroidView(
                     modifier = Modifier
-                        .size(450.dp) // <--- BOOM! Change this size to whatever you want now!
-                        .offset(x = 120.dp, y = (-170).dp), // Adjust Y offset if you make it bigger
+                        .size(450.dp)
+                        .offset(x = 120.dp, y = (-170).dp),
                     factory = { context ->
                         RiveAnimationView(context).apply {
                             setRiveResource(
@@ -217,7 +267,6 @@ fun DiaryListScreen(
                     }
                 )
 
-                // LAYER 3: FRONT HILL
                 Canvas(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -230,31 +279,12 @@ fun DiaryListScreen(
                         drawPath(path = hillPath, color = hillColor)
                     }
                 }
-
-                // LAYER 4: THE PLANT
-//                AndroidView(
-//                    modifier = Modifier
-//                        .size(120.dp)
-//                        .offset(x = (-100).dp, y = (-50).dp),
-//                    factory = { context ->
-//                        RiveAnimationView(context).apply {
-//                            setRiveResource(
-//                                resId = R.raw.plant,
-//                                stateMachineName = "State Machine 1",
-//                                autoplay = true
-//                            )
-//                        }
-//                    }
-//                )
             }
 
-            // --- THE DIARY ENTRIES ---
-            // We apply paddingValues HERE so your text respects the top/bottom bars and
-            // doesn't get hidden behind the navigation bar.
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues) // Prevents list from hiding behind bottom bar
+                    .padding(paddingValues)
                     .padding(horizontal = 16.dp),
                 contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -264,37 +294,5 @@ fun DiaryListScreen(
                 }
             }
         }
-    }
-}
-
-class BottomNavCurveShape(private val cutoutRadius: Float) : Shape {
-    override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
-        val path = Path().apply {
-            val width = size.width
-            val height = size.height
-            val center = width / 2f
-
-            val curveSpread = cutoutRadius * 1.5f
-
-            moveTo(0f, 0f)
-            lineTo(center - curveSpread, 0f)
-
-            cubicTo(
-                x1 = center - cutoutRadius * 0.8f, y1 = 0f,
-                x2 = center - cutoutRadius, y2 = cutoutRadius,
-                x3 = center, y3 = cutoutRadius
-            )
-            cubicTo(
-                x1 = center + cutoutRadius, y1 = cutoutRadius,
-                x2 = center + cutoutRadius * 0.8f, y2 = 0f,
-                x3 = center + curveSpread, y3 = 0f
-            )
-
-            lineTo(width, 0f)
-            lineTo(width, height)
-            lineTo(0f, height)
-            close()
-        }
-        return Outline.Generic(path)
     }
 }

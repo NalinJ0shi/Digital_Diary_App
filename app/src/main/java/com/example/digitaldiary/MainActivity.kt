@@ -21,13 +21,6 @@ import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
 
-/**
- * The main entry point of the Digital Diary application.
- *
- * This activity manages the top-level navigation state and initializes core dependencies
- * like Rive and the system splash screen. It handles switching between different screens
- * such as the splash screen, diary list, mood slider, calendar, and entry editor.
- */
 class MainActivity : ComponentActivity() {
     private val viewModel: DiaryViewModel by viewModels()
 
