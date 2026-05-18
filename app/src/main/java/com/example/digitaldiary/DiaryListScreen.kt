@@ -41,6 +41,10 @@ fun DiaryListScreen(
     onOpenCalendar: () -> Unit,
     onEditEntry: (DiaryEntry) -> Unit,
     onDeleteEntry: (DiaryEntry) -> Unit,
+
+    onNavigateToChart: () -> Unit,
+    onNavigateToGame: () -> Unit,
+    onNavigateToProfile: () -> Unit,
 ) {
     var entryToDelete by remember { mutableStateOf<DiaryEntry?>(null) }
     val coroutineScope = rememberCoroutineScope()
@@ -76,7 +80,8 @@ fun DiaryListScreen(
             CenterAlignedTopAppBar(
                 title = { Text("My Journey", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold), color = titleColor) },
                 actions = { },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
+//                windowInsets = WindowInsets(3.dp)
             )
         },
         bottomBar = {
@@ -153,7 +158,8 @@ fun DiaryListScreen(
                             )
                         }
                         IconButton(
-                            onClick = { selectedTab = 1 },
+                            onClick = { selectedTab = 1
+                                onNavigateToChart() },
                             // --- CONTROL: ICON 2 POSITIONING ---
                             modifier = Modifier.offset(x = 15.dp, y = -5.dp)
                         ) {
@@ -174,7 +180,8 @@ fun DiaryListScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(
-                            onClick = { selectedTab = 2 },
+                            onClick = { selectedTab = 2
+                                onNavigateToGame()},
                             // --- CONTROL: ICON 3 POSITIONING ---
                             modifier = Modifier.offset(x = -15.dp, y = -5.dp)
                         ) {
@@ -186,7 +193,8 @@ fun DiaryListScreen(
                             )
                         }
                         IconButton(
-                            onClick = { selectedTab = 3 },
+                            onClick = { selectedTab = 3
+                                onNavigateToProfile()},
                             // --- CONTROL: ICON 4 POSITIONING ---
                             modifier = Modifier.offset(x = -5.dp, y = -5.dp)
                         ) {

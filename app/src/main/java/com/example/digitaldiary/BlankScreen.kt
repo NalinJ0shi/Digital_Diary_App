@@ -1,18 +1,39 @@
+// app/src/main/java/com/example/digitaldiary/BlankScreen.kt
 package com.example.digitaldiary
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BlankScreen() {
-    // A completely blank screen with your app's dark background color
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF1E1E1E))
-    )
+fun BlankScreen(
+    screenName: String,
+    onNavigateBack: () -> Unit // This is the "Back" interaction
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(screenName) },
+                navigationIcon = {
+                    IconButton(onClick = { onNavigateBack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Go Back")
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = "This is the $screenName screen.")
+        }
+    }
 }

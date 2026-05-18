@@ -1,139 +1,115 @@
-// app/src/main/java/com/example/digitaldiary/MainActivity.kt
 package com.example.digitaldiary
 
-import app.rive.runtime.kotlin.core.Rive
 import android.os.Bundle
-import android.widget.Toast
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import app.rive.runtime.kotlin.core.Rive
+
 import com.example.digitaldiary.ui.theme.PlantformTheme
-import kotlinx.coroutines.delay
-import java.text.SimpleDateFormat
-import java.util.*
 
-/**
- * The main entry point of the Digital Diary application.
- *
- * This activity manages the top-level navigation state and initializes core dependencies
- * like Rive and the system splash screen. It handles switching between different screens
- * such as the splash screen, diary list, mood slider, and calendar.
- */
 class MainActivity : ComponentActivity() {
-    private val viewModel: DiaryViewModel by viewModels()
-
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Handle the splash screen transition
         installSplashScreen()
         super.onCreate(savedInstanceState)
-        
-        // Initialize Rive for animations
-        Rive.init(applicationContext)
+
+        Rive.init(this)
 
         setContent {
-            val systemInDark = isSystemInDarkTheme()
-            var isDarkMode by remember { mutableStateOf(systemInDark) }
-
-            PlantformTheme(darkTheme = isDarkMode)
-            {
+            PlantformTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
-                )
-                {
-                    val entries by viewModel.allEntries.collectAsState(initial = emptyList())
-                    val latestEntry by viewModel.latestEntry.collectAsState(initial = null)
-
-                    // Keep track of the current time for the "can add" cooldown logic
-                    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
-
-                    LaunchedEffect(Unit) {
-                        while (true) {
-                            delay(1000)
-                            now = System.currentTimeMillis()
-                        }
-                    }
-
-                    // Simple rate-limiting logic: 1 minute between entries
-                    val lastTimestamp = latestEntry?.timestamp ?: 0L
-                    val canAddNow = (now - lastTimestamp > 60000L)
-
-                    // Navigation state
-                    var currentScreen by remember { mutableStateOf("CUSTOM_SPLASH") }
-                    var selectedDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
-                    var entryToEdit by remember { mutableStateOf<DiaryEntry?>(null) }
-
-                    // Navigation Router
-                    when (currentScreen) {
-                        "CUSTOM_SPLASH" -> {
-                            CustomSplashScreen(onTimeout = { currentScreen = "LIST" })
-                        }
-                        "LIST" -> {
-                            DiaryListScreen(
-                                entries = entries,
-                                canAdd = canAddNow,
-                                isDarkMode = isDarkMode,
-                                onToggleTheme = { isDarkMode = !isDarkMode },
-                                onAddEntry = {
-                                    if (canAddNow) {
-                                        selectedDate = System.currentTimeMillis()
-                                        entryToEdit = null
-                                        currentScreen = "MOOD_SLIDER"
-                                    } else {
-                                        Toast.makeText(this@MainActivity, "Wait! 1-minute limit active.", Toast.LENGTH_SHORT).show()
-                                    }
-                                },
-                                onOpenCalendar = { currentScreen = "CALENDAR" },
-                                onEditEntry = { entry ->
-                                    selectedDate = entry.timestamp
-                                    entryToEdit = entry
-                                    // Removed navigation to EDIT screen
-                                },
-                                onDeleteEntry = { entry -> viewModel.delete(entry) }
-                            )
-                        }
-                        "BLANK" -> {
-                            BlankScreen()
-                        }
-                        "MOOD_SLIDER" -> {
-                            MoodSliderScreen(
-                                onSaveEntry = { moodValue ->
-                                    val dateTitle = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date(selectedDate))
-                                    viewModel.saveEntry(
-                                        title = dateTitle,
-                                        content = entryToEdit?.content ?: "",
-                                        date = selectedDate,
-                                        dayRating = moodValue,
-                                        existingEntry = entryToEdit
-                                    )
-                                    currentScreen = "LIST"
-                                }
-                            )
-                        }
-                        "CALENDAR" -> {
-                            CalendarScreen(
-                                entries = entries,
-                                onBack = { currentScreen = "LIST" },
-                                onDateSelected = { date ->
-                                    val existing = viewModel.getEntryForDate(date, entries)
-                                    selectedDate = date
-                                    entryToEdit = existing
-                                    // Removed navigation to EDIT screen
-                                }
-                            )
-                        }
-                    }
+                ) {
+                    DiaryAppNavigation()
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun DiaryAppNavigation() {
+    val navController = rememberNavController()
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val diaryViewModel: DiaryViewModel = viewModel(
+        factory = androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.getInstance(context.applicationContext as android.app.Application)
+    )
+
+    var isDarkMode by remember { mutableStateOf(false) }
+
+    // 1. MOVED UP: Now ALL screens can see your database entries!
+    val entries by diaryViewModel.allEntries.collectAsState(initial = emptyList())
+
+    NavHost(navController = navController, startDestination = "home") {
+
+        composable("home") {
+            DiaryListScreen(
+                entries = entries,
+                canAdd = true,
+                isDarkMode = isDarkMode,
+                onToggleTheme = { isDarkMode = !isDarkMode },
+
+                // 2. RIVE BUTTON FIX: This now navigates to your Mood screen
+                onAddEntry = { navController.navigate("mood_screen") },
+
+                onOpenCalendar = { navController.navigate("calendar_screen") },
+                onNavigateToChart = { navController.navigate("chart_screen") },
+                onNavigateToGame = { navController.navigate("game_screen") },
+                onNavigateToProfile = { navController.navigate("profile_screen") },
+
+                onEditEntry = { entry -> /* TODO: Handle Editing */ },
+                onDeleteEntry = { entry -> diaryViewModel.delete(entry) }
+            )
+        }
+
+        // 3. NEW ROUTE: The Mood Slider Screen
+        composable("mood_screen") {
+            MoodSliderScreen(
+                onSaveEntry = { selectedMoodLevel ->
+                    // For now, this just slides back to the home screen after they pick a mood!
+                    // Later, we can make this save to the database or go to the text editor.
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // 4. CALENDAR FIX: Replaced the Blank Screen with your actual CalendarScreen
+        composable("calendar_screen") {
+            CalendarScreen(
+                entries = entries, // Passes the dots to your calendar
+                onDateSelected = { dateInMillis ->
+                    /* TODO: What happens when they tap a specific day? */
+                },
+                onBack = { navController.popBackStack() } // Makes your top-left arrow work
+            )
+        }
+
+        composable("chart_screen") {
+            BlankScreen(screenName = "Charts") { navController.popBackStack() }
+        }
+
+        composable("game_screen") {
+            BlankScreen(screenName = "Games") { navController.popBackStack() }
+        }
+
+        composable("profile_screen") {
+            BlankScreen(screenName = "Profile") { navController.popBackStack() }
         }
     }
 }
