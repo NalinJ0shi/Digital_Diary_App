@@ -78,25 +78,33 @@ fun DiaryAppNavigation() {
             )
         }
 
-        // 3. NEW ROUTE: The Mood Slider Screen
+        // 3. MOOD SLIDER ROUTE
         composable("mood_screen") {
             MoodSliderScreen(
                 onSaveEntry = { selectedMoodLevel ->
-                    // For now, this just slides back to the home screen after they pick a mood!
-                    // Later, we can make this save to the database or go to the text editor.
-                    navController.popBackStack()
+                    navController.navigate("calendar_screen") {
+                        popUpTo("home") { inclusive = false }
+                        // This prevents the calendar from opening twice if the screen refreshes!
+                        launchSingleTop = true
+                    }
                 }
             )
         }
 
-        // 4. CALENDAR FIX: Replaced the Blank Screen with your actual CalendarScreen
+        // 4. CALENDAR ROUTE
         composable("calendar_screen") {
             CalendarScreen(
-                entries = entries, // Passes the dots to your calendar
+                entries = entries,
                 onDateSelected = { dateInMillis ->
-                    /* TODO: What happens when they tap a specific day? */
+                    /* TODO */
                 },
-                onBack = { navController.popBackStack() } // Makes your top-left arrow work
+                onBack = {
+                    // Wipes the entire navigation history clean and forces a fresh jump Home
+                    navController.navigate("home") {
+                        popUpTo(0) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
             )
         }
 

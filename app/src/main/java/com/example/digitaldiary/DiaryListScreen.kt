@@ -4,27 +4,29 @@ package com.example.digitaldiary
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.drawscope.withTransform
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import app.rive.runtime.kotlin.RiveAnimationView
@@ -41,11 +43,11 @@ fun DiaryListScreen(
     onOpenCalendar: () -> Unit,
     onEditEntry: (DiaryEntry) -> Unit,
     onDeleteEntry: (DiaryEntry) -> Unit,
-
     onNavigateToChart: () -> Unit,
     onNavigateToGame: () -> Unit,
     onNavigateToProfile: () -> Unit,
-) {
+)
+{
     var entryToDelete by remember { mutableStateOf<DiaryEntry?>(null) }
     val coroutineScope = rememberCoroutineScope()
     val density = LocalDensity.current
@@ -81,18 +83,22 @@ fun DiaryListScreen(
                 title = { Text("My Journey", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold), color = titleColor) },
                 actions = { },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
-//                windowInsets = WindowInsets(3.dp)
             )
         },
+
         bottomBar = {
 
-            // --- CONTROL: NAVBAR OVERALL DIMENSIONS ---
+            // --- CONTROL: NAVBAR OVERALL HEIGHT ---
             val totalClickableHeight = 100.dp
-            val visualBarHeight = 85.dp
+            val visualBarHeight = 80.dp
 
-            // --- CONTROL: CENTER CUTOUT WIDTH & OVERLAP HACK ---
-            val centerCutoutWidth = 150.dp
-            val overlapGapWidth = 100.dp // Keep this exactly 2.dp smaller than centerCutoutWidth to hide the rendering gap
+            // --- CONTROL: SHAPE DRAWING (The Physical Curve) ---
+            val curveWidthPx = 330f      // How wide the top gap is
+            val curveDepthPx = 130f      // How deep the U-shape dips down
+            val cornerSmoothingPx = 80f  // How wide the smooth transition corners are
+
+            // --- CONTROL: ICON DEAD-ZONE (Pushes left/right icons apart) ---
+            val iconSeparationWidth = 190.dp
 
             // --- CONTROL: ICON SIZES ---
             val icon1Size = 32.dp
@@ -107,31 +113,23 @@ fun DiaryListScreen(
                 contentAlignment = Alignment.BottomCenter
             ) {
 
+                // --- CONTROL: THE UNBREAKABLE SHAPE LAYER ---
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(visualBarHeight)
                         .align(Alignment.BottomCenter)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        Box(modifier = Modifier.weight(1f).fillMaxHeight().background(navBarColor))
-                        Spacer(modifier = Modifier.width(overlapGapWidth))
-                        Box(modifier = Modifier.weight(1f).fillMaxHeight().background(navBarColor))
-                    }
-
-                    Image(
-                        painter = painterResource(id = R.drawable.vector_3),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .width(centerCutoutWidth)
-                            .fillMaxHeight()
-                            .align(Alignment.BottomCenter),
-                        contentScale = ContentScale.FillBounds,
-                        colorFilter = ColorFilter.tint(navBarColor)
-                    )
-                }
+                        .graphicsLayer {
+                            shape = NavBarCutoutShape(
+                                cutoutWidth = curveWidthPx,
+                                cutoutDepth = curveDepthPx,
+                                cornerSmoothing = cornerSmoothingPx
+                            )
+                            clip = true
+                            shadowElevation = 20f
+                        }
+                        .background(navBarColor)
+                )
 
                 Row(
                     modifier = Modifier.fillMaxSize(),
@@ -158,10 +156,12 @@ fun DiaryListScreen(
                             )
                         }
                         IconButton(
-                            onClick = { selectedTab = 1
-                                onNavigateToChart() },
+                            onClick = {
+                                selectedTab = 1
+                                onNavigateToChart()
+                            },
                             // --- CONTROL: ICON 2 POSITIONING ---
-                            modifier = Modifier.offset(x = 15.dp, y = -5.dp)
+                            modifier = Modifier.offset(x = 25.dp, y = -5.dp)
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.chart_line),
@@ -172,7 +172,7 @@ fun DiaryListScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.width(centerCutoutWidth))
+                    Spacer(modifier = Modifier.width(iconSeparationWidth))
 
                     Row(
                         modifier = Modifier.weight(1f),
@@ -180,10 +180,12 @@ fun DiaryListScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(
-                            onClick = { selectedTab = 2
-                                onNavigateToGame()},
+                            onClick = {
+                                selectedTab = 2
+                                onNavigateToGame()
+                            },
                             // --- CONTROL: ICON 3 POSITIONING ---
-                            modifier = Modifier.offset(x = -15.dp, y = -5.dp)
+                            modifier = Modifier.offset(x = -25.dp, y = -5.dp)
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.game_controller),
@@ -193,8 +195,10 @@ fun DiaryListScreen(
                             )
                         }
                         IconButton(
-                            onClick = { selectedTab = 3
-                                onNavigateToProfile()},
+                            onClick = {
+                                selectedTab = 3
+                                onNavigateToProfile()
+                            },
                             // --- CONTROL: ICON 4 POSITIONING ---
                             modifier = Modifier.offset(x = -5.dp, y = -5.dp)
                         ) {
@@ -260,21 +264,6 @@ fun DiaryListScreen(
                     }
                 }
 
-//                AndroidView(
-//                    modifier = Modifier
-//                        .size(450.dp)
-//                        .offset(x = 120.dp, y = (-170).dp),
-//                    factory = { context ->
-//                        RiveAnimationView(context).apply {
-//                            setRiveResource(
-//                                resId = R.raw.tree4,
-//                                stateMachineName = "State Machine 1",
-//                                autoplay = true
-//                            )
-//                        }
-//                    }
-//                )
-
                 Canvas(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -302,5 +291,41 @@ fun DiaryListScreen(
                 }
             }
         }
+    }
+}
+
+class NavBarCutoutShape(
+    private val cutoutWidth: Float,
+    private val cutoutDepth: Float,
+    private val cornerSmoothing: Float
+) : Shape {
+    override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
+        val path = Path().apply {
+            val width = size.width
+            val height = size.height
+            val center = width / 2f
+            val halfWidth = cutoutWidth / 2f
+
+            moveTo(0f, 0f)
+            lineTo(center - halfWidth, 0f)
+
+            cubicTo(
+                x1 = center - halfWidth + cornerSmoothing, y1 = 0f,
+                x2 = center - halfWidth + cornerSmoothing, y2 = cutoutDepth,
+                x3 = center, y3 = cutoutDepth
+            )
+
+            cubicTo(
+                x1 = center + halfWidth - cornerSmoothing, y1 = cutoutDepth,
+                x2 = center + halfWidth - cornerSmoothing, y2 = 0f,
+                x3 = center + halfWidth, y3 = 0f
+            )
+
+            lineTo(width, 0f)
+            lineTo(width, height)
+            lineTo(0f, height)
+            close()
+        }
+        return Outline.Generic(path)
     }
 }
