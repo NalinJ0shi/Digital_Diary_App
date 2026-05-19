@@ -99,6 +99,16 @@ fun CalendarScreen(
                     Icon(Icons.Default.Share, contentDescription = "Share", tint = textColor)
                 }
             }
+        },
+        bottomBar = {
+            CustomBottomNavBar(
+                selectedTab = 0, // Keeps the calendar icon green
+                onCalendarClick = { /* Already here, do nothing */ },
+                onChartClick = { /* We will wire these up to the NavHost later if needed */ },
+                onGameClick = { },
+                onProfileClick = { },
+                onAddEntry = { /* TODO: Navigate to Mood Slider */ }
+            )
         }
     ) { padding ->
         Column(
