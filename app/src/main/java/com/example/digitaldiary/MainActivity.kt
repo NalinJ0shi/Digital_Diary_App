@@ -52,72 +52,205 @@ fun DiaryAppNavigation() {
     )
 
     var isDarkMode by remember { mutableStateOf(false) }
-
-    // 1. MOVED UP: Now ALL screens can see your database entries!
     val entries by diaryViewModel.allEntries.collectAsState(initial = emptyList())
 
     NavHost(navController = navController, startDestination = "home") {
 
+        // --- HOME SCREEN ---
         composable("home") {
             DiaryListScreen(
                 entries = entries,
                 canAdd = true,
                 isDarkMode = isDarkMode,
                 onToggleTheme = { isDarkMode = !isDarkMode },
-
-                // 2. RIVE BUTTON FIX: This now navigates to your Mood screen
                 onAddEntry = { navController.navigate("mood_screen") },
 
-                onOpenCalendar = { navController.navigate("calendar_screen") },
-                onNavigateToChart = { navController.navigate("chart_screen") },
-                onNavigateToGame = { navController.navigate("game_screen") },
-                onNavigateToProfile = { navController.navigate("profile_screen") },
-
-                onEditEntry = { entry -> /* TODO: Handle Editing */ },
+                // Clicking navbar items from Home page
+                onOpenCalendar = {
+                    navController.navigate("calendar_screen") {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onNavigateToChart = {
+                    navController.navigate("chart_screen") {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onNavigateToGame = {
+                    navController.navigate("game_screen") {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onNavigateToProfile = {
+                    navController.navigate("profile_screen") {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onEditEntry = { entry -> /* Handle Editing */ },
                 onDeleteEntry = { entry -> diaryViewModel.delete(entry) }
             )
         }
 
-        // 3. MOOD SLIDER ROUTE
+        // --- MOOD SLIDER ---
         composable("mood_screen") {
             MoodSliderScreen(
-                onSaveEntry = { selectedMoodLevel ->
-                    navController.navigate("calendar_screen") {
-                        popUpTo("home") { inclusive = false }
-                        // This prevents the calendar from opening twice if the screen refreshes!
-                        launchSingleTop = true
-                    }
+                onSaveEntry = {
+                    navController.popBackStack()
                 }
             )
         }
 
-        // 4. CALENDAR ROUTE
+        // --- CALENDAR SCREEN ---
         composable("calendar_screen") {
             CalendarScreen(
                 entries = entries,
-                onDateSelected = { dateInMillis ->
-                    /* TODO */
-                },
+                onDateSelected = { dateInMillis -> },
+                onCalendarClick = { /* Already on calendar */ },
+
+                // --- THIS IS THE FORCE CLEAR RULE FOR THE HOUSE_LINE ---
                 onBack = {
-                    // Wipes the entire navigation history clean and forces a fresh jump Home
                     navController.navigate("home") {
                         popUpTo(0) { inclusive = true }
                         launchSingleTop = true
                     }
-                }
+                },
+
+                onChartClick = {
+                    navController.navigate("chart_screen") {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onGameClick = {
+                    navController.navigate("game_screen") {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onProfileClick = {
+                    navController.navigate("profile_screen") {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onAddEntry = { navController.navigate("mood_screen") }
             )
         }
 
+        // --- CHART SCREEN ---
         composable("chart_screen") {
-            BlankScreen(screenName = "Charts") { navController.popBackStack() }
+            ChartScreen(
+                onNavigateBack = {
+                    navController.navigate("home") {
+                        popUpTo("home") { inclusive = false }
+                        launchSingleTop = true
+                    }
+                },
+                onCalendarClick = {
+                    navController.navigate("calendar_screen") {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onChartClick = { /* Already here */ },
+                onGameClick = {
+                    navController.navigate("game_screen") {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onProfileClick = {
+                    navController.navigate("profile_screen") {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onAddEntry = { navController.navigate("mood_screen") }
+            )
         }
 
+        // --- GAME SCREEN ---
         composable("game_screen") {
-            BlankScreen(screenName = "Games") { navController.popBackStack() }
+            GameScreen(
+                onNavigateBack = {
+                    navController.navigate("home") {
+                        popUpTo("home") { inclusive = false }
+                        launchSingleTop = true
+                    }
+                },
+                onCalendarClick = {
+                    navController.navigate("calendar_screen") {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onChartClick = {
+                    navController.navigate("chart_screen") {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onGameClick = { /* Already here */ },
+                onProfileClick = {
+                    navController.navigate("profile_screen") {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onAddEntry = { navController.navigate("mood_screen") }
+            )
         }
 
+        // --- PROFILE SCREEN ---
         composable("profile_screen") {
-            BlankScreen(screenName = "Profile") { navController.popBackStack() }
+            ProfileScreen(
+                onNavigateBack = {
+                    navController.navigate("home") {
+                        popUpTo("home") { inclusive = false }
+                        launchSingleTop = true
+                    }
+                },
+                onCalendarClick = {
+                    navController.navigate("calendar_screen") {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onChartClick = {
+                    navController.navigate("chart_screen") {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onGameClick = {
+                    navController.navigate("game_screen") {
+                        popUpTo("home") { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onProfileClick = { /* Already here */ },
+                onAddEntry = { navController.navigate("mood_screen") }
+            )
         }
     }
 }

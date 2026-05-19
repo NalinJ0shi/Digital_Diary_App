@@ -1,6 +1,8 @@
+// app/src/main/java/com/example/digitaldiary/CalendarScreen.kt
 package com.example.digitaldiary
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -13,11 +15,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
@@ -31,12 +39,17 @@ import com.nalin.my_digitaldiary.R
 fun CalendarScreen(
     entries: List<DiaryEntry>,
     onDateSelected: (Long) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onCalendarClick: () -> Unit,
+    onChartClick: () -> Unit,
+    onGameClick: () -> Unit,
+    onProfileClick: () -> Unit,
+    onAddEntry: () -> Unit
 ) {
     val context = LocalContext.current
     val today = System.currentTimeMillis()
 
-    // --- DESIGN COLORS ---
+    // --- CONTROL: DESIGN COLORS ---
     val bgColor = Color(0xFF1E1E1E)
     val emptyCircleColor = Color(0xFF424D58)
     val textColor = Color(0xFFE2E8F0)
@@ -46,7 +59,7 @@ fun CalendarScreen(
     val neutralColor = Color(0xFFFFEB3B)
     val sadColor = Color(0xFFF44336)
 
-    // --- CALENDAR MATH (Cached for speed) ---
+    // --- CALENDAR MATH ---
     val calendar = remember { Calendar.getInstance() }
     val currentMonthYear = remember {
         val monthYearFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
@@ -62,7 +75,6 @@ fun CalendarScreen(
         calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
     }
 
-    // --- PRE-PROCESS ENTRIES (Fixes the lag!) ---
     val entriesByDay = remember(entries) {
         val map = mutableMapOf<Int, DiaryEntry>()
         val tempCal = Calendar.getInstance()
@@ -87,8 +99,13 @@ fun CalendarScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // --- FORCE RESET TO HOME ---
                 IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = textColor)
+                    Icon(
+                        painter = painterResource(id = R.drawable.house_line),
+                        contentDescription = "Go Home",
+                        tint = textColor
+                    )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(text = currentMonthYear, color = textColor, fontSize = 20.sp, fontWeight = FontWeight.Bold)
@@ -101,13 +118,14 @@ fun CalendarScreen(
             }
         },
         bottomBar = {
+            // --- CONTROL: REUSABLE NAVBAR COMPONENT ---
             CustomBottomNavBar(
-                selectedTab = 0, // Keeps the calendar icon green
-                onCalendarClick = { /* Already here, do nothing */ },
-                onChartClick = { /* We will wire these up to the NavHost later if needed */ },
-                onGameClick = { },
-                onProfileClick = { },
-                onAddEntry = { /* TODO: Navigate to Mood Slider */ }
+                selectedTab = 0, // Keeps the Calendar tab highlighted green
+                onCalendarClick = onCalendarClick,
+                onChartClick = onChartClick,
+                onGameClick = onGameClick,
+                onProfileClick = onProfileClick,
+                onAddEntry = onAddEntry
             )
         }
     ) { padding ->
@@ -129,7 +147,7 @@ fun CalendarScreen(
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(7),
-                modifier = Modifier.weight(1f), // THE FIX: Prevents blank screen / lag
+                modifier = Modifier.weight(1f),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -140,7 +158,6 @@ fun CalendarScreen(
                 items(daysInMonth) { dayIndex ->
                     val dayNumber = dayIndex + 1
 
-                    // Fast Map Lookup
                     val entryForDay = entriesByDay[dayNumber]
                     val hasMoodData = entryForDay != null
                     val moodRating = entryForDay?.dayRating ?: 5
@@ -170,15 +187,13 @@ fun CalendarScreen(
                             modifier = Modifier.size(48.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            // 1. Background Shape (Your plain imperfect circle)
-                            Icon(
-                                painter = painterResource(id = R.drawable.calender_face),
-                                contentDescription = "Day Background",
-                                modifier = Modifier.fillMaxSize(),
-                                tint = circleColor
+                            // --- CONTROL: UNBREAKABLE SLIGHTLY IRREGULAR CIRCLE BACKGROUND ---
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(color = circleColor, shape = OrganicCircleShape())
                             )
 
-                            // 2. Face Icon (Draws ON TOP of the background)
                             if (hasMoodData) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.calender_face),
@@ -199,5 +214,22 @@ fun CalendarScreen(
                 }
             }
         }
+    }
+}
+
+class OrganicCircleShape : Shape {
+    override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
+        val path = Path().apply {
+            val w = size.width
+            val h = size.height
+
+            moveTo(w * 0.5f, h * 0.02f)
+            cubicTo(w * 0.88f, h * 0.01f, w * 0.99f, h * 0.22f, w * 0.98f, h * 0.5f)
+            cubicTo(w * 0.97f, h * 0.78f, w * 0.78f, h * 0.96f, w * 0.48f, h * 0.98f)
+            cubicTo(w * 0.18f, h * 1.00f, w * 0.02f, h * 0.76f, w * 0.01f, h * 0.48f)
+            cubicTo(w * 0.00f, h * 0.20f, w * 0.22f, h * 0.03f, w * 0.5f, h * 0.02f)
+            close()
+        }
+        return Outline.Generic(path)
     }
 }
