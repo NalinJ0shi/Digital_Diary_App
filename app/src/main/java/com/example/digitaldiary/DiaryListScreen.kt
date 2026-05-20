@@ -88,7 +88,7 @@ fun DiaryListScreen(
 
         bottomBar = {
             CustomBottomNavBar(
-                selectedTab = 0, // Calendar/Home is active
+                selectedTab = -1,
                 onCalendarClick = onOpenCalendar,
                 onChartClick = onNavigateToChart,
                 onGameClick = onNavigateToGame,

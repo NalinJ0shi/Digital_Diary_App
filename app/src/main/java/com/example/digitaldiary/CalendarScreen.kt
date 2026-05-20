@@ -2,6 +2,7 @@
 package com.example.digitaldiary
 
 import android.widget.Toast
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,17 +16,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
@@ -39,7 +38,7 @@ import com.nalin.my_digitaldiary.R
 fun CalendarScreen(
     entries: List<DiaryEntry>,
     onDateSelected: (Long) -> Unit,
-    onBack: () -> Unit,
+    onBack: () -> Unit, // This explicitly captures the back action
     onCalendarClick: () -> Unit,
     onChartClick: () -> Unit,
     onGameClick: () -> Unit,
@@ -49,7 +48,7 @@ fun CalendarScreen(
     val context = LocalContext.current
     val today = System.currentTimeMillis()
 
-    // --- CONTROL: DESIGN COLORS ---
+    // --- DESIGN COLORS ---
     val bgColor = Color(0xFF1E1E1E)
     val emptyCircleColor = Color(0xFF424D58)
     val textColor = Color(0xFFE2E8F0)
@@ -59,7 +58,20 @@ fun CalendarScreen(
     val neutralColor = Color(0xFFFFEB3B)
     val sadColor = Color(0xFFF44336)
 
-    // --- CALENDAR MATH ---
+    // --- NEW: GRADIENT & HILLS ---
+    val topColor = Color(0xFF0F172A)
+    val bottomColor = Color(0xFF064E3B)
+    val gradientBrush = Brush.verticalGradient(colors = listOf(topColor, bottomColor))
+
+    val hillColor = Color(0xFFDAEBC0)
+    val hillPathString = "M285 17.4657C203.574 -21.8322 183.5 17.4659 114.5 17.4658L-3 17.4657V203.801H402V27.8015C402 27.8015 352 49.8013 285 17.4657Z"
+    val hillPath = remember { androidx.compose.ui.graphics.vector.PathParser().parsePathString(hillPathString).toPath() }
+
+    val hill2Color = Color(0xFFC6D7AC)
+    val hill2PathString = "M309.5 15.5557C225.712 -29.7517 192.778 63.778 117 15.5555C62 -19.4445 -3 15.5557 -3 15.5557V264.055H402V45.5552C402 45.5552 328.771 25.9765 309.5 15.5557Z"
+    val hill2Path = remember { androidx.compose.ui.graphics.vector.PathParser().parsePathString(hill2PathString).toPath() }
+
+    // --- CALENDAR MATH (Cached for speed) ---
     val calendar = remember { Calendar.getInstance() }
     val currentMonthYear = remember {
         val monthYearFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
@@ -75,6 +87,7 @@ fun CalendarScreen(
         calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
     }
 
+    // --- PRE-PROCESS ENTRIES (Fixes the lag!) ---
     val entriesByDay = remember(entries) {
         val map = mutableMapOf<Int, DiaryEntry>()
         val tempCal = Calendar.getInstance()
@@ -89,147 +102,163 @@ fun CalendarScreen(
         map
     }
 
-    Scaffold(
-        containerColor = bgColor,
-        topBar = {
-            Row(
+    // Wrap the entire screen in the Background Box
+    Box(modifier = Modifier.fillMaxSize().background(gradientBrush)) {
+
+        // 1. Draw the Background Hills
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Canvas(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 24.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .aspectRatio(402f / 204f)
+                    .align(Alignment.BottomCenter)
             ) {
-                // --- FORCE RESET TO HOME ---
-                IconButton(onClick = onBack) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.house_line),
-                        contentDescription = "Go Home",
-                        tint = textColor
-                    )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = currentMonthYear, color = textColor, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Change Month", tint = textColor)
-                }
-                IconButton(onClick = { /* Handle Share */ }) {
-                    Icon(Icons.Default.Share, contentDescription = "Share", tint = textColor)
+                val scaleX = size.width / 402f
+                val scaleY = size.height / 204f
+                withTransform({ scale(scaleX, scaleY, Offset.Zero) }) {
+                    translate(top = -40f) { drawPath(path = hill2Path, color = hill2Color) }
                 }
             }
-        },
-        bottomBar = {
-            // --- CONTROL: REUSABLE NAVBAR COMPONENT ---
-            CustomBottomNavBar(
-                selectedTab = 0, // Keeps the Calendar tab highlighted green
-                onCalendarClick = onCalendarClick,
-                onChartClick = onChartClick,
-                onGameClick = onGameClick,
-                onProfileClick = onProfileClick,
-                onAddEntry = onAddEntry
-            )
+
+            Canvas(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(402f / 204f)
+                    .align(Alignment.BottomCenter)
+            ) {
+                val scaleX = size.width / 402f
+                val scaleY = size.height / 204f
+                withTransform({ scale(scaleX, scaleY, Offset.Zero) }) {
+                    drawPath(path = hillPath, color = hillColor)
+                }
+            }
         }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-        ) {
-            val weekdays = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                weekdays.forEach { day ->
-                    Text(text = day, color = mutedTextColor, modifier = Modifier.weight(1f), textAlign = TextAlign.Center, fontSize = 14.sp)
-                }
-            }
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(7),
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(firstDayOfWeek) {
-                    Box(modifier = Modifier.size(48.dp))
-                }
-
-                items(daysInMonth) { dayIndex ->
-                    val dayNumber = dayIndex + 1
-
-                    val entryForDay = entriesByDay[dayNumber]
-                    val hasMoodData = entryForDay != null
-                    val moodRating = entryForDay?.dayRating ?: 5
-
-                    val circleColor = when {
-                        !hasMoodData -> emptyCircleColor
-                        moodRating >= 8 -> happyColor
-                        moodRating >= 4 -> neutralColor
-                        else -> sadColor
-                    }
-
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.clickable {
-                            val clickCal = Calendar.getInstance()
-                            clickCal.set(Calendar.DAY_OF_MONTH, dayNumber)
-                            val selectedTime = clickCal.timeInMillis
-
-                            if (selectedTime > today) {
-                                Toast.makeText(context, "No writing in the future!", Toast.LENGTH_SHORT).show()
-                            } else {
-                                onDateSelected(selectedTime)
-                            }
-                        }
-                    ) {
-                        Box(
-                            modifier = Modifier.size(48.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            // --- CONTROL: UNBREAKABLE SLIGHTLY IRREGULAR CIRCLE BACKGROUND ---
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(color = circleColor, shape = OrganicCircleShape())
-                            )
-
-                            if (hasMoodData) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.calender_face),
-                                    contentDescription = "Mood Face",
-                                    modifier = Modifier.size(24.dp),
-                                    tint = bgColor
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = dayNumber.toString(),
-                            color = if (hasMoodData) circleColor else textColor,
-                            fontSize = 12.sp,
-                            fontWeight = if (hasMoodData) FontWeight.Bold else FontWeight.Normal
+        // 2. The Main Content
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // --- FIXED: Explicitly trigger the passed 'onBack' function here ---
+                    IconButton(onClick = { onBack() }) { // Or onNavigateBack
+                        Icon(
+                            painter = painterResource(id = R.drawable.home), // Make sure your file is actually named home.xml or home.png
+                            contentDescription = "Go Home",
+                            Modifier.size(32.dp),
+                            tint = textColor
                         )
                     }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = currentMonthYear, color = textColor, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Change Month", tint = textColor)
+                    }
+                    IconButton(onClick = { /* Handle Share */ }) {
+                        Icon(Icons.Default.Share, contentDescription = "Share", tint = textColor)
+                    }
+                }
+            },
+            bottomBar = {
+                CustomBottomNavBar(
+                    selectedTab = 0,
+                    onCalendarClick = onCalendarClick,
+                    onChartClick = onChartClick,
+                    onGameClick = onGameClick,
+                    onProfileClick = onProfileClick,
+                    onAddEntry = onAddEntry
+                )
+            }
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp)
+            ) {
+                Spacer(modifier = Modifier.height(24.dp))
+
+                val weekdays = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    weekdays.forEach { day ->
+                        Text(text = day, color = mutedTextColor, modifier = Modifier.weight(1f), textAlign = TextAlign.Center, fontSize = 14.sp)
+                    }
+                }
+
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(7),
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(bottom = 120.dp)
+                ) {
+                    items(firstDayOfWeek) {
+                        Box(modifier = Modifier.size(48.dp))
+                    }
+
+                    items(daysInMonth) { dayIndex ->
+                        val dayNumber = dayIndex + 1
+
+                        val entryForDay = entriesByDay[dayNumber]
+                        val hasMoodData = entryForDay != null
+                        val moodRating = entryForDay?.dayRating ?: 5
+
+                        val circleColor = when {
+                            !hasMoodData -> emptyCircleColor
+                            moodRating >= 8 -> happyColor
+                            moodRating >= 4 -> neutralColor
+                            else -> sadColor
+                        }
+
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.clickable {
+                                val clickCal = Calendar.getInstance()
+                                clickCal.set(Calendar.DAY_OF_MONTH, dayNumber)
+                                val selectedTime = clickCal.timeInMillis
+
+                                if (selectedTime > today) {
+                                    Toast.makeText(context, "No writing in the future!", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    onDateSelected(selectedTime)
+                                }
+                            }
+                        ) {
+                            Box(
+                                modifier = Modifier.size(48.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.calender_face),
+                                    contentDescription = "Day Background",
+                                    modifier = Modifier.fillMaxSize(),
+                                    tint = circleColor
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = dayNumber.toString(),
+                                color = if (hasMoodData) circleColor else textColor,
+                                fontSize = 12.sp,
+                                fontWeight = if (hasMoodData) FontWeight.Bold else FontWeight.Normal
+                            )
+                        }
+                    }
                 }
             }
         }
-    }
-}
-
-class OrganicCircleShape : Shape {
-    override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
-        val path = Path().apply {
-            val w = size.width
-            val h = size.height
-
-            moveTo(w * 0.5f, h * 0.02f)
-            cubicTo(w * 0.88f, h * 0.01f, w * 0.99f, h * 0.22f, w * 0.98f, h * 0.5f)
-            cubicTo(w * 0.97f, h * 0.78f, w * 0.78f, h * 0.96f, w * 0.48f, h * 0.98f)
-            cubicTo(w * 0.18f, h * 1.00f, w * 0.02f, h * 0.76f, w * 0.01f, h * 0.48f)
-            cubicTo(w * 0.00f, h * 0.20f, w * 0.22f, h * 0.03f, w * 0.5f, h * 0.02f)
-            close()
-        }
-        return Outline.Generic(path)
     }
 }

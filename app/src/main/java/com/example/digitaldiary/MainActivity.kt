@@ -159,7 +159,7 @@ fun DiaryAppNavigation() {
         // --- CHART SCREEN ---
         composable("chart_screen") {
             ChartScreen(
-                onNavigateBack = {
+                onBack = {
                     navController.navigate("home") {
                         popUpTo("home") { inclusive = false }
                         launchSingleTop = true
@@ -194,7 +194,7 @@ fun DiaryAppNavigation() {
         // --- GAME SCREEN ---
         composable("game_screen") {
             GameScreen(
-                onNavigateBack = {
+                onBack = {
                     navController.navigate("home") {
                         popUpTo("home") { inclusive = false }
                         launchSingleTop = true
@@ -229,7 +229,7 @@ fun DiaryAppNavigation() {
         // --- PROFILE SCREEN ---
         composable("profile_screen") {
             ProfileScreen(
-                onNavigateBack = {
+                onBack = {
                     navController.navigate("home") {
                         popUpTo("home") { inclusive = false }
                         launchSingleTop = true

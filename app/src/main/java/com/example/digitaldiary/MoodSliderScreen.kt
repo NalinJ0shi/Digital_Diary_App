@@ -1,7 +1,9 @@
 package com.example.digitaldiary
 
 import com.nalin.my_digitaldiary.R
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,15 +14,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import app.rive.runtime.kotlin.RiveAnimationView
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoodSliderScreen(
-    // UPDATED: Now expects only Content (String) and Mood (Int)
     onSaveEntry: (String, Int) -> Unit
 ) {
-    var moodLevel by remember { mutableFloatStateOf(5f) }
+    // Start at 2f (Neutral/Center dot)
+    var moodLevel by remember { mutableFloatStateOf(2f) }
     var entryContent by remember { mutableStateOf("") }
-
-    // NEW: Tracks if the user has touched the slider yet
     var hasSlided by remember { mutableStateOf(false) }
 
     Column(
@@ -47,7 +48,8 @@ fun MoodSliderScreen(
                 }
             },
             update = { view ->
-                val mappedRiveValue = (moodLevel - 1f) * (100f / 9f)
+                // Smoothly maps continuous decimal values (like 1.45, 2.7) directly to the 0-100 Rive timeline
+                val mappedRiveValue = (moodLevel - 1f) * 50f
                 try {
                     view.setNumberState("State Machine 1", "Number 1", mappedRiveValue)
                 } catch (e: Exception) {
@@ -58,26 +60,83 @@ fun MoodSliderScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // 100% SMOOTH CONTINUOUS SLIDER WITH CUSTOM VISUAL DOTS
         Slider(
             value = moodLevel,
             onValueChange = {
                 moodLevel = it
-                hasSlided = true // Triggered when they move the slider
+                hasSlided = true
             },
-            valueRange = 1f..10f,
-            steps = 8,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
+            valueRange = 1f..3f, // Continuous float range (no 'steps' parameter = completely smooth sliding)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp),
+            thumb = {
+                // The main draggable thumb dot
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .background(color = Color.Black, shape = CircleShape)
+                )
+            },
+            track = {
+                // Custom track handling: Renders a thin line and places 3 fixed background dots
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Thin horizontal line
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(2.dp)
+                            .background(Color.Black)
+                    )
+
+                    // Fixed Left Dot
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .background(Color.Black, shape = CircleShape)
+                            .align(Alignment.CenterStart)
+                    )
+
+                    // Fixed Center Dot
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .background(Color.Black, shape = CircleShape)
+                            .align(Alignment.Center)
+                    )
+
+                    // Fixed Right Dot
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .background(Color.Black, shape = CircleShape)
+                            .align(Alignment.CenterEnd)
+                    )
+                }
+            }
         )
 
-        Text(
-            text = "Level: ${moodLevel.toInt()}",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(top = 8.dp)
-        )
+        // LABELS ALIGNED UNDER THE 3 DOTS
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 40.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = "Bad", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "Okay", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "Good", style = MaterialTheme.typography.bodyMedium)
+        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-        // NEW: Only show the text field and button IF they have slided
+        // Smart Reveal Text Field
         if (hasSlided) {
             TextField(
                 value = entryContent,
@@ -87,9 +146,9 @@ fun MoodSliderScreen(
                     .fillMaxWidth()
                     .height(120.dp)
                     .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(16.dp), // Rounds the corners
+                shape = RoundedCornerShape(16.dp),
                 colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = Color.Transparent,   // Removes the sharp bottom line
+                    focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                     disabledIndicatorColor = Color.Transparent
                 ),

@@ -83,7 +83,7 @@ fun CustomBottomNavBar(
                     modifier = Modifier.offset(x = 5.dp, y = -5.dp)
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.calendar_blank),
+                        painter = painterResource(id = R.drawable.calendar_silhouette),
                         contentDescription = "Calendar",
                         modifier = Modifier.size(32.dp),
                         tint = if (selectedTab == 0) activeIconColor else inactiveIconColor
@@ -94,7 +94,7 @@ fun CustomBottomNavBar(
                     modifier = Modifier.offset(x = 25.dp, y = -5.dp)
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.chart_line),
+                        painter = painterResource(id = R.drawable.graph__1_),
                         contentDescription = "Chart",
                         modifier = Modifier.size(32.dp),
                         tint = if (selectedTab == 1) activeIconColor else inactiveIconColor
@@ -114,7 +114,7 @@ fun CustomBottomNavBar(
                     modifier = Modifier.offset(x = -25.dp, y = -5.dp)
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.game_controller),
+                        painter = painterResource(id = R.drawable.dead),
                         contentDescription = "Games",
                         modifier = Modifier.size(32.dp),
                         tint = if (selectedTab == 2) activeIconColor else inactiveIconColor

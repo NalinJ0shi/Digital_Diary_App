@@ -1,20 +1,20 @@
 // app/src/main/java/com/example/digitaldiary/ProfileScreen.kt
 package com.example.digitaldiary
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import com.nalin.my_digitaldiary.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    onNavigateBack: () -> Unit,
+    onBack: () -> Unit,
     onCalendarClick: () -> Unit,
     onChartClick: () -> Unit,
     onGameClick: () -> Unit,
@@ -27,10 +27,15 @@ fun ProfileScreen(
         containerColor = bgColor,
         topBar = {
             TopAppBar(
-                title = { Text("Profile", color = Color.White) },
+                title = {},
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Go Back", tint = Color.White)
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.home),
+                            contentDescription = "Go Home",
+                            Modifier.size(32.dp),
+                            tint = Color.White
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
