@@ -80,7 +80,7 @@ fun DiaryListScreen(
         containerColor = Color.Transparent,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("My Journey", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold), color = titleColor) },
+                title = { Text("My Shiz", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold), color = titleColor) },
                 actions = { },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
             )
@@ -107,7 +107,8 @@ fun DiaryListScreen(
                         .fillMaxWidth()
                         .aspectRatio(402f / 204f)
                         .align(Alignment.BottomCenter)
-                ) {
+                )
+                {
                     val scaleX = size.width / 402f
                     val scaleY = size.height / 204f
                     withTransform({ scale(scaleX, scaleY, Offset.Zero) }) {
@@ -122,7 +123,8 @@ fun DiaryListScreen(
                         .fillMaxWidth()
                         .aspectRatio(402f / 204f)
                         .align(Alignment.BottomCenter)
-                ) {
+                )
+                {
                     val scaleX = size.width / 402f
                     val scaleY = size.height / 204f
                     withTransform({ scale(scaleX, scaleY, Offset.Zero) }) {
@@ -140,7 +142,14 @@ fun DiaryListScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(entries, key = { it.id }) { entry ->
-                    DiaryItem(entry = entry, onEdit = onEditEntry, onDeleteRequest = { entryToDelete = it })
+                    DiaryItem(
+                        entry = entry,
+                        onEdit = onEditEntry,
+                        // UPDATED: Now it actually tells the system to delete the entry!
+                        onDeleteRequest = {
+                            onDeleteEntry(it)
+                        }
+                    )
                 }
             }
         }
