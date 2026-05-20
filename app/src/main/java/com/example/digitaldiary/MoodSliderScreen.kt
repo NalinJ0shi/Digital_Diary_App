@@ -2,87 +2,108 @@ package com.example.digitaldiary
 
 import com.nalin.my_digitaldiary.R
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import app.rive.runtime.kotlin.RiveAnimationView
 
 @Composable
 fun MoodSliderScreen(
-    onSaveEntry: (Int) -> Unit // Callback to handle saving or navigating away
+    // UPDATED: Now expects only Content (String) and Mood (Int)
+    onSaveEntry: (String, Int) -> Unit
 ) {
-    // Setting up the 1-to-10 scale, starting in the middle
     var moodLevel by remember { mutableFloatStateOf(5f) }
+    var entryContent by remember { mutableStateOf("") }
+
+    // NEW: Tracks if the user has touched the slider yet
+    var hasSlided by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "How are you feeling today?",
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 32.dp)
+            modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // The Rive Mascot integration
-        // The Rive Mascot integration
         AndroidView(
-            modifier = Modifier.size(250.dp),
+            modifier = Modifier.size(200.dp),
             factory = { context ->
                 RiveAnimationView(context).apply {
                     setRiveResource(
-                        resId = R.raw.mascot1, // <-- MAKE SURE THIS MATCHES YOUR FILE NAME
-                        stateMachineName = "State Machine 1" // <-- MUST MATCH EXACTLY
+                        resId = R.raw.mascot1,
+                        stateMachineName = "State Machine 1"
                     )
                 }
             },
             update = { view ->
                 val mappedRiveValue = (moodLevel - 1f) * (100f / 9f)
-
-                // We wrap this in a try-catch so the app doesn't crash if the names don't match!
                 try {
-                    view.setNumberState(
-                        "State Machine 1", // <-- MUST MATCH EXACTLY
-                        "Number 1",      // <-- MUST MATCH EXACTLY WHAT IS IN RIVE
-                        mappedRiveValue
-                    )
+                    view.setNumberState("State Machine 1", "Number 1", mappedRiveValue)
                 } catch (e: Exception) {
                     println("RIVE ERROR: Could not find State Machine or Input name!")
-                    e.printStackTrace()
                 }
             }
         )
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // The Slider
         Slider(
             value = moodLevel,
-            onValueChange = { moodLevel = it },
+            onValueChange = {
+                moodLevel = it
+                hasSlided = true // Triggered when they move the slider
+            },
             valueRange = 1f..10f,
-            steps = 8, // 8 steps between 1 and 10 snaps the slider exactly to whole numbers
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp)
+            steps = 8,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
         )
 
         Text(
             text = "Level: ${moodLevel.toInt()}",
             style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(top = 16.dp)
+            modifier = Modifier.padding(top = 8.dp)
         )
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        Button(
-            onClick = { onSaveEntry(moodLevel.toInt()) },
-            modifier = Modifier.size(width = 200.dp, height = 50.dp)
-        ) {
-            Text("Save Mood")
+        // NEW: Only show the text field and button IF they have slided
+        if (hasSlided) {
+            TextField(
+                value = entryContent,
+                onValueChange = { entryContent = it },
+                placeholder = { Text("Write your diary entry...") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .padding(horizontal = 16.dp),
+                shape = RoundedCornerShape(16.dp), // Rounds the corners
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,   // Removes the sharp bottom line
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                ),
+                maxLines = 5
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = { onSaveEntry(entryContent, moodLevel.toInt()) },
+                modifier = Modifier.size(width = 200.dp, height = 50.dp)
+            ) {
+                Text("Save Entry")
+            }
         }
     }
 }

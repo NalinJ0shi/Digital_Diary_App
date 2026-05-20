@@ -100,9 +100,17 @@ fun DiaryAppNavigation() {
         }
 
         // --- MOOD SLIDER ---
+        // --- MOOD SLIDER ---
+        // --- MOOD SLIDER ---
         composable("mood_screen") {
             MoodSliderScreen(
-                onSaveEntry = {
+                onSaveEntry = { content, moodScore ->
+                    diaryViewModel.saveEntry(
+                        title = "", // Title is gone, so we save it as blank
+                        content = content,
+                        date = System.currentTimeMillis(),
+                        dayRating = moodScore
+                    )
                     navController.popBackStack()
                 }
             )
