@@ -1,4 +1,3 @@
-// app/src/main/java/com/example/digitaldiary/CalendarScreen.kt
 package com.example.digitaldiary
 
 import android.widget.Toast
@@ -38,7 +37,7 @@ import com.nalin.my_digitaldiary.R
 fun CalendarScreen(
     entries: List<DiaryEntry>,
     onDateSelected: (Long) -> Unit,
-    onBack: () -> Unit, // This explicitly captures the back action
+    onBack: () -> Unit,
     onCalendarClick: () -> Unit,
     onChartClick: () -> Unit,
     onGameClick: () -> Unit,
@@ -48,7 +47,6 @@ fun CalendarScreen(
     val context = LocalContext.current
     val today = System.currentTimeMillis()
 
-    // --- DESIGN COLORS ---
     val bgColor = Color(0xFF1E1E1E)
     val emptyCircleColor = Color(0xFF424D58)
     val textColor = Color(0xFFE2E8F0)
@@ -58,7 +56,6 @@ fun CalendarScreen(
     val neutralColor = Color(0xFFFFEB3B)
     val sadColor = Color(0xFFF44336)
 
-    // --- NEW: GRADIENT & HILLS ---
     val topColor = Color(0xFF0F172A)
     val bottomColor = Color(0xFF064E3B)
     val gradientBrush = Brush.verticalGradient(colors = listOf(topColor, bottomColor))
@@ -71,7 +68,6 @@ fun CalendarScreen(
     val hill2PathString = "M309.5 15.5557C225.712 -29.7517 192.778 63.778 117 15.5555C62 -19.4445 -3 15.5557 -3 15.5557V264.055H402V45.5552C402 45.5552 328.771 25.9765 309.5 15.5557Z"
     val hill2Path = remember { androidx.compose.ui.graphics.vector.PathParser().parsePathString(hill2PathString).toPath() }
 
-    // --- CALENDAR MATH (Cached for speed) ---
     val calendar = remember { Calendar.getInstance() }
     val currentMonthYear = remember {
         val monthYearFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
@@ -87,7 +83,6 @@ fun CalendarScreen(
         calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
     }
 
-    // --- PRE-PROCESS ENTRIES (Fixes the lag!) ---
     val entriesByDay = remember(entries) {
         val map = mutableMapOf<Int, DiaryEntry>()
         val tempCal = Calendar.getInstance()
@@ -102,10 +97,8 @@ fun CalendarScreen(
         map
     }
 
-    // Wrap the entire screen in the Background Box
     Box(modifier = Modifier.fillMaxSize().background(gradientBrush)) {
 
-        // 1. Draw the Background Hills
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.BottomCenter
@@ -137,21 +130,19 @@ fun CalendarScreen(
             }
         }
 
-        // 2. The Main Content
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 24.dp),
+                        .padding(horizontal = 16.dp, vertical = 32.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // --- FIXED: Explicitly trigger the passed 'onBack' function here ---
-                    IconButton(onClick = { onBack() }) { // Or onNavigateBack
+                    IconButton(onClick = { onBack() }) {
                         Icon(
-                            painter = painterResource(id = R.drawable.home), // Make sure your file is actually named home.xml or home.png
+                            painter = painterResource(id = R.drawable.home),
                             contentDescription = "Go Home",
                             Modifier.size(32.dp),
                             tint = textColor
@@ -162,7 +153,7 @@ fun CalendarScreen(
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Change Month", tint = textColor)
                     }
-                    IconButton(onClick = { /* Handle Share */ }) {
+                    IconButton(onClick = { }) {
                         Icon(Icons.Default.Share, contentDescription = "Share", tint = textColor)
                     }
                 }
@@ -200,7 +191,10 @@ fun CalendarScreen(
                     columns = GridCells.Fixed(7),
                     modifier = Modifier.weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+
+                    // ADJUST THE VALUE BELOW to bring the calendar_face icon rows closer together (e.g., reduce 16.dp to 8.dp or 4.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+
                     contentPadding = PaddingValues(bottom = 120.dp)
                 ) {
                     items(firstDayOfWeek) {
