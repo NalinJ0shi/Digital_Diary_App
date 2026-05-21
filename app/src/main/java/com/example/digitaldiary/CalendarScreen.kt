@@ -55,6 +55,7 @@ fun CalendarScreen(
     val happyColor = Color(0xFF4CAF50)
     val neutralColor = Color(0xFFFFEB3B)
     val sadColor = Color(0xFFF44336)
+    val limeGreen = Color(0xFF32CD32)
 
     val topColor = Color(0xFF0F172A)
     val bottomColor = Color(0xFF064E3B)
@@ -69,6 +70,7 @@ fun CalendarScreen(
     val hill2Path = remember { androidx.compose.ui.graphics.vector.PathParser().parsePathString(hill2PathString).toPath() }
 
     val calendar = remember { Calendar.getInstance() }
+    val realTodayCal = remember { Calendar.getInstance() }
     val currentMonthYear = remember {
         val monthYearFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
         monthYearFormat.format(calendar.time)
@@ -193,7 +195,7 @@ fun CalendarScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
 
                     // ADJUST THE VALUE BELOW to bring the calendar_face icon rows closer together (e.g., reduce 16.dp to 8.dp or 4.dp)
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(1.dp),
 
                     contentPadding = PaddingValues(bottom = 120.dp)
                 ) {
@@ -203,6 +205,11 @@ fun CalendarScreen(
 
                     items(daysInMonth) { dayIndex ->
                         val dayNumber = dayIndex + 1
+
+                        // 1. Check if the cell being drawn is EXACTLY today's date
+                        val isToday = dayNumber == realTodayCal.get(Calendar.DAY_OF_MONTH) &&
+                                calendar.get(Calendar.MONTH) == realTodayCal.get(Calendar.MONTH) &&
+                                calendar.get(Calendar.YEAR) == realTodayCal.get(Calendar.YEAR)
 
                         val entryForDay = entriesByDay[dayNumber]
                         val hasMoodData = entryForDay != null
@@ -230,12 +237,27 @@ fun CalendarScreen(
                             }
                         ) {
                             Box(
-                                modifier = Modifier.size(48.dp),
+                                modifier = Modifier.size(48.dp), // Keep the main cell size the same
                                 contentAlignment = Alignment.Center
                             ) {
+
+                                // --- THE LIME GREEN RING ---
+                                // If it is today, draw a slightly larger version of the irregular shape behind it!
+                                if (isToday) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.calender_face),
+                                        contentDescription = "Today Highlight Ring",
+                                        // 54.dp is slightly larger than the 48.dp box, creating a 3.dp border effect
+                                        modifier = Modifier.size(60.dp),
+                                        tint = limeGreen
+                                    )
+                                }
+
+                                // --- THE MAIN DAY ICON ---
                                 Icon(
                                     painter = painterResource(id = R.drawable.calender_face),
                                     contentDescription = "Day Background",
+                                    // This stays at 48.dp to match the box size
                                     modifier = Modifier.fillMaxSize(),
                                     tint = circleColor
                                 )
@@ -247,7 +269,7 @@ fun CalendarScreen(
                                 text = dayNumber.toString(),
                                 color = if (hasMoodData) circleColor else textColor,
                                 fontSize = 12.sp,
-                                fontWeight = if (hasMoodData) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (hasMoodData || isToday) FontWeight.Bold else FontWeight.Normal
                             )
                         }
                     }
