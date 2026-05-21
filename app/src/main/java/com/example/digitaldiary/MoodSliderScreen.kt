@@ -42,7 +42,7 @@ fun MoodSliderScreen(
             factory = { context ->
                 RiveAnimationView(context).apply {
                     setRiveResource(
-                        resId = R.raw.mascot1,
+                        resId = R.raw.ghost2,
                         stateMachineName = "State Machine 1"
                     )
                 }
@@ -51,7 +51,7 @@ fun MoodSliderScreen(
                 // Smoothly maps continuous decimal values (like 1.45, 2.7) directly to the 0-100 Rive timeline
                 val mappedRiveValue = (moodLevel - 1f) * 50f
                 try {
-                    view.setNumberState("State Machine 1", "Number 1", mappedRiveValue)
+                    view.setNumberState("State Machine 1", "NumberInput", mappedRiveValue)
                 } catch (e: Exception) {
                     println("RIVE ERROR: Could not find State Machine or Input name!")
                 }
