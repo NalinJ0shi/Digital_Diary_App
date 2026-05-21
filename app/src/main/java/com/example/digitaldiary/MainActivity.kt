@@ -193,7 +193,7 @@ fun DiaryAppNavigation() {
 
         // --- GAME SCREEN ---
         composable("game_screen") {
-            GameScreen(
+            BreathingScreen(
                 onBack = {
                     navController.navigate("home") {
                         popUpTo("home") { inclusive = false }
