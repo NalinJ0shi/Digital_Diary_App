@@ -48,12 +48,11 @@ fun CalendarScreen(
     val todayMillis = System.currentTimeMillis()
 
     // --- DESIGN COLORS ---
-    val bgColor = Color(0xFF1E1E1E)
-    val emptyCircleColor = Color(0xFF424D58)
+    val emptyCircleColor = Color(0xFFEDE9E1)
     val textColor = Color(0xFFE2E8F0)
     val mutedTextColor = Color(0xFF94A3B8)
     val innerFillColor = Color(0xFFEDE9E1)
-    val todayRingColor = Color(0xFF38BDF8) // <-- Distinct Light Blue ring color exclusive to today
+    val todayRingColor = Color(0xFF38BDF8)
 
     val happyColor = Color(0xFF4CAF50)
     val neutralColor = Color(0xFFFFEB3B)
@@ -88,7 +87,6 @@ fun CalendarScreen(
         calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
     }
 
-    // Capture today's real-time components to check against grid cells
     val todayCalc = remember { Calendar.getInstance().apply { timeInMillis = todayMillis } }
     val todayYear = todayCalc.get(Calendar.YEAR)
     val todayMonth = todayCalc.get(Calendar.MONTH)
@@ -110,8 +108,6 @@ fun CalendarScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize().background(gradientBrush)) {
-
-        // 1. Background Landscape Layout
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.BottomCenter
@@ -128,7 +124,6 @@ fun CalendarScreen(
                     translate(top = -40f) { drawPath(path = hill2Path, color = hill2Color) }
                 }
             }
-
             Canvas(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -143,7 +138,6 @@ fun CalendarScreen(
             }
         }
 
-        // 2. The Main Scaffold Layer
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
@@ -193,7 +187,7 @@ fun CalendarScreen(
 
                 val weekdays = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), // Reduced bottom margin
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     weekdays.forEach { day ->
@@ -205,7 +199,7 @@ fun CalendarScreen(
                     columns = GridCells.Fixed(7),
                     modifier = Modifier.weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp), // --- FIXED: Tightened space between rows ---
                     contentPadding = PaddingValues(bottom = 120.dp)
                 ) {
                     items(firstDayOfWeek) {
@@ -226,7 +220,6 @@ fun CalendarScreen(
                             else -> sadColor
                         }
 
-                        // Evaluate precisely if this single cell is today
                         val isToday = calendar.get(Calendar.YEAR) == todayYear &&
                                 calendar.get(Calendar.MONTH) == todayMonth &&
                                 dayNumber == todayDayNumber
@@ -251,7 +244,6 @@ fun CalendarScreen(
                             ) {
                                 when {
                                     isToday -> {
-                                        // RULE 1: TODAY'S DATE ALWAYS KEEPS THE UNIQUE COLORED RING AND INNER FILL
                                         Icon(
                                             painter = painterResource(id = R.drawable.calender_face),
                                             contentDescription = "Today Outer Ring",
@@ -266,7 +258,6 @@ fun CalendarScreen(
                                         )
                                     }
                                     hasMoodData -> {
-                                        // RULE 2: ENTRIES THAT ARE NOT TODAY ARE FILLED WHOLLY (NO INNER CUTOUT / NO RING)
                                         Icon(
                                             painter = painterResource(id = R.drawable.calender_face),
                                             contentDescription = "Solid Filled Past Day",
@@ -275,10 +266,9 @@ fun CalendarScreen(
                                         )
                                     }
                                     else -> {
-                                        // RULE 3: DEFAULT BLANK DAYS WITH NO DATA
                                         Icon(
                                             painter = painterResource(id = R.drawable.calender_face),
-                                            contentDescription = "Empty Day Shape",
+                                            contentDescription = "Empty Custom Day Shape",
                                             modifier = Modifier.fillMaxSize(),
                                             tint = emptyCircleColor
                                         )
@@ -286,13 +276,15 @@ fun CalendarScreen(
                                 }
                             }
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                            // --- FIXED: Minimal text spacer gap ---
+                            Spacer(modifier = Modifier.height(2.dp))
 
                             Text(
                                 text = dayNumber.toString(),
-                                color = if (hasMoodData || isToday) (if(isToday) todayRingColor else circleColor) else textColor,
-                                fontSize = 12.sp,
-                                fontWeight = if (hasMoodData || isToday) FontWeight.Bold else FontWeight.Normal
+                                // --- FIXED: Locked typography attributes to white and bold ---
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
                             )
                         }
                     }
