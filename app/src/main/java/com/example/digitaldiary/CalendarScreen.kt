@@ -52,7 +52,7 @@ fun CalendarScreen(
     val textColor = Color(0xFFE2E8F0)
     val mutedTextColor = Color(0xFF94A3B8)
     val innerFillColor = Color(0xFFEDE9E1)
-    val todayRingColor = Color(0xFF38BDF8)
+    val todayRingColor = Color(0xD3E0FF36)
 
     val happyColor = Color(0xFF4CAF50)
     val neutralColor = Color(0xFFFFEB3B)
