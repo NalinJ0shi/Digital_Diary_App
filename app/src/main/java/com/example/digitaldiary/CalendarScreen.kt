@@ -1,3 +1,4 @@
+// app/src/main/java/com/example/digitaldiary/CalendarScreen.kt
 package com.example.digitaldiary
 
 import android.widget.Toast
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
@@ -45,18 +45,21 @@ fun CalendarScreen(
     onAddEntry: () -> Unit
 ) {
     val context = LocalContext.current
-    val today = System.currentTimeMillis()
+    val todayMillis = System.currentTimeMillis()
 
+    // --- DESIGN COLORS ---
     val bgColor = Color(0xFF1E1E1E)
     val emptyCircleColor = Color(0xFF424D58)
     val textColor = Color(0xFFE2E8F0)
     val mutedTextColor = Color(0xFF94A3B8)
+    val innerFillColor = Color(0xFFEDE9E1)
+    val todayRingColor = Color(0xFF38BDF8) // <-- Distinct Light Blue ring color exclusive to today
 
     val happyColor = Color(0xFF4CAF50)
     val neutralColor = Color(0xFFFFEB3B)
     val sadColor = Color(0xFFF44336)
-    val limeGreen = Color(0xFF32CD32)
 
+    // --- GRADIENT & HILLS ---
     val topColor = Color(0xFF0F172A)
     val bottomColor = Color(0xFF064E3B)
     val gradientBrush = Brush.verticalGradient(colors = listOf(topColor, bottomColor))
@@ -69,8 +72,8 @@ fun CalendarScreen(
     val hill2PathString = "M309.5 15.5557C225.712 -29.7517 192.778 63.778 117 15.5555C62 -19.4445 -3 15.5557 -3 15.5557V264.055H402V45.5552C402 45.5552 328.771 25.9765 309.5 15.5557Z"
     val hill2Path = remember { androidx.compose.ui.graphics.vector.PathParser().parsePathString(hill2PathString).toPath() }
 
+    // --- CALENDAR MATH ---
     val calendar = remember { Calendar.getInstance() }
-    val realTodayCal = remember { Calendar.getInstance() }
     val currentMonthYear = remember {
         val monthYearFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
         monthYearFormat.format(calendar.time)
@@ -85,6 +88,13 @@ fun CalendarScreen(
         calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
     }
 
+    // Capture today's real-time components to check against grid cells
+    val todayCalc = remember { Calendar.getInstance().apply { timeInMillis = todayMillis } }
+    val todayYear = todayCalc.get(Calendar.YEAR)
+    val todayMonth = todayCalc.get(Calendar.MONTH)
+    val todayDayNumber = todayCalc.get(Calendar.DAY_OF_MONTH)
+
+    // --- PRE-PROCESS ENTRIES ---
     val entriesByDay = remember(entries) {
         val map = mutableMapOf<Int, DiaryEntry>()
         val tempCal = Calendar.getInstance()
@@ -101,6 +111,7 @@ fun CalendarScreen(
 
     Box(modifier = Modifier.fillMaxSize().background(gradientBrush)) {
 
+        // 1. Background Landscape Layout
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.BottomCenter
@@ -132,17 +143,18 @@ fun CalendarScreen(
             }
         }
 
+        // 2. The Main Scaffold Layer
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 32.dp),
+                        .padding(horizontal = 16.dp, vertical = 24.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { onBack() }) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             painter = painterResource(id = R.drawable.home),
                             contentDescription = "Go Home",
@@ -152,10 +164,10 @@ fun CalendarScreen(
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = currentMonthYear, color = textColor, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(1.dp))
                         Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Change Month", tint = textColor)
                     }
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = { /* Handle Share */ }) {
                         Icon(Icons.Default.Share, contentDescription = "Share", tint = textColor)
                     }
                 }
@@ -193,10 +205,7 @@ fun CalendarScreen(
                     columns = GridCells.Fixed(7),
                     modifier = Modifier.weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-
-                    // ADJUST THE VALUE BELOW to bring the calendar_face icon rows closer together (e.g., reduce 16.dp to 8.dp or 4.dp)
-                    verticalArrangement = Arrangement.spacedBy(1.dp),
-
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(bottom = 120.dp)
                 ) {
                     items(firstDayOfWeek) {
@@ -205,11 +214,6 @@ fun CalendarScreen(
 
                     items(daysInMonth) { dayIndex ->
                         val dayNumber = dayIndex + 1
-
-                        // 1. Check if the cell being drawn is EXACTLY today's date
-                        val isToday = dayNumber == realTodayCal.get(Calendar.DAY_OF_MONTH) &&
-                                calendar.get(Calendar.MONTH) == realTodayCal.get(Calendar.MONTH) &&
-                                calendar.get(Calendar.YEAR) == realTodayCal.get(Calendar.YEAR)
 
                         val entryForDay = entriesByDay[dayNumber]
                         val hasMoodData = entryForDay != null
@@ -222,6 +226,11 @@ fun CalendarScreen(
                             else -> sadColor
                         }
 
+                        // Evaluate precisely if this single cell is today
+                        val isToday = calendar.get(Calendar.YEAR) == todayYear &&
+                                calendar.get(Calendar.MONTH) == todayMonth &&
+                                dayNumber == todayDayNumber
+
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.clickable {
@@ -229,7 +238,7 @@ fun CalendarScreen(
                                 clickCal.set(Calendar.DAY_OF_MONTH, dayNumber)
                                 val selectedTime = clickCal.timeInMillis
 
-                                if (selectedTime > today) {
+                                if (selectedTime > todayMillis) {
                                     Toast.makeText(context, "No writing in the future!", Toast.LENGTH_SHORT).show()
                                 } else {
                                     onDateSelected(selectedTime)
@@ -237,37 +246,51 @@ fun CalendarScreen(
                             }
                         ) {
                             Box(
-                                modifier = Modifier.size(48.dp), // Keep the main cell size the same
+                                modifier = Modifier.size(48.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-
-                                // --- THE LIME GREEN RING ---
-                                // If it is today, draw a slightly larger version of the irregular shape behind it!
-                                if (isToday) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.calender_face),
-                                        contentDescription = "Today Highlight Ring",
-                                        // 54.dp is slightly larger than the 48.dp box, creating a 3.dp border effect
-                                        modifier = Modifier.size(60.dp),
-                                        tint = limeGreen
-                                    )
+                                when {
+                                    isToday -> {
+                                        // RULE 1: TODAY'S DATE ALWAYS KEEPS THE UNIQUE COLORED RING AND INNER FILL
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.calender_face),
+                                            contentDescription = "Today Outer Ring",
+                                            modifier = Modifier.fillMaxSize(),
+                                            tint = todayRingColor
+                                        )
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.calender_face),
+                                            contentDescription = "Today Inner Fill",
+                                            modifier = Modifier.size(38.dp),
+                                            tint = innerFillColor
+                                        )
+                                    }
+                                    hasMoodData -> {
+                                        // RULE 2: ENTRIES THAT ARE NOT TODAY ARE FILLED WHOLLY (NO INNER CUTOUT / NO RING)
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.calender_face),
+                                            contentDescription = "Solid Filled Past Day",
+                                            modifier = Modifier.fillMaxSize(),
+                                            tint = circleColor
+                                        )
+                                    }
+                                    else -> {
+                                        // RULE 3: DEFAULT BLANK DAYS WITH NO DATA
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.calender_face),
+                                            contentDescription = "Empty Day Shape",
+                                            modifier = Modifier.fillMaxSize(),
+                                            tint = emptyCircleColor
+                                        )
+                                    }
                                 }
-
-                                // --- THE MAIN DAY ICON ---
-                                Icon(
-                                    painter = painterResource(id = R.drawable.calender_face),
-                                    contentDescription = "Day Background",
-                                    // This stays at 48.dp to match the box size
-                                    modifier = Modifier.fillMaxSize(),
-                                    tint = circleColor
-                                )
                             }
 
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text(
                                 text = dayNumber.toString(),
-                                color = if (hasMoodData) circleColor else textColor,
+                                color = if (hasMoodData || isToday) (if(isToday) todayRingColor else circleColor) else textColor,
                                 fontSize = 12.sp,
                                 fontWeight = if (hasMoodData || isToday) FontWeight.Bold else FontWeight.Normal
                             )
