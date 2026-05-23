@@ -157,6 +157,7 @@ fun DiaryAppNavigation() {
         // --- CHART SCREEN ---
         composable("chart_screen") {
             ChartScreen(
+                entries = entries, // <-- THIS IS THE MISSING PIECE
                 onBack = {
                     navController.navigate("home") {
                         popUpTo("home") { inclusive = false }

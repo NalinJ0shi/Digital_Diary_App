@@ -1,29 +1,84 @@
 package com.example.digitaldiary
 
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.nalin.my_digitaldiary.R
+import java.text.SimpleDateFormat
+import java.util.*
+
+// --- Soft Color Palette ---
+val BgColor = Color(0xFFF5F6F8)
+val CardWhite = Color.White
+val PrimaryGreen = Color(0xFF6EBE80)
+val TextDark = Color(0xFF2C2C2C)
+val TextGray = Color(0xFFA0A0A0)
+val GridBarColor = Color(0xFFF4F5F7) // Soft gray for vertical bars
+
+// Mood Colors (Best to Worst)
+val MoodColors = listOf(
+    Color(0xFF6EBE80), // 5: Best
+    Color(0xFF8FCE9D), // 4: Good
+    Color(0xFFBBE5C5), // 3: Okay
+    Color(0xFFE2E8E4), // 2: Bad
+    Color(0xFFC7CDCE)  // 1: Terrible
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChartScreen(
-    onBack: () -> Unit, // Cleaned up old parameter!
+    entries: List<DiaryEntry>,
+    onBack: () -> Unit,
     onCalendarClick: () -> Unit,
     onChartClick: () -> Unit,
     onGameClick: () -> Unit,
     onProfileClick: () -> Unit,
     onAddEntry: () -> Unit
 ) {
-    val bgColor = Color(0xFF0F172A)
+    // Graph Logic: Groups by exact date (e.g., "23 May")
+    val dailyAverages = remember(entries) {
+        entries.groupBy {
+            val calendar = Calendar.getInstance().apply { timeInMillis = it.timestamp }
+            SimpleDateFormat("d MMM", Locale.getDefault()).format(calendar.time)
+        }.mapValues { entryMap ->
+            entryMap.value.map { it.dayRating.toDouble() }.average().toFloat()
+        }.toList().takeLast(7)
+    }
+
+    // Proportion Logic: Calculates % of each mood score (1-5)
+    val proportions = remember(entries) {
+        val total = entries.size.coerceAtLeast(1)
+        val counts = entries.groupingBy { it.dayRating }.eachCount()
+        (5 downTo 1).map { mood ->
+            (counts[mood] ?: 0).toFloat() / total
+        }
+    }
 
     Scaffold(
-        containerColor = bgColor,
+        containerColor = BgColor,
         topBar = {
             TopAppBar(
                 title = {},
@@ -32,8 +87,8 @@ fun ChartScreen(
                         Icon(
                             painter = painterResource(id = R.drawable.home),
                             contentDescription = "Go Home",
-                            Modifier.size(32.dp),
-                            tint = Color.White
+                            modifier = Modifier.size(28.dp),
+                            tint = TextDark
                         )
                     }
                 },
@@ -42,7 +97,7 @@ fun ChartScreen(
         },
         bottomBar = {
             CustomBottomNavBar(
-                selectedTab = 1, // 1 = Chart Icon Active
+                selectedTab = 1,
                 onCalendarClick = onCalendarClick,
                 onChartClick = onChartClick,
                 onGameClick = onGameClick,
@@ -51,11 +106,224 @@ fun ChartScreen(
             )
         }
     ) { paddingValues ->
-        Box(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
-            contentAlignment = Alignment.Center
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "Your future charts will go here!", color = Color.White)
+            // 1. Weekly/Monthly Tabs
+            Row(modifier = Modifier.padding(bottom = 16.dp)) {
+                Text(
+                    text = "Weekly",
+                    color = PrimaryGreen,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Text(
+                    text = "Monthly",
+                    color = TextGray,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
+
+            // 2. Date Selector
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 24.dp)) {
+                Text(
+                    text = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date()),
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 22.sp,
+                    color = TextDark
+                )
+                Icon(Icons.Default.ArrowDropDown, contentDescription = "Select Month", tint = TextDark)
+            }
+
+            // 3. Mood Flow Card (The Graph)
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = CardWhite),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Text("Mood flow", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextDark)
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Box(modifier = Modifier.fillMaxWidth().height(240.dp)) {
+                        if (dailyAverages.isEmpty()) {
+                            Text("Not enough data.", Modifier.align(Alignment.Center), color = TextGray)
+                        } else {
+                            StraightLineBarGraph(dataPoints = dailyAverages)
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // 4. Mood Proportion Card (The Stats)
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 40.dp),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = CardWhite),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(modifier = Modifier.padding(24.dp)) {
+                    Text("Mood proportion", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextDark)
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(20.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(GridBarColor)
+                    ) {
+                        proportions.forEachIndexed { index, weight ->
+                            if (weight > 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(weight)
+                                        .fillMaxHeight()
+                                        .background(MoodColors[index])
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        proportions.forEachIndexed { index, percentage ->
+                            val percentInt = (percentage * 100).toInt()
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .clip(CircleShape)
+                                        .background(MoodColors[index])
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(if (percentInt > 0) PrimaryGreen.copy(alpha = 0.1f) else BgColor)
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                ) {
+                                    Text(
+                                        text = "$percentInt%",
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (percentInt > 0) PrimaryGreen else TextGray
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        val maxPoint = 5f
+        val minPoint = 1f
+
+        // Leave room for dates at the bottom and dots on the left
+        val textPaddingBottom = 60f
+        val yAxisPadding = 40.dp.toPx()
+
+        val graphWidth = size.width - yAxisPadding
+        val graphHeight = size.height - textPaddingBottom
+        val spacePerNode = graphWidth / if (dataPoints.size > 1) (dataPoints.size - 1) else 1
+        val heightRatio = graphHeight / (maxPoint - minPoint)
+
+        val textPaint = android.graphics.Paint().apply {
+            color = android.graphics.Color.parseColor("#A0A0A0") // TextGray
+            textSize = 28f
+            textAlign = android.graphics.Paint.Align.CENTER
+            isAntiAlias = true
+        }
+
+        // 1. Draw Rounded Vertical Bars & Exact Dates
+        dataPoints.forEachIndexed { index, data ->
+            val x = yAxisPadding + (index * spacePerNode)
+
+            // Soft Vertical Bar Background
+            drawLine(
+                color = GridBarColor,
+                start = Offset(x, 0f),
+                end = Offset(x, graphHeight),
+                strokeWidth = 24.dp.toPx(),
+                cap = StrokeCap.Round
+            )
+
+            // Date Text (e.g. "23 May") directly below the bar
+            drawContext.canvas.nativeCanvas.drawText(
+                data.first,
+                x,
+                size.height - 10f, // Position near very bottom
+                textPaint
+            )
+        }
+
+        // 2. Draw Y-Axis Mood Dots
+        for (i in 5 downTo 1) {
+            val y = graphHeight - ((i - minPoint) * heightRatio)
+            drawCircle(
+                color = MoodColors[5 - i],
+                radius = 6.dp.toPx(),
+                center = Offset(10.dp.toPx(), y)
+            )
+        }
+
+        val path = Path()
+        val coordinates = mutableListOf<Offset>()
+
+        dataPoints.forEachIndexed { index, data ->
+            val x = yAxisPadding + (index * spacePerNode)
+            val y = graphHeight - ((data.second - minPoint) * heightRatio)
+            coordinates.add(Offset(x, y))
+        }
+
+        // 3. Draw Straight Connecting Lines
+        if (coordinates.isNotEmpty()) {
+            path.moveTo(coordinates.first().x, coordinates.first().y)
+            for (i in 1 until coordinates.size) {
+                // Using lineTo for sharp, straight connecting lines instead of curves
+                path.lineTo(coordinates[i].x, coordinates[i].y)
+            }
+
+            drawPath(
+                path = path,
+                color = PrimaryGreen,
+                style = Stroke(
+                    width = 3.dp.toPx(),
+                    cap = StrokeCap.Round,
+                    join = StrokeJoin.Round
+                )
+            )
+        }
+
+        // 4. Draw the Data Nodes over the lines
+        coordinates.forEach { offset ->
+            drawCircle(color = Color.White, radius = 8.dp.toPx(), center = offset)
+            drawCircle(color = PrimaryGreen, radius = 5.dp.toPx(), center = offset)
         }
     }
 }
