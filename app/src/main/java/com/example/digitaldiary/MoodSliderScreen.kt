@@ -17,12 +17,18 @@ import app.rive.runtime.kotlin.RiveAnimationView
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoodSliderScreen(
-    onSaveEntry: (String, Int) -> Unit
+    existingEntry: DiaryEntry? = null, // Add this parameter
+    onSaveEntry: (String, Int) -> Unit,
+    onBack: () -> Unit
 ) {
-    // Start at 2f (Neutral/Center dot)
-    var moodLevel by remember { mutableFloatStateOf(2f) }
-    var entryContent by remember { mutableStateOf("") }
-    var hasSlided by remember { mutableStateOf(false) }
+    // Pre-fill state if existingEntry is not null
+    var moodLevel by remember {
+        mutableFloatStateOf(existingEntry?.dayRating?.toFloat() ?: 2f)
+    }
+    var entryContent by remember {
+        mutableStateOf(existingEntry?.content ?: "")
+    }
+    var hasSlided by remember { mutableStateOf(existingEntry != null) }
 
     Column(
         modifier = Modifier

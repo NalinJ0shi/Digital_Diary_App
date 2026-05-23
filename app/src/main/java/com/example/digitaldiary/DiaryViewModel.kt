@@ -25,17 +25,8 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     ) {
         viewModelScope.launch {
             // FIX: dayRating is now actually being saved to your database!
-            val entry = existingEntry?.copy(
-                title = title,
-                content = content,
-                timestamp = date,
-                dayRating = dayRating
-            ) ?: DiaryEntry(
-                title = title,
-                content = content,
-                timestamp = date,
-                dayRating = dayRating
-            )
+            val entry = existingEntry?.copy(title = title, content = content, timestamp = date, dayRating = dayRating)
+                ?: DiaryEntry(title = title, content = content, timestamp = date, dayRating = dayRating)
             dao.insertEntry(entry)
         }
     }

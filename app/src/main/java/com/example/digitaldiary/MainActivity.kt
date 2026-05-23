@@ -17,6 +17,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import app.rive.runtime.kotlin.core.Rive
 
@@ -100,17 +101,33 @@ fun DiaryAppNavigation() {
         }
 
         // --- MOOD SLIDER ---
-        composable("mood_screen") {
+        composable(
+            route = "mood_screen?timestamp={timestamp}",
+            arguments = listOf(navArgument("timestamp") {
+                type = androidx.navigation.NavType.LongType
+                defaultValue = -1L // Indicates a new entry
+            } )
+        ) { backStackEntry ->
+            val timestamp = backStackEntry.arguments?.getLong("timestamp") ?: -1L
+
+            // Find entry if timestamp is passed
+            val existingEntry = if (timestamp != -1L) {
+                entries.find { it.timestamp == timestamp }
+            } else null
+
             MoodSliderScreen(
+                existingEntry = existingEntry,
                 onSaveEntry = { content, moodScore ->
                     diaryViewModel.saveEntry(
-                        title = "", // Title is gone, so we save it as blank
+                        title = "",
                         content = content,
-                        date = System.currentTimeMillis(),
-                        dayRating = moodScore
+                        date = if (timestamp != -1L) timestamp else System.currentTimeMillis(),
+                        dayRating = moodScore,
+                        existingEntry = existingEntry
                     )
                     navController.popBackStack()
-                }
+                },
+                onBack = { navController.popBackStack() }
             )
         }
 
@@ -118,7 +135,9 @@ fun DiaryAppNavigation() {
         composable("calendar_screen") {
             CalendarScreen(
                 entries = entries,
-                onDateSelected = { dateInMillis -> },
+                onDateSelected = { dateInMillis ->
+                    navController.navigate("mood_screen?timestamp=$dateInMillis")
+                },
                 onCalendarClick = { /* Already on calendar */ },
 
                 // --- THIS IS THE FORCE CLEAR RULE FOR THE HOUSE_LINE ---
