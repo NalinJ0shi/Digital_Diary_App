@@ -100,8 +100,6 @@ fun DiaryAppNavigation() {
         }
 
         // --- MOOD SLIDER ---
-        // --- MOOD SLIDER ---
-        // --- MOOD SLIDER ---
         composable("mood_screen") {
             MoodSliderScreen(
                 onSaveEntry = { content, moodScore ->
