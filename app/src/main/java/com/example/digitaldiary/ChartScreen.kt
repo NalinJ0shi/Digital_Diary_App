@@ -3,7 +3,6 @@ package com.example.digitaldiary
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,7 +35,8 @@ val CardWhite = Color.White
 val PrimaryGreen = Color(0xFF6EBE80)
 val TextDark = Color(0xFF2C2C2C)
 val TextGray = Color(0xFFA0A0A0)
-val GridBarColor = Color(0xFFF4F5F7) // Soft gray for vertical bars
+val GridBarColor = Color(0xFFF4F5F7)
+val GridLineColor = Color(0xFFE2E8F0) // Slightly darker for the thin grid lines
 
 // Mood Colors (Best to Worst)
 val MoodColors = listOf(
@@ -58,14 +58,15 @@ fun ChartScreen(
     onProfileClick: () -> Unit,
     onAddEntry: () -> Unit
 ) {
-    // Graph Logic: Groups by exact date (e.g., "23 May")
+    // FIX 1: Sorting chronologically before grouping so the timeline flows correctly
     val dailyAverages = remember(entries) {
-        entries.groupBy {
-            val calendar = Calendar.getInstance().apply { timeInMillis = it.timestamp }
-            SimpleDateFormat("d MMM", Locale.getDefault()).format(calendar.time)
-        }.mapValues { entryMap ->
-            entryMap.value.map { it.dayRating.toDouble() }.average().toFloat()
-        }.toList().takeLast(7)
+        entries.sortedBy { it.timestamp } // Stops the time-travel bug!
+            .groupBy {
+                val calendar = Calendar.getInstance().apply { timeInMillis = it.timestamp }
+                SimpleDateFormat("d MMM", Locale.getDefault()).format(calendar.time)
+            }.mapValues { entryMap ->
+                entryMap.value.map { it.dayRating.toDouble() }.average().toFloat()
+            }.toList().takeLast(7)
     }
 
     // Proportion Logic: Calculates % of each mood score (1-5)
@@ -254,35 +255,26 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
         val heightRatio = graphHeight / (maxPoint - minPoint)
 
         val textPaint = android.graphics.Paint().apply {
-            color = android.graphics.Color.parseColor("#A0A0A0") // TextGray
+            color = android.graphics.Color.parseColor("#A0A0A0")
             textSize = 28f
             textAlign = android.graphics.Paint.Align.CENTER
             isAntiAlias = true
         }
 
-        // 1. Draw Rounded Vertical Bars & Exact Dates
-        dataPoints.forEachIndexed { index, data ->
-            val x = yAxisPadding + (index * spacePerNode)
-
-            // Soft Vertical Bar Background
+        // LAYER 1: The Static 4-Week Background Grid
+        // FIX 2 & 3: Draws exactly 4 thin lines completely independently of the data points
+        val weekSpacing = graphWidth / 3 // 4 lines = 3 spaces between them
+        for (i in 0..3) {
+            val gridX = yAxisPadding + (i * weekSpacing)
             drawLine(
-                color = GridBarColor,
-                start = Offset(x, 0f),
-                end = Offset(x, graphHeight),
-                strokeWidth = 24.dp.toPx(),
-                cap = StrokeCap.Round
-            )
-
-            // Date Text (e.g. "23 May") directly below the bar
-            drawContext.canvas.nativeCanvas.drawText(
-                data.first,
-                x,
-                size.height - 10f, // Position near very bottom
-                textPaint
+                color = GridLineColor,
+                start = Offset(gridX, 0f),
+                end = Offset(gridX, graphHeight),
+                strokeWidth = 2.dp.toPx() // Thin 2dp line
             )
         }
 
-        // 2. Draw Y-Axis Mood Dots
+        // LAYER 2: Draw Y-Axis Mood Dots (The static scale on the left)
         for (i in 5 downTo 1) {
             val y = graphHeight - ((i - minPoint) * heightRatio)
             drawCircle(
@@ -292,6 +284,7 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
             )
         }
 
+        // Pre-calculate path nodes for data
         val path = Path()
         val coordinates = mutableListOf<Offset>()
 
@@ -299,14 +292,21 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
             val x = yAxisPadding + (index * spacePerNode)
             val y = graphHeight - ((data.second - minPoint) * heightRatio)
             coordinates.add(Offset(x, y))
+
+            // Draw the exact date text centered under this data point
+            drawContext.canvas.nativeCanvas.drawText(
+                data.first,
+                x,
+                size.height - 10f,
+                textPaint
+            )
         }
 
-        // 3. Draw Straight Connecting Lines
+        // LAYER 3: Draw Straight Connecting Lines between Data Points
         if (coordinates.isNotEmpty()) {
             path.moveTo(coordinates.first().x, coordinates.first().y)
             for (i in 1 until coordinates.size) {
-                // Using lineTo for sharp, straight connecting lines instead of curves
-                path.lineTo(coordinates[i].x, coordinates[i].y)
+                path.lineTo(coordinates[i].x, coordinates[i].y) // Sharp, straight lines
             }
 
             drawPath(
@@ -320,7 +320,7 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
             )
         }
 
-        // 4. Draw the Data Nodes over the lines
+        // LAYER 4: Draw the Data Nodes over the connecting lines
         coordinates.forEach { offset ->
             drawCircle(color = Color.White, radius = 8.dp.toPx(), center = offset)
             drawCircle(color = PrimaryGreen, radius = 5.dp.toPx(), center = offset)
