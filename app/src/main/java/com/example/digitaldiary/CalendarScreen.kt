@@ -211,13 +211,18 @@ fun CalendarScreen(
 
                         val entryForDay = entriesByDay[dayNumber]
                         val hasMoodData = entryForDay != null
-                        val moodRating = entryForDay?.dayRating ?: 5
 
-                        val circleColor = when {
-                            !hasMoodData -> emptyCircleColor
-                            moodRating >= 8 -> happyColor
-                            moodRating >= 4 -> neutralColor
-                            else -> sadColor
+                        // Default to 3 (surprise/neutral) if something goes wrong
+                        val moodRating = entryForDay?.dayRating ?: 3
+
+                        // --- NEW: Map the 1-5 rating directly to your new drawable vectors ---
+                        val emotionDrawableId = when (moodRating) {
+                            1 -> R.drawable.sad
+                            2 -> R.drawable.tire
+                            3 -> R.drawable.surprise
+                            4 -> R.drawable.happy
+                            5 -> R.drawable.exicted
+                            else -> R.drawable.surprise
                         }
 
                         val isToday = calendar.get(Calendar.YEAR) == todayYear &&
@@ -258,11 +263,23 @@ fun CalendarScreen(
                                         )
                                     }
                                     hasMoodData -> {
+                                        // --- NEW: Stack the vectors inside the Box ---
+
+                                        // LAYER 1: The standard organic calendar face shape as a background
                                         Icon(
                                             painter = painterResource(id = R.drawable.calender_face),
-                                            contentDescription = "Solid Filled Past Day",
+                                            contentDescription = "Empty Custom Day Shape Background",
                                             modifier = Modifier.fillMaxSize(),
-                                            tint = circleColor
+                                            tint = emptyCircleColor
+                                        )
+
+                                        // LAYER 2: Your custom Figma emoji vector drawn perfectly over top
+                                        Icon(
+                                            painter = painterResource(id = emotionDrawableId),
+                                            contentDescription = "Mood Emoji Face",
+                                            modifier = Modifier.fillMaxSize(),
+                                            // CRITICAL: Unspecified prevents Compose from overriding your Figma colors!
+                                            tint = Color.Unspecified
                                         )
                                     }
                                     else -> {
@@ -281,7 +298,6 @@ fun CalendarScreen(
 
                             Text(
                                 text = dayNumber.toString(),
-                                // --- FIXED: Locked typography attributes to white and bold ---
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp
