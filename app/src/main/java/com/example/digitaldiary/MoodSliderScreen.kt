@@ -17,13 +17,13 @@ import app.rive.runtime.kotlin.RiveAnimationView
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoodSliderScreen(
-    existingEntry: DiaryEntry? = null, // Add this parameter
+    existingEntry: DiaryEntry? = null,
     onSaveEntry: (String, Int) -> Unit,
     onBack: () -> Unit
 ) {
-    // Pre-fill state if existingEntry is not null
+    // Start at 3f (The physical Center Dot)
     var moodLevel by remember {
-        mutableFloatStateOf(existingEntry?.dayRating?.toFloat() ?: 2f)
+        mutableFloatStateOf(existingEntry?.dayRating?.toFloat() ?: 3f)
     }
     var entryContent by remember {
         mutableStateOf(existingEntry?.content ?: "")
@@ -54,8 +54,8 @@ fun MoodSliderScreen(
                 }
             },
             update = { view ->
-                // Smoothly maps continuous decimal values (like 1.45, 2.7) directly to the 0-100 Rive timeline
-                val mappedRiveValue = (moodLevel - 1f) * 50f
+                // HIDDEN MATH: Smoothly maps the 1-5 data scale to the 0-100 Rive timeline
+                val mappedRiveValue = (moodLevel - 1f) * 25f
                 try {
                     view.setNumberState("State Machine 1", "NumberInput", mappedRiveValue)
                 } catch (e: Exception) {
@@ -66,14 +66,14 @@ fun MoodSliderScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 100% SMOOTH CONTINUOUS SLIDER WITH CUSTOM VISUAL DOTS
+        // HIDDEN 5-STEP SLIDER OVER A 3-DOT TRACK
         Slider(
             value = moodLevel,
             onValueChange = {
                 moodLevel = it
                 hasSlided = true
             },
-            valueRange = 1f..3f, // Continuous float range (no 'steps' parameter = completely smooth sliding)
+            valueRange = 1f..5f, // DATA: 5 hidden steps for the database
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp),
@@ -86,7 +86,7 @@ fun MoodSliderScreen(
                 )
             },
             track = {
-                // Custom track handling: Renders a thin line and places 3 fixed background dots
+                // VISUALS: Your exact 3-dot track design
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -128,7 +128,7 @@ fun MoodSliderScreen(
             }
         )
 
-        // LABELS ALIGNED UNDER THE 3 DOTS
+        // VISUALS: Your exact 3 labels
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -136,7 +136,7 @@ fun MoodSliderScreen(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(text = "Bad", style = MaterialTheme.typography.bodyMedium)
-            Text(text = "Okay", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "Neutral", style = MaterialTheme.typography.bodyMedium)
             Text(text = "Good", style = MaterialTheme.typography.bodyMedium)
         }
 
