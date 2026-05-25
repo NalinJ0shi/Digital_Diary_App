@@ -1,4 +1,3 @@
-// app/src/main/java/com/example/digitaldiary/CalendarScreen.kt
 package com.example.digitaldiary
 
 import android.widget.Toast
@@ -42,10 +41,16 @@ fun CalendarScreen(
     onChartClick: () -> Unit,
     onGameClick: () -> Unit,
     onProfileClick: () -> Unit,
-    onAddEntry: () -> Unit
+    onAddEntry: () -> Unit,
+    // NEW: Added these so the DiaryItem card can handle editing and deleting
+    onEditEntry: (DiaryEntry) -> Unit,
+    onDeleteEntry: (DiaryEntry) -> Unit
 ) {
     val context = LocalContext.current
     val todayMillis = System.currentTimeMillis()
+
+    // --- NEW STATE: Master pointer for the currently tapped date ---
+    var selectedDateMillis by remember { mutableLongStateOf(todayMillis) }
 
     // --- DESIGN COLORS ---
     val emptyCircleColor = Color(0xFFEDE9E1)
@@ -53,10 +58,6 @@ fun CalendarScreen(
     val mutedTextColor = Color(0xFF94A3B8)
     val innerFillColor = Color(0xFFEDE9E1)
     val todayRingColor = Color(0xD3E0FF36)
-
-    val happyColor = Color(0xFF4CAF50)
-    val neutralColor = Color(0xFFFFEB3B)
-    val sadColor = Color(0xFFF44336)
 
     // --- GRADIENT & HILLS ---
     val topColor = Color(0xFF0F172A)
@@ -92,7 +93,7 @@ fun CalendarScreen(
     val todayMonth = todayCalc.get(Calendar.MONTH)
     val todayDayNumber = todayCalc.get(Calendar.DAY_OF_MONTH)
 
-    // --- PRE-PROCESS ENTRIES ---
+    // --- PRE-PROCESS GRID ENTRIES ---
     val entriesByDay = remember(entries) {
         val map = mutableMapOf<Int, DiaryEntry>()
         val tempCal = Calendar.getInstance()
@@ -105,6 +106,22 @@ fun CalendarScreen(
             }
         }
         map
+    }
+
+    // --- NEW: EXTRACT THE SINGLE SELECTED ENTRY ---
+    val selectedEntry = remember(selectedDateMillis, entries) {
+        val selectedCal = Calendar.getInstance().apply { timeInMillis = selectedDateMillis }
+        val sYear = selectedCal.get(Calendar.YEAR)
+        val sMonth = selectedCal.get(Calendar.MONTH)
+        val sDay = selectedCal.get(Calendar.DAY_OF_MONTH)
+
+        val tempCal = Calendar.getInstance()
+        entries.find { entry ->
+            tempCal.timeInMillis = entry.timestamp
+            tempCal.get(Calendar.YEAR) == sYear &&
+                    tempCal.get(Calendar.MONTH) == sMonth &&
+                    tempCal.get(Calendar.DAY_OF_MONTH) == sDay
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize().background(gradientBrush)) {
@@ -149,12 +166,7 @@ fun CalendarScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.home),
-                            contentDescription = "Go Home",
-                            Modifier.size(32.dp),
-                            tint = textColor
-                        )
+                        Icon(painter = painterResource(id = R.drawable.home), contentDescription = "Go Home", Modifier.size(32.dp), tint = textColor)
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = currentMonthYear, color = textColor, fontSize = 20.sp, fontWeight = FontWeight.Bold)
@@ -187,7 +199,7 @@ fun CalendarScreen(
 
                 val weekdays = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), // Reduced bottom margin
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     weekdays.forEach { day ->
@@ -195,12 +207,13 @@ fun CalendarScreen(
                     }
                 }
 
+                // Grid takes up available top space
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(7),
                     modifier = Modifier.weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp), // --- FIXED: Tightened space between rows ---
-                    contentPadding = PaddingValues(bottom = 120.dp)
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                    contentPadding = PaddingValues(bottom = 16.dp) // Reduced padding so card fits
                 ) {
                     items(firstDayOfWeek) {
                         Box(modifier = Modifier.size(48.dp))
@@ -208,14 +221,10 @@ fun CalendarScreen(
 
                     items(daysInMonth) { dayIndex ->
                         val dayNumber = dayIndex + 1
-
                         val entryForDay = entriesByDay[dayNumber]
                         val hasMoodData = entryForDay != null
-
-                        // Default to 3 (surprise/neutral) if something goes wrong
                         val moodRating = entryForDay?.dayRating ?: 3
 
-                        // --- NEW: Map the 1-5 rating directly to your new drawable vectors ---
                         val emotionDrawableId = when (moodRating) {
                             1 -> R.drawable.sad
                             2 -> R.drawable.tire
@@ -229,17 +238,19 @@ fun CalendarScreen(
                                 calendar.get(Calendar.MONTH) == todayMonth &&
                                 dayNumber == todayDayNumber
 
+                        // Check if this cell is currently the selected one
+                        val clickCal = Calendar.getInstance().apply { set(Calendar.DAY_OF_MONTH, dayNumber) }
+                        val isSelected = clickCal.timeInMillis == selectedDateMillis
+
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.clickable {
-                                val clickCal = Calendar.getInstance()
-                                clickCal.set(Calendar.DAY_OF_MONTH, dayNumber)
                                 val selectedTime = clickCal.timeInMillis
-
                                 if (selectedTime > todayMillis) {
                                     Toast.makeText(context, "No writing in the future!", Toast.LENGTH_SHORT).show()
                                 } else {
-                                    onDateSelected(selectedTime)
+                                    // Instantly update the spot light pointer!
+                                    selectedDateMillis = selectedTime
                                 }
                             }
                         ) {
@@ -249,62 +260,57 @@ fun CalendarScreen(
                             ) {
                                 when {
                                     isToday -> {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.calender_face),
-                                            contentDescription = "Today Outer Ring",
-                                            modifier = Modifier.fillMaxSize(),
-                                            tint = todayRingColor
-                                        )
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.calender_face),
-                                            contentDescription = "Today Inner Fill",
-                                            modifier = Modifier.size(38.dp),
-                                            tint = innerFillColor
-                                        )
+                                        Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = "Today Outer Ring", modifier = Modifier.fillMaxSize(), tint = todayRingColor)
+                                        Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = "Today Inner Fill", modifier = Modifier.size(38.dp), tint = innerFillColor)
                                     }
                                     hasMoodData -> {
-                                        // --- NEW: Stack the vectors inside the Box ---
-
-                                        // LAYER 1: The standard organic calendar face shape as a background
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.calender_face),
-                                            contentDescription = "Empty Custom Day Shape Background",
-                                            modifier = Modifier.fillMaxSize(),
-                                            tint = emptyCircleColor
-                                        )
-
-                                        // LAYER 2: Your custom Figma emoji vector drawn perfectly over top
-                                        Icon(
-                                            painter = painterResource(id = emotionDrawableId),
-                                            contentDescription = "Mood Emoji Face",
-                                            modifier = Modifier.fillMaxSize(),
-                                            // CRITICAL: Unspecified prevents Compose from overriding your Figma colors!
-                                            tint = Color.Unspecified
-                                        )
+                                        Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = "Empty Custom Day Shape Background", modifier = Modifier.fillMaxSize(), tint = emptyCircleColor)
+                                        Icon(painter = painterResource(id = emotionDrawableId), contentDescription = "Mood Emoji Face", modifier = Modifier.fillMaxSize(), tint = Color.Unspecified)
                                     }
                                     else -> {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.calender_face),
-                                            contentDescription = "Empty Custom Day Shape",
-                                            modifier = Modifier.fillMaxSize(),
-                                            tint = emptyCircleColor
-                                        )
+                                        Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = "Empty Custom Day Shape", modifier = Modifier.fillMaxSize(), tint = emptyCircleColor)
                                     }
                                 }
                             }
 
-                            // --- FIXED: Minimal text spacer gap ---
                             Spacer(modifier = Modifier.height(2.dp))
 
                             Text(
                                 text = dayNumber.toString(),
-                                color = Color.White,
+                                // Highlight the day number if it is the currently selected date
+                                color = if (isSelected) todayRingColor else Color.White,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp
                             )
                         }
                     }
                 }
+
+                // --- NEW UI BLOCK: THE CARD ---
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (selectedEntry != null) {
+                        DiaryItem(
+                            entry = selectedEntry,
+                            onEdit = onEditEntry,
+                            onDeleteRequest = { onDeleteEntry(it) }
+                        )
+                    } else {
+                        Text(
+                            text = "No thoughts logged for this day yet.",
+                            color = mutedTextColor,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                // Keep the card safely above the navigation bar
+                Spacer(modifier = Modifier.height(80.dp))
             }
         }
     }

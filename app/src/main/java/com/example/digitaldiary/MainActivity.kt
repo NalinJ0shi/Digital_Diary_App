@@ -1,3 +1,4 @@
+// app/src/main/java/com/example/digitaldiary/MainActivity.kt
 package com.example.digitaldiary
 
 import android.os.Bundle
@@ -95,7 +96,9 @@ fun DiaryAppNavigation() {
                         restoreState = true
                     }
                 },
-                onEditEntry = { entry -> /* Handle Editing */ },
+                onEditEntry = { entry ->
+                    navController.navigate("mood_screen?timestamp=${entry.timestamp}")
+                },
                 onDeleteEntry = { entry -> diaryViewModel.delete(entry) }
             )
         }
@@ -169,14 +172,22 @@ fun DiaryAppNavigation() {
                         restoreState = true
                     }
                 },
-                onAddEntry = { navController.navigate("mood_screen") }
+                onAddEntry = { navController.navigate("mood_screen") },
+
+                // --- FIXED: Added the required parameters here so the compiler knows how to handle the DiaryItem cards edits/deletes ---
+                onEditEntry = { entry ->
+                    navController.navigate("mood_screen?timestamp=${entry.timestamp}")
+                },
+                onDeleteEntry = { entry ->
+                    diaryViewModel.delete(entry)
+                }
             )
         }
 
         // --- CHART SCREEN ---
         composable("chart_screen") {
             ChartScreen(
-                entries = entries, // <-- THIS IS THE MISSING PIECE
+                entries = entries,
                 onBack = {
                     navController.navigate("home") {
                         popUpTo("home") { inclusive = false }
