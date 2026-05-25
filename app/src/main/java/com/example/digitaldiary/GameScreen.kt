@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,8 @@ fun BreathingScreen(
     val breathDurationMillis = 4000
 
     Scaffold(
+        // UPDATED: Now uses your exact dark background color
+        containerColor = Color(0xFF0F172A),
         bottomBar = {
             CustomBottomNavBar(
                 selectedTab = 2,
@@ -58,7 +61,7 @@ fun BreathingScreen(
                     modifier = Modifier.size(260.dp),
                     strokeWidth = 14.dp,
                     color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), // Dimmed track for dark mode
                 )
 
                 Box(modifier = Modifier.size(200.dp)) {
@@ -113,7 +116,6 @@ fun BreathingScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Only display the text layout if the user is pressing or the ring is draining
             if (progress.value > 0f || isPressed) {
                 Text(
                     text = if (isPressed) "Breath in!" else "Breath out!",
@@ -121,10 +123,10 @@ fun BreathingScreen(
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Medium
                     ),
-                    color = MaterialTheme.colorScheme.onBackground
+                    // UPDATED: Light text to pop against the dark 0xFF0F172A background
+                    color = Color(0xFFE2E8F0)
                 )
             } else {
-                // Invisible placeholder text box to keep the layout from shifting vertically when text vanishes
                 Spacer(modifier = Modifier.height(34.dp))
             }
         }

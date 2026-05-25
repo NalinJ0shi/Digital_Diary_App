@@ -30,13 +30,13 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 // --- Soft Color Palette ---
-val BgColor = Color(0xFFF5F6F8)
+val BgColor = Color(0xFF0F172A)
 val CardWhite = Color.White
 val PrimaryGreen = Color(0xFF6EBE80)
 val TextDark = Color(0xFF2C2C2C)
 val TextGray = Color(0xFFA0A0A0)
 val GridBarColor = Color(0xFFF4F5F7)
-val GridLineColor = Color(0xFFE2E8F0) // Slightly darker for the thin grid lines
+val GridLineColor = Color(0xFFE2E8F0)
 
 // Mood Colors (Best to Worst)
 val MoodColors = listOf(
