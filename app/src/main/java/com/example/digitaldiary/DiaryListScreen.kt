@@ -14,6 +14,9 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import app.rive.runtime.kotlin.RiveAnimationView
+import com.nalin.my_digitaldiary.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,6 +93,20 @@ fun DiaryListScreen(
                 contentAlignment = Alignment.Center
             ) {
                 // You can add a static Rive Mascot, a welcome text, or total app stats right here!
+                AndroidView(
+                    modifier = Modifier
+                        .size(200.dp) // Adjust width/height here
+                        .offset(x = 0.dp, y = (30).dp) // Adjust x/y offset here
+                        .align(Alignment.BottomCenter), // Adjust anchor alignment here
+                    factory = { context ->
+                        RiveAnimationView(context).apply {
+                            setRiveResource(
+                                resId = R.raw.plant,
+                                autoplay = true
+                            )
+                        }
+                    }
+                )
             }
         }
     }
