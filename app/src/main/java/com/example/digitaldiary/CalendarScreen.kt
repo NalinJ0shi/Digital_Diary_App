@@ -246,11 +246,18 @@ fun CalendarScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.clickable {
                                 val selectedTime = clickCal.timeInMillis
+
                                 if (selectedTime > todayMillis) {
+                                    // Prevent future time travel
                                     Toast.makeText(context, "No writing in the future!", Toast.LENGTH_SHORT).show()
                                 } else {
-                                    // Instantly update the spot light pointer!
+                                    // 1. Instantly update the spotlight pointer so the UI reacts
                                     selectedDateMillis = selectedTime
+
+                                    // 2. RESTORED FEATURE: If the day is empty, jump straight to the mood slider!
+                                    if (!hasMoodData) {
+                                        onDateSelected(selectedTime)
+                                    }
                                 }
                             }
                         ) {
