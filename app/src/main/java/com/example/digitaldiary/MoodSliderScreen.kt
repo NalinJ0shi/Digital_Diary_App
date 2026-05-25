@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import app.rive.runtime.kotlin.RiveAnimationView
+import kotlin.math.roundToInt // NEW: Imported the rounding function
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -164,7 +165,8 @@ fun MoodSliderScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { onSaveEntry(entryContent, moodLevel.toInt()) },
+                // NEW: Uses roundToInt() to accurately convert the continuous float scale to your 1-5 database integers
+                onClick = { onSaveEntry(entryContent, moodLevel.roundToInt()) },
                 modifier = Modifier.size(width = 200.dp, height = 50.dp)
             ) {
                 Text("Save Entry")

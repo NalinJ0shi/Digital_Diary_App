@@ -42,14 +42,12 @@ fun CalendarScreen(
     onGameClick: () -> Unit,
     onProfileClick: () -> Unit,
     onAddEntry: () -> Unit,
-    // NEW: Added these so the DiaryItem card can handle editing and deleting
     onEditEntry: (DiaryEntry) -> Unit,
     onDeleteEntry: (DiaryEntry) -> Unit
 ) {
     val context = LocalContext.current
     val todayMillis = System.currentTimeMillis()
 
-    // --- NEW STATE: Master pointer for the currently tapped date ---
     var selectedDateMillis by remember { mutableLongStateOf(todayMillis) }
 
     // --- DESIGN COLORS ---
@@ -108,7 +106,7 @@ fun CalendarScreen(
         map
     }
 
-    // --- NEW: EXTRACT THE SINGLE SELECTED ENTRY ---
+    // --- EXTRACT THE SINGLE SELECTED ENTRY ---
     val selectedEntry = remember(selectedDateMillis, entries) {
         val selectedCal = Calendar.getInstance().apply { timeInMillis = selectedDateMillis }
         val sYear = selectedCal.get(Calendar.YEAR)
@@ -207,13 +205,12 @@ fun CalendarScreen(
                     }
                 }
 
-                // Grid takes up available top space
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(7),
                     modifier = Modifier.weight(1f),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
-                    contentPadding = PaddingValues(bottom = 16.dp) // Reduced padding so card fits
+                    contentPadding = PaddingValues(bottom = 16.dp)
                 ) {
                     items(firstDayOfWeek) {
                         Box(modifier = Modifier.size(48.dp))
@@ -238,7 +235,6 @@ fun CalendarScreen(
                                 calendar.get(Calendar.MONTH) == todayMonth &&
                                 dayNumber == todayDayNumber
 
-                        // Check if this cell is currently the selected one
                         val clickCal = Calendar.getInstance().apply { set(Calendar.DAY_OF_MONTH, dayNumber) }
                         val isSelected = clickCal.timeInMillis == selectedDateMillis
 
@@ -248,13 +244,10 @@ fun CalendarScreen(
                                 val selectedTime = clickCal.timeInMillis
 
                                 if (selectedTime > todayMillis) {
-                                    // Prevent future time travel
                                     Toast.makeText(context, "No writing in the future!", Toast.LENGTH_SHORT).show()
                                 } else {
-                                    // 1. Instantly update the spotlight pointer so the UI reacts
                                     selectedDateMillis = selectedTime
 
-                                    // 2. RESTORED FEATURE: If the day is empty, jump straight to the mood slider!
                                     if (!hasMoodData) {
                                         onDateSelected(selectedTime)
                                     }
@@ -265,18 +258,17 @@ fun CalendarScreen(
                                 modifier = Modifier.size(48.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                when {
-                                    isToday -> {
-                                        Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = "Today Outer Ring", modifier = Modifier.fillMaxSize(), tint = todayRingColor)
-                                        Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = "Today Inner Fill", modifier = Modifier.size(38.dp), tint = innerFillColor)
-                                    }
-                                    hasMoodData -> {
-                                        Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = "Empty Custom Day Shape Background", modifier = Modifier.fillMaxSize(), tint = emptyCircleColor)
-                                        Icon(painter = painterResource(id = emotionDrawableId), contentDescription = "Mood Emoji Face", modifier = Modifier.fillMaxSize(), tint = Color.Unspecified)
-                                    }
-                                    else -> {
-                                        Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = "Empty Custom Day Shape", modifier = Modifier.fillMaxSize(), tint = emptyCircleColor)
-                                    }
+                                // 1. Draw the background shape first (Lime Green Ring if Today, or standard Empty Circle)
+                                if (isToday) {
+                                    Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = "Today Outer Ring", modifier = Modifier.fillMaxSize(), tint = todayRingColor)
+                                    Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = "Today Inner Fill", modifier = Modifier.size(38.dp), tint = innerFillColor)
+                                } else {
+                                    Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = "Empty Custom Day Shape Background", modifier = Modifier.fillMaxSize(), tint = emptyCircleColor)
+                                }
+
+                                // 2. Draw the Emoji Face over the background if data exists
+                                if (hasMoodData) {
+                                    Icon(painter = painterResource(id = emotionDrawableId), contentDescription = "Mood Emoji Face", modifier = Modifier.fillMaxSize(), tint = Color.Unspecified)
                                 }
                             }
 
@@ -284,7 +276,6 @@ fun CalendarScreen(
 
                             Text(
                                 text = dayNumber.toString(),
-                                // Highlight the day number if it is the currently selected date
                                 color = if (isSelected) todayRingColor else Color.White,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp
@@ -293,7 +284,7 @@ fun CalendarScreen(
                     }
                 }
 
-                // --- NEW UI BLOCK: THE CARD ---
+                // --- UI BLOCK: THE CARD ---
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -316,7 +307,6 @@ fun CalendarScreen(
                     }
                 }
 
-                // Keep the card safely above the navigation bar
                 Spacer(modifier = Modifier.height(80.dp))
             }
         }
