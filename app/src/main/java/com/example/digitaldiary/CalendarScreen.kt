@@ -164,7 +164,7 @@ fun CalendarScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = onBack) {
-                        Icon(painter = painterResource(id = R.drawable.home), contentDescription = "Go Home", Modifier.size(32.dp), tint = textColor)
+                        Icon(painter = painterResource(id = R.drawable.potted_plant), contentDescription = "Go Home", Modifier.size(32.dp), tint = textColor)
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = currentMonthYear, color = textColor, fontSize = 20.sp, fontWeight = FontWeight.Bold)

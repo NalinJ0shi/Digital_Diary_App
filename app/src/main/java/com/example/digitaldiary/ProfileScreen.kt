@@ -53,7 +53,7 @@ fun ProfileScreen(
                 ) {
                     IconButton(onClick = onBack) {
                         Icon(
-                            painter = painterResource(id = R.drawable.home), // Your custom home/back arrow
+                            painter = painterResource(id = R.drawable.potted_plant), // Your custom home/back arrow
                             contentDescription = "Go Home",
                             modifier = Modifier.size(32.dp),
                             tint = textColor

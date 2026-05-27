@@ -86,7 +86,7 @@ fun ChartScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            painter = painterResource(id = R.drawable.home),
+                            painter = painterResource(id = R.drawable.potted_plant),
                             contentDescription = "Go Home",
                             modifier = Modifier.size(28.dp),
                             tint = TextDark
