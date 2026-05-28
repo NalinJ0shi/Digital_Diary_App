@@ -21,6 +21,11 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import app.rive.runtime.kotlin.core.Rive
+import com.example.digitaldiary.screens.BreathingScreen
+import com.example.digitaldiary.screens.CalendarScreen
+import com.example.digitaldiary.screens.ChartScreen
+import com.example.digitaldiary.screens.MoodSliderScreen
+import com.example.digitaldiary.screens.ProfileScreen
 
 import com.example.digitaldiary.ui.theme.PlantformTheme
 

@@ -1,5 +1,6 @@
-package com.example.digitaldiary
+package com.example.digitaldiary.screens
 
+import android.graphics.Paint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -25,6 +26,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.digitaldiary.CustomBottomNavBar
+import com.example.digitaldiary.DiaryEntry
 import com.nalin.my_digitaldiary.R
 import java.text.SimpleDateFormat
 import java.util.*
@@ -254,10 +257,10 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
         val spacePerNode = graphWidth / if (dataPoints.size > 1) (dataPoints.size - 1) else 1
         val heightRatio = graphHeight / (maxPoint - minPoint)
 
-        val textPaint = android.graphics.Paint().apply {
+        val textPaint = Paint().apply {
             color = android.graphics.Color.parseColor("#A0A0A0")
             textSize = 28f
-            textAlign = android.graphics.Paint.Align.CENTER
+            textAlign = Paint.Align.CENTER
             isAntiAlias = true
         }
 

@@ -1,4 +1,4 @@
-package com.example.digitaldiary
+package com.example.digitaldiary.screens
 
 import com.nalin.my_digitaldiary.R
 import androidx.compose.animation.core.Animatable
@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import app.rive.runtime.kotlin.RiveAnimationView
+import com.example.digitaldiary.CustomBottomNavBar
 import kotlinx.coroutines.launch
 
 @Composable

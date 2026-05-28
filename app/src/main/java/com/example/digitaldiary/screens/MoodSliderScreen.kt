@@ -1,4 +1,4 @@
-package com.example.digitaldiary
+package com.example.digitaldiary.screens
 
 import com.nalin.my_digitaldiary.R
 import androidx.compose.foundation.background
@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import app.rive.runtime.kotlin.RiveAnimationView
+import com.example.digitaldiary.DiaryEntry
 import kotlin.math.roundToInt // NEW: Imported the rounding function
 
 @OptIn(ExperimentalMaterial3Api::class)

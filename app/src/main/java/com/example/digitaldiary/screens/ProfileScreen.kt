@@ -1,4 +1,4 @@
-package com.example.digitaldiary
+package com.example.digitaldiary.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,6 +22,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.digitaldiary.CustomBottomNavBar
 import com.nalin.my_digitaldiary.R
 
 @OptIn(ExperimentalMaterial3Api::class)
