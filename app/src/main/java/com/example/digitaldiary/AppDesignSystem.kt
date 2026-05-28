@@ -1,6 +1,6 @@
 package com.example.digitaldiary
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,51 +15,47 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+// ==========================================
+// 1. LIGHT THEME TOKENS (DAILYBEAN STYLE)
+// ==========================================
 object AppDesignTokens {
-    // Shared Baselines
-    val backgroundColor = Color(0xFF12161A)
-    val surfaceColor = Color(0xFF1A1F26)
-    val borderColor = Color(0xFF282F38)
-    val dividerColor = Color(0xFF282F38)
-    val primaryText = Color(0xFFECEFF4)
-    val secondaryText = Color(0xFF7E8996)
-    val destructiveText = Color(0xFFF87171)
+    // Soft, Low-Stress Palette
+    val backgroundColor = Color(0xFFF5F6F8) // Light warm gray/cream
+    val surfaceColor = Color(0xFFFFFFFF)    // Pure white cards
+    val primaryText = Color(0xFF2C2C2C)     // Bold dark
+    val secondaryText = Color(0xFFA0A0A0)   // Medium gray
+    val dividerColor = Color(0xFFF0F0F0)    // Almost invisible divider
+    val accentColor = Color(0xFF6EBE80)     // Soft green accent
 
-    // The 3 Card Hierarchies (A, B, C) Configurations
+    // The 3 Card Hierarchies
     object CardStyles {
-        // Type A: Large Primary Card
+        // Type A: Large Primary Card (Identities/Info)
         val LargePrimary = CardConfiguration(
-            paddingValues = PaddingValues(all = 20.dp),
-            cornerRadius = 16.dp,
-            backgroundColor = Color(0xFF1E2640), // Royal Indigo Dark Blue Fill
-            hasBorder = true
+            paddingValues = PaddingValues(horizontal = 24.dp, vertical = 24.dp),
+            cornerRadius = 28.dp,
+            backgroundColor = surfaceColor
         )
-        // Type B: Medium Statistic Card
+        // Type B: Medium Statistic Card (Quick Glance)
         val MediumStat = CardConfiguration(
-            paddingValues = PaddingValues(vertical = 20.dp, horizontal = 12.dp),
-            cornerRadius = 16.dp,
-            backgroundColor = Color(0xFF1A1F26),
-            hasBorder = false
+            paddingValues = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
+            cornerRadius = 24.dp,
+            backgroundColor = surfaceColor
         )
-        // Type C: Standard List Card Rows
+        // Type C: List Cards (Settings/Navigation - grouped inside a container)
         val ListCardRow = CardConfiguration(
-            paddingValues = PaddingValues(horizontal = 16.dp, vertical = 18.dp),
-            cornerRadius = 0.dp, // Flat item rows inside wrapped container structures
-            backgroundColor = Color.Transparent,
-            hasBorder = false
+            paddingValues = PaddingValues(horizontal = 20.dp, vertical = 18.dp),
+            cornerRadius = 0.dp,
+            backgroundColor = Color.Transparent
         )
     }
 }
 
-// Data holder class mapping specific architectural layout properties
 data class CardConfiguration(
     val paddingValues: PaddingValues,
     val cornerRadius: Dp,
-    val backgroundColor: Color,
-    val hasBorder: Boolean
+    val backgroundColor: Color
 )
 
-// Controls if illustration/SVG asset pins to the Left or Right boundary edges
 enum class AssetPosition { Left, Right }
 
 // ==========================================
@@ -80,7 +76,7 @@ fun UniversalDesignCard(
             .then(clickableModifier),
         color = config.backgroundColor,
         shape = RoundedCornerShape(config.cornerRadius),
-        border = if (config.hasBorder) BorderStroke(1.dp, AppDesignTokens.borderColor) else null
+        shadowElevation = 0.dp // "Almost invisible" / "Floating paper feel"
     ) {
         Box(modifier = Modifier.padding(config.paddingValues)) {
             content()
@@ -89,14 +85,14 @@ fun UniversalDesignCard(
 }
 
 // ==========================================
-// 3. FLEXIBLE REUSABLE ELEMENT BLOCK BLUEPRINTS
+// 3. FLEXIBLE REUSABLE ELEMENT BLOCK
 // ==========================================
 @Composable
 fun BalancedContentRow(
     title: String,
     subtitle: String? = null,
-    assetPosition: AssetPosition = AssetPosition.Left,
-    titleFontWeight: FontWeight = FontWeight.SemiBold,
+    assetPosition: AssetPosition = AssetPosition.Right, // Defaulting to Right as requested
+    titleFontWeight: FontWeight = FontWeight.Bold,
     titleColor: Color = AppDesignTokens.primaryText,
     illustrationSlot: @Composable () -> Unit
 ) {
@@ -105,33 +101,34 @@ fun BalancedContentRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // If illustration goes to the LEFT edge
+        // Illustration Left
         if (assetPosition == AssetPosition.Left) {
             illustrationSlot()
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(20.dp))
         }
 
-        // Text Content Block column wrapping (automatically consumes relative fluid space)
+        // Text Content Block (Left Aligned)
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
                 color = titleColor,
-                fontSize = 16.sp,
+                fontSize = 18.sp,
                 fontWeight = titleFontWeight
             )
             if (subtitle != null) {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = subtitle,
                     color = AppDesignTokens.secondaryText,
-                    fontSize = 12.sp
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Normal
                 )
             }
         }
 
-        // If illustration goes to the RIGHT edge
+        // Illustration Right (Text on left -> illustration on right)
         if (assetPosition == AssetPosition.Right) {
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(20.dp))
             illustrationSlot()
         }
     }
