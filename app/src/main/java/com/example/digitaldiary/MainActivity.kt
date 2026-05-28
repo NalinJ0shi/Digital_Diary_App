@@ -24,6 +24,7 @@ import app.rive.runtime.kotlin.core.Rive
 import com.example.digitaldiary.screens.BreathingScreen
 import com.example.digitaldiary.screens.CalendarScreen
 import com.example.digitaldiary.screens.ChartScreen
+import com.example.digitaldiary.screens.DiaryListScreen
 import com.example.digitaldiary.screens.MoodSliderScreen
 import com.example.digitaldiary.screens.ProfileScreen
 

@@ -1,4 +1,4 @@
-package com.example.digitaldiary
+package com.example.digitaldiary.screens
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -12,10 +12,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import app.rive.runtime.kotlin.RiveAnimationView
+import com.example.digitaldiary.CustomBottomNavBar
+import com.example.digitaldiary.DiaryEntry
 import com.nalin.my_digitaldiary.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,11 +43,11 @@ fun DiaryListScreen(
 
     val hillColor = Color(0xFFDAEBC0)
     val hillPathString = "M285 17.4657C203.574 -21.8322 183.5 17.4659 114.5 17.4658L-3 17.4657V203.801H402V27.8015C402 27.8015 352 49.8013 285 17.4657Z"
-    val hillPath = remember { androidx.compose.ui.graphics.vector.PathParser().parsePathString(hillPathString).toPath() }
+    val hillPath = remember { PathParser().parsePathString(hillPathString).toPath() }
 
     val hill2Color = Color(0xFFC6D7AC)
     val hill2PathString = "M309.5 15.5557C225.712 -29.7517 192.778 63.778 117 15.5555C62 -19.4445 -3 15.5557 -3 15.5557V264.055H402V45.5552C402 45.5552 328.771 25.9765 309.5 15.5557Z"
-    val hill2Path = remember { androidx.compose.ui.graphics.vector.PathParser().parsePathString(hill2PathString).toPath() }
+    val hill2Path = remember { PathParser().parsePathString(hill2PathString).toPath() }
 
     Scaffold(
         containerColor = Color.Transparent,
