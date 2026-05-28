@@ -2,7 +2,6 @@ package com.example.digitaldiary.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -16,14 +15,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import com.example.digitaldiary.AppDesignTokens
+import com.example.digitaldiary.UniversalDesignCard
+import com.example.digitaldiary.AssetPosition
+import com.example.digitaldiary.BalancedContentRow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.digitaldiary.CustomBottomNavBar
 import com.nalin.my_digitaldiary.R
+import com.example.digitaldiary.CustomBottomNavBar
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.foundation.clickable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,300 +40,234 @@ fun ProfileScreen(
     onProfileClick: () -> Unit,
     onAddEntry: () -> Unit
 ) {
-    // --- EXACT MINIMALIST DARK DESIGN THEME COLORS ---
-    val backgroundColor = Color(0xFF12161A) // Deep structural panel charcoal background
-    val surfaceColor = Color(0xFF1A1F26)     // Menu item tile fill
-    val borderColor = Color(0xFF282F38)     // Distinct outline borders
-    val premiumBannerColor = Color(0xFF1E2640) // Royal dark blue for premium card
+    // Extract definitions cleanly from our single truth Design Tokens object file
+    val tokens = AppDesignTokens
+    val cardStyles = AppDesignTokens.CardStyles
 
-    val textColor = Color(0xFFECEFF4)        // Bright white/gray text
-    val mutedTextColor = Color(0xFF7E8996)   // Subtle description text
-    val accentPurple = Color(0xFF9F7AEA)     // Locked premium purple color
+    Scaffold(
+        containerColor = tokens.backgroundColor,
+        topBar = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Replaced Settings Icon with your signature potted-plant vector link
+                IconButton(onClick = onBack) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.potted_plant),
+                        contentDescription = "Go Home",
+                        modifier = Modifier.size(28.dp),
+                        tint = tokens.primaryText
+                    )
+                }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundColor)
-    ) {
-        Scaffold(
-            containerColor = Color.Transparent,
-            topBar = {
-                // Top Header containing Settings icon, Avatar, and Streak stats on one row
+                Text(
+                    text = "Account",
+                    color = tokens.primaryText,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                // Streak gold counter module box badge
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .background(tokens.surfaceColor, RoundedCornerShape(12.dp))
+                        .border(1.dp, tokens.borderColor, RoundedCornerShape(12.dp))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
-                    // Settings Gear Icon (Left side)
-                    IconButton(onClick = onBack) { // Restored your home navigation!
-                        Icon(
-                            painter = painterResource(id = R.drawable.potted_plant),
-                            contentDescription = "Go Home",
-                            modifier = Modifier.size(28.dp), // Made it slightly larger to stand out
-                            tint = textColor
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "Streak",
+                        modifier = Modifier.size(16.dp),
+                        tint = Color(0xFFFBBF24)
+                    )
+                    Text(text = "365", color = tokens.primaryText, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+        },
+        bottomBar = {
+            CustomBottomNavBar(
+                selectedTab = 3,
+                onCalendarClick = onCalendarClick,
+                onChartClick = onChartClick,
+                onGameClick = onGameClick,
+                onProfileClick = onProfileClick,
+                onAddEntry = onAddEntry
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(12.dp))
 
-                    // Centered Profile Avatar Placeholder Circle
+            // ==================================================
+            // TYPE A: LARGE PRIMARY CARD (Unlock Premium Advertisement Banner)
+            // ==================================================
+            UniversalDesignCard(config = cardStyles.LargePrimary) {
+                BalancedContentRow(
+                    title = "Unlock Premium Plan",
+                    subtitle = "Get unlimited icons, custom fonts, themes & advanced charts analysis.",
+                    assetPosition = AssetPosition.Left // Figma layout: Icon on LEFT
+                ) {
+                    // Illustration slot content container mapping
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color(0x1F9F7AEA)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(imageVector = Icons.Default.Lock, contentDescription = null, tint = Color(0xFF9F7AEA), modifier = Modifier.size(20.dp))
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ==================================================
+            // TYPE B: MEDIUM STATISTICS CONTAINER FRAME ("choco" card element link)
+            // ==================================================
+            UniversalDesignCard(config = cardStyles.MediumStat, onClick = { /* Edit action */ }) {
+                BalancedContentRow(
+                    title = "choco",
+                    assetPosition = AssetPosition.Left
+                ) {
                     Box(
                         modifier = Modifier
                             .size(44.dp)
                             .clip(CircleShape)
-                            .background(surfaceColor)
-                            .border(1.dp, borderColor, CircleShape),
+                            .background(tokens.dividerColor),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Avatar",
-                            modifier = Modifier.size(22.dp),
-                            tint = mutedTextColor
-                        )
-                    }
-
-                    // Streak Count Component (Right side)
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier
-                            .background(surfaceColor, RoundedCornerShape(12.dp))
-                            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "Streak",
-                            modifier = Modifier.size(16.dp),
-                            tint = Color(0xFFFBBF24) // Gold Star
-                        )
-                        Text(
-                            text = "365",
-                            color = textColor,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Icon(imageVector = Icons.Default.Person, contentDescription = null, tint = tokens.secondaryText, modifier = Modifier.size(22.dp))
                     }
                 }
-            },
-            bottomBar = {
-                CustomBottomNavBar(
-                    selectedTab = 3, // Profile index position
-                    onCalendarClick = onCalendarClick,
-                    onChartClick = onChartClick,
-                    onGameClick = onGameClick,
-                    onProfileClick = onProfileClick,
-                    onAddEntry = onAddEntry
-                )
             }
-        ) { padding ->
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            // Section Label Divider Row Node
+            Text(
+                text = "My records",
+                color = tokens.secondaryText,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.fillMaxWidth().padding(start = 8.dp, bottom = 12.dp)
+            )
+
+            // ==================================================
+            // SPLIT STATISTICS ROW COMPONENT (Recorded Days vs Photos split matrix layout)
+            // ==================================================
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = tokens.surfaceColor,
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, tokens.borderColor)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Left Column Frame segment: Recorded Days
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(text = "Recorded days", color = tokens.secondaryText, fontSize = 13.sp)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(text = "365", color = tokens.primaryText, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                    }
+
+                    // Strict vertical vector hairline divider separator element
+                    Box(modifier = Modifier.height(36.dp).width(1.dp).background(tokens.borderColor))
+
+                    // Right Column Frame segment: Photos
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(text = "Photos", color = tokens.secondaryText, fontSize = 13.sp)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(text = "12", color = tokens.primaryText, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ==================================================
+            // TYPE C: PACKED INTEGRATED ROW TILE LIST BLOCK
+            // ==================================================
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 16.dp)
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth()
+                    .background(tokens.surfaceColor, RoundedCornerShape(16.dp))
+                    .border(1.dp, tokens.borderColor, RoundedCornerShape(16.dp))
             ) {
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // --- PREMIUM ADVERTISEMENT BANNER ---
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 24.dp),
-                    color = premiumBannerColor,
-                    shape = RoundedCornerShape(16.dp),
-                    border = BorderStroke(1.dp, borderColor) // FIXED: Changed BoxStroke to BorderStroke
-                )
-                {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Locked Indicator Icon Area
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(Color(0x1F9F7AEA)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = "Premium Feature",
-                                tint = accentPurple,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(16.dp))
-
-                        // Banner Promotion Messages
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Unlock Premium Plan",
-                                color = textColor,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Text(
-                                text = "Get unlimited icons, custom fonts, themes & advanced charts analysis.",
-                                color = mutedTextColor,
-                                fontSize = 12.sp,
-                                lineHeight = 16.sp
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        // Upgrade Call-To-Action Click Button
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Upgrade link",
-                            tint = mutedTextColor,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-
-                // --- MENUS INTEGRATED BOX CONTAINER ---
-                // Groups options tightly inside full-width blocks like DailyBean
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(surfaceColor, RoundedCornerShape(16.dp))
-                        .border(1.dp, borderColor, RoundedCornerShape(16.dp))
-                ) {
-                    DailyBeanMenuItem(
-                        icon = Icons.Default.Build,
-                        title = "App Themes",
-                        textColor = textColor,
-                        mutedTextColor = mutedTextColor,
-                        showDivider = true
-                    )
-                    DailyBeanMenuItem(
-                        icon = Icons.Default.Menu,
-                        title = "Custom Icon Packs",
-                        textColor = textColor,
-                        mutedTextColor = mutedTextColor,
-                        showDivider = true
-                    )
-                    DailyBeanMenuItem(
-                        icon = Icons.Default.Notifications,
-                        title = "Daily Reminders",
-                        textColor = textColor,
-                        mutedTextColor = mutedTextColor,
-                        showDivider = false
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // --- SECONDARY SETTINGS OPTION BLOCK ---
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(surfaceColor, RoundedCornerShape(16.dp))
-                        .border(1.dp, borderColor, RoundedCornerShape(16.dp))
-                ) {
-                    DailyBeanMenuItem(
-                        icon = Icons.Default.Info,
-                        title = "Help & Feedback Support",
-                        textColor = textColor,
-                        mutedTextColor = mutedTextColor,
-                        showDivider = true
-                    )
-                    DailyBeanMenuItem(
-                        icon = Icons.Default.Share,
-                        title = "Share Feelsy App",
-                        textColor = textColor,
-                        mutedTextColor = mutedTextColor,
-                        showDivider = false
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // --- DESTRUCTIVE LOG OUT BUTTON ---
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(surfaceColor, RoundedCornerShape(16.dp))
-                        .border(1.dp, borderColor, RoundedCornerShape(16.dp))
-                ) {
-                    DailyBeanMenuItem(
-                        icon = Icons.Default.ExitToApp,
-                        title = "Log Out Account",
-                        textColor = Color(0xFFF87171), // Clean red indicator color tone
-                        mutedTextColor = mutedTextColor,
-                        showDivider = false
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
+                // Settings Row Item 1
+                DailyBeanListItem(title = "App Themes", icon = Icons.Default.Build, showDivider = true)
+                // Settings Row Item 2
+                DailyBeanListItem(title = "Custom Icon Packs", icon = Icons.Default.Menu, showDivider = true)
+                // Settings Row Item 3
+                DailyBeanListItem(title = "Daily Reminders", icon = Icons.Default.Notifications, showDivider = false)
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Destructive standalone logout listing card panel element block
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(tokens.surfaceColor, RoundedCornerShape(16.dp))
+                    .border(1.dp, tokens.borderColor, RoundedCornerShape(16.dp))
+            ) {
+                DailyBeanListItem(
+                    title = "Log Out Account",
+                    icon = Icons.Default.ExitToApp,
+                    titleColor = tokens.destructiveText, // Dynamic red highlight mapping
+                    showDivider = false
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
 
-// --- EXACT DAILYBEAN ROW LIST SEPARATOR BLUEPRINT ---
+// Reusable list sub-component binding logic straight into Master Token Layout configurations
 @Composable
-fun DailyBeanMenuItem(
-    icon: ImageVector,
+fun DailyBeanListItem(
     title: String,
-    textColor: Color,
-    mutedTextColor: Color,
-    showDivider: Boolean
+    icon: ImageVector,
+    showDivider: Boolean,
+    titleColor: Color = AppDesignTokens.primaryText
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { /* Handle MenuItem Execution Click Block */ }
-    ) {
+    Column(modifier = Modifier.fillMaxWidth().clickable { /* Actions */ }) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 18.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    tint = textColor,
-                    modifier = Modifier.size(20.dp)
-                )
-                Text(
-                    text = title,
-                    color = textColor,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowRight,
-                contentDescription = "Navigate option",
-                tint = mutedTextColor,
-                modifier = Modifier.size(18.dp)
-            )
+            Icon(imageVector = icon, contentDescription = null, tint = titleColor, modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(text = title, color = titleColor, fontSize = 15.sp, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
+            Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = null, tint = AppDesignTokens.secondaryText, modifier = Modifier.size(18.dp))
         }
-
         if (showDivider) {
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                thickness = 1.dp,
-                color = Color(0xFF282F38) // Distinct clean divider stroke
-            )
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 1.dp, color = AppDesignTokens.dividerColor)
         }
     }
 }

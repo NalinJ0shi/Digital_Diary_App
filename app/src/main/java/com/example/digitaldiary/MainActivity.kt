@@ -28,12 +28,13 @@ import com.example.digitaldiary.screens.DiaryListScreen
 import com.example.digitaldiary.screens.MoodSliderScreen
 import com.example.digitaldiary.screens.ProfileScreen
 
+
 import com.example.digitaldiary.ui.theme.PlantformTheme
 
 /**
  * The main entry point of the Digital Diary application.
  *
- * This activity initializes the system splash screen and Rive animations, 
+ * This activity initializes the system splash screen and Rive animations,
  * and sets up the top-level navigation using Jetpack Compose Navigation.
  */
 class MainActivity : ComponentActivity() {
