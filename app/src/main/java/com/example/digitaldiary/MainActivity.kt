@@ -4,6 +4,8 @@ package com.example.digitaldiary
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -27,6 +29,7 @@ import com.example.digitaldiary.screens.ChartScreen
 import com.example.digitaldiary.screens.DiaryListScreen
 import com.example.digitaldiary.screens.MoodSliderScreen
 import com.example.digitaldiary.screens.ProfileScreen
+import com.example.digitaldiary.ui.theme.AppGlobalGradient
 
 
 import com.example.digitaldiary.ui.theme.PlantformTheme
@@ -46,9 +49,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             PlantformTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(AppGlobalGradient) // Crucial line: attaches your white/soft gradient
                 ) {
                     DiaryAppNavigation()
                 }

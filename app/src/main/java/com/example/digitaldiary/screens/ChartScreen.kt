@@ -159,7 +159,7 @@ fun ChartScreen(
                     Text("Mood flow", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextDark)
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    Box(modifier = Modifier.fillMaxWidth().height(240.dp)) {
+                    Box(modifier = Modifier.fillMaxWidth().height(150.dp)) {
                         if (dailyAverages.isEmpty()) {
                             Text("Not enough data.", Modifier.align(Alignment.Center), color = TextGray)
                         } else {

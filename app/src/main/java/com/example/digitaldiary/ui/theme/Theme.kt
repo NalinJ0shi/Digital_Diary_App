@@ -15,6 +15,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -28,6 +30,15 @@ private val LightColorScheme = lightColorScheme(
     primary = Purple40,
     secondary = PurpleGrey40,
     tertiary = Pink40
+)
+
+// Define a very soft, calming off-white companion color (e.g., Creamy Alabaster or Soft Lavender/Blue hint)
+val SoftCream = Color(0xFF377CC2)
+val PureWhite = Color(0xFFFF8C8C)
+
+// Combine them into a vertical linear gradient brush token
+val AppGlobalGradient = Brush.verticalGradient(
+    colors = listOf(PureWhite, SoftCream)
 )
 
 @Composable
