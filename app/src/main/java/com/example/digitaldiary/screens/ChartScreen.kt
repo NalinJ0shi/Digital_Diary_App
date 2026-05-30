@@ -334,7 +334,7 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
         // LAYER 4: Draw the Data Nodes over the connecting lines
         coordinates.forEach { offset ->
             drawCircle(color = Color.White, radius = 8.dp.toPx(), center = offset)
-            drawCircle(color = PrimaryGreen, radius = 5.dp.toPx(), center = offset)
+            drawCircle(color = PrimaryGreen, radius = 4.dp.toPx(), center = offset)
         }
     }
 }

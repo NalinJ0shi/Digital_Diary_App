@@ -149,7 +149,7 @@ fun MoodSliderScreen(
             TextField(
                 value = entryContent,
                 onValueChange = { entryContent = it },
-                placeholder = { Text("Write your diary entry...") },
+                placeholder = { Text("...") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)

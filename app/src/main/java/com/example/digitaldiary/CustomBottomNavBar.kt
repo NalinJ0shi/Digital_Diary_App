@@ -36,7 +36,7 @@ fun CustomBottomNavBar(
 
     val groundColor = Color(0xFF042F2E)
     val navBarColor = Color(0xFFF8FAFC)
-    val activeIconColor = groundColor
+    val activeIconColor = Color(0xFF4CA18A)
     val inactiveIconColor = Color(0xFF94A3B8)
 
     val totalClickableHeight = 120.dp
@@ -80,23 +80,23 @@ fun CustomBottomNavBar(
             ) {
                 IconButton(
                     onClick = onCalendarClick,
-                    modifier = Modifier.offset(x = 5.dp, y = -5.dp)
+                    modifier = Modifier.offset(x = 5.dp, y = -15.dp)
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.calendar_silhouette),
                         contentDescription = "Calendar",
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(28.dp),
                         tint = if (selectedTab == 0) activeIconColor else inactiveIconColor
                     )
                 }
                 IconButton(
                     onClick = onChartClick,
-                    modifier = Modifier.offset(x = 25.dp, y = -5.dp)
+                    modifier = Modifier.offset(x = 25.dp, y = -15.dp)
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.graph__1_),
                         contentDescription = "Chart",
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(28.dp),
                         tint = if (selectedTab == 1) activeIconColor else inactiveIconColor
                     )
                 }
@@ -111,23 +111,23 @@ fun CustomBottomNavBar(
             ) {
                 IconButton(
                     onClick = onGameClick,
-                    modifier = Modifier.offset(x = -25.dp, y = -5.dp)
+                    modifier = Modifier.offset(x = -25.dp, y = -15.dp)
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.dead),
                         contentDescription = "Games",
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(28.dp),
                         tint = if (selectedTab == 2) activeIconColor else inactiveIconColor
                     )
                 }
                 IconButton(
                     onClick = onProfileClick,
-                    modifier = Modifier.offset(x = -5.dp, y = -5.dp)
+                    modifier = Modifier.offset(x = -5.dp, y = -15.dp)
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.user),
                         contentDescription = "Profile",
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(28.dp),
                         tint = if (selectedTab == 3) activeIconColor else inactiveIconColor
                     )
                 }
@@ -136,9 +136,9 @@ fun CustomBottomNavBar(
 
         AndroidView(
             modifier = Modifier
-                .size(120.dp)
+                .size(100.dp)
                 .align(Alignment.BottomCenter)
-                .offset(x = 0.dp, y = (-35).dp),
+                .offset(x = 0.dp, y = (-40).dp),
             factory = { context ->
                 RiveAnimationView(context).apply {
                     setRiveResource(
