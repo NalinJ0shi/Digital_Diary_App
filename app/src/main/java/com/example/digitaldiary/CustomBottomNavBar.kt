@@ -39,11 +39,11 @@ fun CustomBottomNavBar(
     val activeIconColor = groundColor
     val inactiveIconColor = Color(0xFF94A3B8)
 
-    val totalClickableHeight = 100.dp
-    val visualBarHeight = 80.dp
-    val curveWidthPx = 330f // How wide the top gap is
-    val curveDepthPx = 130f // How deep the U-shape dips down
-    val cornerSmoothingPx = 80f  // How wide the smooth transition corners are
+    val totalClickableHeight = 120.dp
+    val visualBarHeight = 100.dp
+    val curveWidthPx = 360f // How wide the top gap is
+    val curveDepthPx = 140f // How deep the U-shape dips down
+    val cornerSmoothingPx = 70f  // How wide the smooth transition corners are
     val iconSeparationWidth = 190.dp  // --- CONTROL: ICON DEAD-ZONE (Pushes left/right icons apart) ---
 
     Box(
@@ -138,7 +138,7 @@ fun CustomBottomNavBar(
             modifier = Modifier
                 .size(120.dp)
                 .align(Alignment.BottomCenter)
-                .offset(x = 0.dp, y = (-25).dp),
+                .offset(x = 0.dp, y = (-35).dp),
             factory = { context ->
                 RiveAnimationView(context).apply {
                     setRiveResource(

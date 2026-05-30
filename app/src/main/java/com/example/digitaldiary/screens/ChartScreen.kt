@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -34,13 +33,15 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 // --- Soft Color Palette ---
-val BgColor = Color(0xFF0F172A)
 val CardWhite = Color.White
 val PrimaryGreen = Color(0xFF6EBE80)
 val TextDark = Color(0xFF2C2C2C)
 val TextGray = Color(0xFFA0A0A0)
 val GridBarColor = Color(0xFFF4F5F7)
 val GridLineColor = Color(0xFFE2E8F0)
+
+// Safely keeping this as a fallback color for the 0% proportion empty states
+val EmptyBgColorFallback = Color(0xFF0F172A)
 
 // Mood Colors (Best to Worst)
 val MoodColors = listOf(
@@ -62,7 +63,7 @@ fun ChartScreen(
     onProfileClick: () -> Unit,
     onAddEntry: () -> Unit
 ) {
-    // FIX 1: Sorting chronologically before grouping so the timeline flows correctly
+    // Sorting chronologically before grouping so the timeline flows correctly
     val dailyAverages = remember(entries) {
         entries.sortedBy { it.timestamp } // Stops the time-travel bug!
             .groupBy {
@@ -82,157 +83,164 @@ fun ChartScreen(
         }
     }
 
-    Scaffold(
-        containerColor = BgColor,
-        topBar = {
-            TopAppBar(
-                title = {},
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.potted_plant),
-                            contentDescription = "Go Home",
-                            modifier = Modifier.size(28.dp),
-                            tint = TextDark
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-            )
-        },
-        bottomBar = {
-            CustomBottomNavBar(
-                selectedTab = 1,
-                onCalendarClick = onCalendarClick,
-                onChartClick = onChartClick,
-                onGameClick = onGameClick,
-                onProfileClick = onProfileClick,
-                onAddEntry = onAddEntry
-            )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // 1. Weekly/Monthly Tabs
-            Row(modifier = Modifier.padding(bottom = 16.dp)) {
-                Text(
-                    text = "Weekly",
-                    color = PrimaryGreen,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-                Text(
-                    text = "Monthly",
-                    color = TextGray,
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            }
-
-            // 2. Date Selector
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 24.dp)) {
-                Text(
-                    text = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date()),
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 22.sp,
-                    color = TextDark
-                )
-                Icon(Icons.Default.ArrowDropDown, contentDescription = "Select Month", tint = TextDark)
-            }
-
-            // 3. Mood Flow Card (The Graph)
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = CardWhite),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    Text("Mood flow", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextDark)
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Box(modifier = Modifier.fillMaxWidth().height(150.dp)) {
-                        if (dailyAverages.isEmpty()) {
-                            Text("Not enough data.", Modifier.align(Alignment.Center), color = TextGray)
-                        } else {
-                            StraightLineBarGraph(dataPoints = dailyAverages)
+    // THE UNIVERSAL FIX: Safely wrap the Scaffold in a Box to apply the Brush Background
+    Box(modifier = androidx.compose.ui.Modifier
+            .fillMaxSize()
+            .background(com.example.digitaldiary.AppDesignTokens.UniversalBrush))
+    {
+        Scaffold(
+            // Make the Scaffold transparent so the universal box background shows through
+            containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    title = {},
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.potted_plant),
+                                contentDescription = "Go Home",
+                                modifier = Modifier.size(28.dp),
+                                tint = TextDark
+                            )
                         }
-                    }
-                }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                )
+            },
+            bottomBar = {
+                CustomBottomNavBar(
+                    selectedTab = 1,
+                    onCalendarClick = onCalendarClick,
+                    onChartClick = onChartClick,
+                    onGameClick = onGameClick,
+                    onProfileClick = onProfileClick,
+                    onAddEntry = onAddEntry
+                )
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // 4. Mood Proportion Card (The Stats)
-            Card(
+        ) { paddingValues ->
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .padding(bottom = 40.dp),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = CardWhite),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(modifier = Modifier.padding(24.dp)) {
-                    Text("Mood proportion", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextDark)
-                    Spacer(modifier = Modifier.height(24.dp))
+                // 1. Weekly/Monthly Tabs
+                Row(modifier = Modifier.padding(bottom = 16.dp)) {
+                    Text(
+                        text = "Weekly",
+                        color = PrimaryGreen,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                    Text(
+                        text = "Monthly",
+                        color = TextGray,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(20.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(GridBarColor)
-                    ) {
-                        proportions.forEachIndexed { index, weight ->
-                            if (weight > 0) {
-                                Box(
-                                    modifier = Modifier
-                                        .weight(weight)
-                                        .fillMaxHeight()
-                                        .background(MoodColors[index])
-                                )
+                // 2. Date Selector
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 24.dp)) {
+                    Text(
+                        text = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date()),
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 22.sp,
+                        color = TextDark
+                    )
+                    Icon(Icons.Default.ArrowDropDown, contentDescription = "Select Month", tint = TextDark)
+                }
+
+                // 3. Mood Flow Card (The Graph)
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = CardWhite),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Column(modifier = Modifier.padding(24.dp)) {
+                        Text("Mood flow", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextDark)
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Box(modifier = Modifier.fillMaxWidth().height(130.dp)) {
+                            if (dailyAverages.isEmpty()) {
+                                Text("Not enough data.", Modifier.align(Alignment.Center), color = TextGray)
+                            } else {
+                                StraightLineBarGraph(dataPoints = dailyAverages)
                             }
                         }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        proportions.forEachIndexed { index, percentage ->
-                            val percentInt = (percentage * 100).toInt()
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(16.dp)
-                                        .clip(CircleShape)
-                                        .background(MoodColors[index])
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(if (percentInt > 0) PrimaryGreen.copy(alpha = 0.1f) else BgColor)
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                                ) {
-                                    Text(
-                                        text = "$percentInt%",
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (percentInt > 0) PrimaryGreen else TextGray
+                // 4. Mood Proportion Card (The Stats)
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .padding(bottom = 40.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(containerColor = CardWhite),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Column(modifier = Modifier.padding(24.dp)) {
+                        Text("Mood proportion", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextDark)
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(20.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(GridBarColor)
+                        ) {
+                            proportions.forEachIndexed { index, weight ->
+                                if (weight > 0) {
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(weight)
+                                            .fillMaxHeight()
+                                            .background(MoodColors[index])
                                     )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            proportions.forEachIndexed { index, percentage ->
+                                val percentInt = (percentage * 100).toInt()
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .clip(CircleShape)
+                                            .background(MoodColors[index])
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(if (percentInt > 0) PrimaryGreen.copy(alpha = 0.1f) else EmptyBgColorFallback)
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(
+                                            text = "$percentInt%",
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (percentInt > 0) PrimaryGreen else TextGray
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -266,15 +274,14 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
         }
 
         // LAYER 1: The Static 4-Week Background Grid
-        // FIX 2 & 3: Draws exactly 4 thin lines completely independently of the data points
-        val weekSpacing = graphWidth / 3 // 4 lines = 3 spaces between them
+        val weekSpacing = graphWidth / 3
         for (i in 0..3) {
             val gridX = yAxisPadding + (i * weekSpacing)
             drawLine(
                 color = GridLineColor,
                 start = Offset(gridX, 0f),
                 end = Offset(gridX, graphHeight),
-                strokeWidth = 2.dp.toPx() // Thin 2dp line
+                strokeWidth = 2.dp.toPx()
             )
         }
 
