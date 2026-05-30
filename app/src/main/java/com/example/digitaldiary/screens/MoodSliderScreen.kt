@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import app.rive.runtime.kotlin.RiveAnimationView
-import com.example.digitaldiary.DiaryEntry
+import com.example.digitaldiary.database.DiaryEntry
 import kotlin.math.roundToInt // NEW: Imported the rounding function
 
 @OptIn(ExperimentalMaterial3Api::class)
