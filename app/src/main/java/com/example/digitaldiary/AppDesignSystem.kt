@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -25,23 +26,28 @@ object AppDesignTokens {
     val primaryText = Color(0xFF2C2C2C)     // Bold dark
     val secondaryText = Color(0xFFA0A0A0)   // Medium gray
     val dividerColor = Color(0xFFF0F0F0)    // Almost invisible divider
+
+    val UniversalTopBgColor = Color(0xFFFFFFFF) // Pure White
+    val UniversalBottomBgColor = Color(0xFFF4F6F8) // Softer Companion Color
     val accentColor = Color(0xFF6EBE80)     // Soft green accent
+
+    // THE FIX: One pure, static variable. No functions. No arguments.
+    val UniversalBrush = Brush.verticalGradient(
+        colors = listOf(UniversalTopBgColor, UniversalBottomBgColor)
+    )
 
     // The 3 Card Hierarchies
     object CardStyles {
-        // Type A: Large Primary Card (Identities/Info)
         val LargePrimary = CardConfiguration(
             paddingValues = PaddingValues(horizontal = 24.dp, vertical = 24.dp),
             cornerRadius = 28.dp,
             backgroundColor = surfaceColor
         )
-        // Type B: Medium Statistic Card (Quick Glance)
         val MediumStat = CardConfiguration(
             paddingValues = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
             cornerRadius = 24.dp,
             backgroundColor = surfaceColor
         )
-        // Type C: List Cards (Settings/Navigation - grouped inside a container)
         val ListCardRow = CardConfiguration(
             paddingValues = PaddingValues(horizontal = 20.dp, vertical = 18.dp),
             cornerRadius = 0.dp,
@@ -76,7 +82,7 @@ fun UniversalDesignCard(
             .then(clickableModifier),
         color = config.backgroundColor,
         shape = RoundedCornerShape(config.cornerRadius),
-        shadowElevation = 0.dp // "Almost invisible" / "Floating paper feel"
+        shadowElevation = 0.dp
     ) {
         Box(modifier = Modifier.padding(config.paddingValues)) {
             content()
@@ -91,7 +97,7 @@ fun UniversalDesignCard(
 fun BalancedContentRow(
     title: String,
     subtitle: String? = null,
-    assetPosition: AssetPosition = AssetPosition.Right, // Defaulting to Right as requested
+    assetPosition: AssetPosition = AssetPosition.Right,
     titleFontWeight: FontWeight = FontWeight.Bold,
     titleColor: Color = AppDesignTokens.primaryText,
     illustrationSlot: @Composable () -> Unit
@@ -101,13 +107,11 @@ fun BalancedContentRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Illustration Left
         if (assetPosition == AssetPosition.Left) {
             illustrationSlot()
             Spacer(modifier = Modifier.width(20.dp))
         }
 
-        // Text Content Block (Left Aligned)
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
@@ -126,7 +130,6 @@ fun BalancedContentRow(
             }
         }
 
-        // Illustration Right (Text on left -> illustration on right)
         if (assetPosition == AssetPosition.Right) {
             Spacer(modifier = Modifier.width(20.dp))
             illustrationSlot()

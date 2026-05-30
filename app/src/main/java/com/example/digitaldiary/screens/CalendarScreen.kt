@@ -15,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.drawscope.withTransform
@@ -29,11 +28,10 @@ import androidx.compose.ui.unit.sp
 import com.example.digitaldiary.CustomBottomNavBar
 import com.example.digitaldiary.DiaryEntry
 import com.example.digitaldiary.DiaryItem
+import com.nalin.my_digitaldiary.R
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-
-import com.nalin.my_digitaldiary.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,7 +49,6 @@ fun CalendarScreen(
 ) {
     val context = LocalContext.current
     val todayMillis = System.currentTimeMillis()
-
     var selectedDateMillis by remember { mutableLongStateOf(todayMillis) }
 
     // --- DESIGN COLORS ---
@@ -62,10 +59,6 @@ fun CalendarScreen(
     val todayRingColor = Color(0xD3E0FF36)
 
     // --- GRADIENT & HILLS ---
-    val topColor = Color(0xFF0F172A)
-    val bottomColor = Color(0xFF064E3B)
-    val gradientBrush = Brush.verticalGradient(colors = listOf(topColor, bottomColor))
-
     val hillColor = Color(0xFFDAEBC0)
     val hillPathString = "M285 17.4657C203.574 -21.8322 183.5 17.4659 114.5 17.4658L-3 17.4657V203.801H402V27.8015C402 27.8015 352 49.8013 285 17.4657Z"
     val hillPath = remember { PathParser().parsePathString(hillPathString).toPath() }
@@ -76,97 +69,63 @@ fun CalendarScreen(
 
     // --- CALENDAR MATH ---
     val calendar = remember { Calendar.getInstance() }
-    val currentMonthYear = remember {
-        val monthYearFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
-        monthYearFormat.format(calendar.time)
-    }
-
-    val firstDayOfWeek = remember {
-        calendar.set(Calendar.DAY_OF_MONTH, 1)
-        calendar.get(Calendar.DAY_OF_WEEK) - 1
-    }
-
-    val daysInMonth = remember {
-        calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
-    }
+    val currentMonthYear = remember { SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(calendar.time) }
+    val firstDayOfWeek = remember { calendar.set(Calendar.DAY_OF_MONTH, 1); calendar.get(Calendar.DAY_OF_WEEK) - 1 }
+    val daysInMonth = remember { calendar.getActualMaximum(Calendar.DAY_OF_MONTH) }
 
     val todayCalc = remember { Calendar.getInstance().apply { timeInMillis = todayMillis } }
     val todayYear = todayCalc.get(Calendar.YEAR)
     val todayMonth = todayCalc.get(Calendar.MONTH)
     val todayDayNumber = todayCalc.get(Calendar.DAY_OF_MONTH)
 
-    // --- PRE-PROCESS GRID ENTRIES ---
     val entriesByDay = remember(entries) {
         val map = mutableMapOf<Int, DiaryEntry>()
         val tempCal = Calendar.getInstance()
-
         entries.forEach { entry ->
             tempCal.timeInMillis = entry.timestamp
-            if (tempCal.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) &&
-                tempCal.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)) {
+            if (tempCal.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) && tempCal.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)) {
                 map[tempCal.get(Calendar.DAY_OF_MONTH)] = entry
             }
         }
         map
     }
 
-    // --- EXTRACT THE SINGLE SELECTED ENTRY ---
     val selectedEntry = remember(selectedDateMillis, entries) {
         val selectedCal = Calendar.getInstance().apply { timeInMillis = selectedDateMillis }
         val sYear = selectedCal.get(Calendar.YEAR)
         val sMonth = selectedCal.get(Calendar.MONTH)
         val sDay = selectedCal.get(Calendar.DAY_OF_MONTH)
-
         val tempCal = Calendar.getInstance()
         entries.find { entry ->
             tempCal.timeInMillis = entry.timestamp
-            tempCal.get(Calendar.YEAR) == sYear &&
-                    tempCal.get(Calendar.MONTH) == sMonth &&
-                    tempCal.get(Calendar.DAY_OF_MONTH) == sDay
+            tempCal.get(Calendar.YEAR) == sYear && tempCal.get(Calendar.MONTH) == sMonth && tempCal.get(Calendar.DAY_OF_MONTH) == sDay
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(gradientBrush)) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            Canvas(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(402f / 204f)
-                    .align(Alignment.BottomCenter)
-            ) {
-                val scaleX = size.width / 402f
-                val scaleY = size.height / 204f
-                withTransform({ scale(scaleX, scaleY, Offset.Zero) }) {
-                    translate(top = -40f) { drawPath(path = hill2Path, color = hill2Color) }
-                }
-            }
-            Canvas(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(402f / 204f)
-                    .align(Alignment.BottomCenter)
-            ) {
-                val scaleX = size.width / 402f
-                val scaleY = size.height / 204f
-                withTransform({ scale(scaleX, scaleY, Offset.Zero) }) {
-                    drawPath(path = hillPath, color = hillColor)
-                }
-            }
+    // THE FIX: Universal brush reference for downstream canvas logic
+    val gradientBrush = com.example.digitaldiary.AppDesignTokens.UniversalBrush
+
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(gradientBrush)
+    ) {
+        Canvas(modifier = Modifier.fillMaxWidth().aspectRatio(402f / 204f).align(Alignment.BottomCenter)) {
+            val scaleX = size.width / 402f
+            val scaleY = size.height / 204f
+            withTransform({ scale(scaleX, scaleY, Offset.Zero) }) { translate(top = -40f) { drawPath(path = hill2Path, color = hill2Color) } }
+        }
+        Canvas(modifier = Modifier.fillMaxWidth().aspectRatio(402f / 204f).align(Alignment.BottomCenter)) {
+            val scaleX = size.width / 402f
+            val scaleY = size.height / 204f
+            withTransform({ scale(scaleX, scaleY, Offset.Zero) }) { drawPath(path = hillPath, color = hillColor) }
         }
 
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, end = 16.dp, top = 62.dp, bottom = 6.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Row(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 62.dp, bottom = 6.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onBack) {
                         Icon(painter = painterResource(id = R.drawable.potted_plant), contentDescription = "Go Home", Modifier.size(32.dp), tint = textColor)
                     }
@@ -175,142 +134,53 @@ fun CalendarScreen(
                         Spacer(modifier = Modifier.width(1.dp))
                         Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Change Month", tint = textColor)
                     }
-                    IconButton(onClick = { /* Handle Share */ }) {
-                        Icon(Icons.Default.Share, contentDescription = "Share", tint = textColor)
-                    }
+                    IconButton(onClick = { }) { Icon(Icons.Default.Share, contentDescription = "Share", tint = textColor) }
                 }
             },
             bottomBar = {
-                CustomBottomNavBar(
-                    selectedTab = 0,
-                    onCalendarClick = onCalendarClick,
-                    onChartClick = onChartClick,
-                    onGameClick = onGameClick,
-                    onProfileClick = onProfileClick,
-                    onAddEntry = onAddEntry
-                )
+                CustomBottomNavBar(0, onCalendarClick, onChartClick, onGameClick, onProfileClick, onAddEntry)
             }
         ) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 16.dp)
-            ) {
+            Column(modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
                 Spacer(modifier = Modifier.height(24.dp))
 
                 val weekdays = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    weekdays.forEach { day ->
-                        Text(text = day, color = mutedTextColor, modifier = Modifier.weight(1f), textAlign = TextAlign.Center, fontSize = 14.sp)
-                    }
+                Row(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                    weekdays.forEach { day -> Text(text = day, color = mutedTextColor, modifier = Modifier.weight(1f), textAlign = TextAlign.Center, fontSize = 14.sp) }
                 }
 
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(7),
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                    contentPadding = PaddingValues(bottom = 16.dp)
-                ) {
-                    items(firstDayOfWeek) {
-                        Box(modifier = Modifier.size(48.dp))
-                    }
-
+                LazyVerticalGrid(columns = GridCells.Fixed(7), modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp), contentPadding = PaddingValues(bottom = 16.dp)) {
+                    items(firstDayOfWeek) { Box(modifier = Modifier.size(48.dp)) }
                     items(daysInMonth) { dayIndex ->
                         val dayNumber = dayIndex + 1
                         val entryForDay = entriesByDay[dayNumber]
                         val hasMoodData = entryForDay != null
                         val moodRating = entryForDay?.dayRating ?: 3
-
-                        val emotionDrawableId = when (moodRating) {
-                            1 -> R.drawable.sad
-                            2 -> R.drawable.tire
-                            3 -> R.drawable.surprise
-                            4 -> R.drawable.happy
-                            5 -> R.drawable.exicted
-                            else -> R.drawable.surprise
-                        }
-
-                        val isToday = calendar.get(Calendar.YEAR) == todayYear &&
-                                calendar.get(Calendar.MONTH) == todayMonth &&
-                                dayNumber == todayDayNumber
-
+                        val emotionDrawableId = when (moodRating) { 1 -> R.drawable.sad; 2 -> R.drawable.tire; 3 -> R.drawable.surprise; 4 -> R.drawable.happy; 5 -> R.drawable.exicted; else -> R.drawable.surprise }
+                        val isToday = calendar.get(Calendar.YEAR) == todayYear && calendar.get(Calendar.MONTH) == todayMonth && dayNumber == todayDayNumber
                         val clickCal = Calendar.getInstance().apply { set(Calendar.DAY_OF_MONTH, dayNumber) }
                         val isSelected = clickCal.timeInMillis == selectedDateMillis
 
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.clickable {
-                                val selectedTime = clickCal.timeInMillis
-
-                                if (selectedTime > todayMillis) {
-                                    Toast.makeText(context, "No writing in the future!", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    selectedDateMillis = selectedTime
-
-                                    if (!hasMoodData) {
-                                        onDateSelected(selectedTime)
-                                    }
-                                }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable {
+                            val selectedTime = clickCal.timeInMillis
+                            if (selectedTime > todayMillis) Toast.makeText(context, "No writing in the future!", Toast.LENGTH_SHORT).show()
+                            else { selectedDateMillis = selectedTime; if (!hasMoodData) onDateSelected(selectedTime) }
+                        }) {
+                            Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+                                if (isToday) { Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.fillMaxSize(), tint = todayRingColor); Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.size(38.dp), tint = innerFillColor) }
+                                else { Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.fillMaxSize(), tint = emptyCircleColor) }
+                                if (hasMoodData) Icon(painter = painterResource(id = emotionDrawableId), contentDescription = null, modifier = Modifier.fillMaxSize(), tint = Color.Unspecified)
                             }
-                        ) {
-                            Box(
-                                modifier = Modifier.size(48.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                // 1. Draw the background shape first (Lime Green Ring if Today, or standard Empty Circle)
-                                if (isToday) {
-                                    Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = "Today Outer Ring", modifier = Modifier.fillMaxSize(), tint = todayRingColor)
-                                    Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = "Today Inner Fill", modifier = Modifier.size(38.dp), tint = innerFillColor)
-                                } else {
-                                    Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = "Empty Custom Day Shape Background", modifier = Modifier.fillMaxSize(), tint = emptyCircleColor)
-                                }
-
-                                // 2. Draw the Emoji Face over the background if data exists
-                                if (hasMoodData) {
-                                    Icon(painter = painterResource(id = emotionDrawableId), contentDescription = "Mood Emoji Face", modifier = Modifier.fillMaxSize(), tint = Color.Unspecified)
-                                }
-                            }
-
                             Spacer(modifier = Modifier.height(2.dp))
-
-                            Text(
-                                text = dayNumber.toString(),
-                                color = if (isSelected) todayRingColor else Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 12.sp
-                            )
+                            Text(text = dayNumber.toString(), color = if (isSelected) todayRingColor else Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
                     }
                 }
 
-                // --- UI BLOCK: THE CARD ---
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (selectedEntry != null) {
-                        DiaryItem(
-                            entry = selectedEntry,
-                            onEdit = onEditEntry,
-                            onDeleteRequest = { onDeleteEntry(it) }
-                        )
-                    } else {
-                        Text(
-                            text = "No thoughts logged for this day yet.",
-                            color = mutedTextColor,
-                            fontSize = 16.sp,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                Box(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
+                    if (selectedEntry != null) DiaryItem(selectedEntry, onEditEntry, { onDeleteEntry(it) })
+                    else Text(text = "No thoughts logged for this day yet.", color = mutedTextColor, fontSize = 16.sp, textAlign = TextAlign.Center)
                 }
-
                 Spacer(modifier = Modifier.height(80.dp))
             }
         }
