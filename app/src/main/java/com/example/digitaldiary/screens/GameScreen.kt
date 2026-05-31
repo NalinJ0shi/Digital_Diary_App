@@ -10,7 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
@@ -36,17 +35,9 @@ fun BreathingScreen(
     val scope = rememberCoroutineScope()
     val breathDurationMillis = 4000
 
-    // Create a custom solid moody color brush for your game screen background field
-    val gameScreenBackgroundBrush = remember {
-        Brush.linearGradient(
-            colors = listOf(Color(0xFF0F172A), Color(0xFF0F172A))
-        )
-    }
-
     // 1. Wrap the layout inside the DesignSystem Scenery wrapper
-    UniversalBackgroundWrapper(
-        backgroundBrush = gameScreenBackgroundBrush
-    ) {
+    // We removed the dark background override so it defaults to the universal white theme!
+    UniversalBackgroundWrapper {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             containerColor = Color.Transparent, // MUST remain transparent to let design system hills shine through
@@ -137,6 +128,7 @@ fun BreathingScreen(
                 Spacer(modifier = Modifier.height(40.dp))
 
                 // Guided breathing label indicators
+                // Note: Changed the text color to a darker grey so it is readable on the new white background
                 if (progress.value > 0f || isPressed) {
                     Text(
                         text = if (isPressed) "Breath in!" else "Breath out!",
@@ -144,7 +136,7 @@ fun BreathingScreen(
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Medium
                         ),
-                        color = Color(0xFFE2E8F0)
+                        color = Color(0xFF475569) // Darker color for light background visibility
                     )
                 } else {
                     Spacer(modifier = Modifier.height(34.dp))

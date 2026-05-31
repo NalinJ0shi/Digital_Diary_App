@@ -28,8 +28,8 @@ object AppDesignTokens {
     val accentColor = Color(0xFF6EBE80)
 
     // Baseline fallback background colors & gradient
-    val UniversalTopBgColor = Color(0xFFFFFFFF)
-    val UniversalBottomBgColor = Color(0xFFF4F6F8)
+    val UniversalTopBgColor = Color(0xFFAEBE93)
+    val UniversalBottomBgColor = Color(0xFF707E88)
     val UniversalBrush = Brush.verticalGradient(
         colors = listOf(UniversalTopBgColor, UniversalBottomBgColor)
     )
