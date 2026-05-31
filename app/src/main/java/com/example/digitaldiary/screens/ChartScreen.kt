@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.digitaldiary.CustomBottomNavBar
+import com.example.digitaldiary.UniversalBackgroundWrapper
 import com.example.digitaldiary.database.DiaryEntry
 import com.nalin.my_digitaldiary.R
 import java.text.SimpleDateFormat
@@ -83,11 +84,8 @@ fun ChartScreen(
         }
     }
 
-    // THE UNIVERSAL FIX: Safely wrap the Scaffold in a Box to apply the Brush Background
-    Box(modifier = androidx.compose.ui.Modifier
-            .fillMaxSize()
-            .background(com.example.digitaldiary.AppDesignTokens.UniversalBrush))
-    {
+    // Swapped raw gradient box with your global single-source design framework component
+    UniversalBackgroundWrapper {
         Scaffold(
             // Make the Scaffold transparent so the universal box background shows through
             containerColor = Color.Transparent,
