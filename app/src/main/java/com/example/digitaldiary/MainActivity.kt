@@ -25,7 +25,7 @@ import com.example.digitaldiary.database.DiaryViewModel
 import com.example.digitaldiary.screens.BreathingScreen
 import com.example.digitaldiary.screens.CalendarScreen
 import com.example.digitaldiary.screens.ChartScreen
-import com.example.digitaldiary.screens.DiaryListScreen
+import com.example.digitaldiary.screens.GardenScreen
 import com.example.digitaldiary.screens.MoodSliderScreen
 import com.example.digitaldiary.screens.ProfileScreen
 import com.example.digitaldiary.ui.theme.AppGlobalGradient
@@ -82,7 +82,7 @@ fun DiaryAppNavigation() {
 
         // --- HOME SCREEN ---
         composable("home") {
-            DiaryListScreen(
+            GardenScreen(
                 entries = entries,
                 canAdd = true,
                 isDarkMode = isDarkMode,
