@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,6 +39,9 @@ fun GardenScreen(
 ) {
     // 1. The Trigger: Flips to true instantly when the screen opens
     var startAnimation by remember { mutableStateOf(false) }
+
+    // Hardcoded for testing: Simulating that today is Friday (Index 4)
+    val currentDayIndex = 4
 
     // 2. The Shared Animation: Drives BOTH the green bar and the Rive Plant
     val streakProgress by animateFloatAsState(
@@ -74,14 +78,12 @@ fun GardenScreen(
             ) {
 
                 // --- 3. THE RIVE PLANT ANIMATION ---
-                // Using weight(1f) here automatically centers the plant in the empty space
-                // AND naturally pushes your frosted Streak Card all the way to the bottom!
                 Box(
                     modifier = Modifier.weight(1f).fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
                     AndroidView(
-                        modifier = Modifier.size(300.dp), // Adjust plant size here
+                        modifier = Modifier.size(400.dp), // Adjust plant size here
                         factory = { context ->
                             RiveAnimationView(context).apply {
                                 setRiveResource(
@@ -105,7 +107,7 @@ fun GardenScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.85f)),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFC8D2C8).copy(alpha = 0.9f)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     Column(
@@ -126,46 +128,70 @@ fun GardenScreen(
                                 .fillMaxWidth()
                                 .padding(horizontal = 8.dp)
                                 .padding(bottom = 8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            // Align bottom so the bigger active letter pops UP, not down
+                            verticalAlignment = Alignment.Bottom
                         ) {
-                            val days = listOf("M", "T", "W", "T", "F", "S", "S")
+                            val days = listOf( "Su","Mo", "Tu", "We", "Th", "Fr", "Sa")
                             days.forEachIndexed { index, day ->
+                                // ISOLATES THE HIGHLIGHT TO JUST THE ACTIVE DAY
+                                val isActive = index == currentDayIndex
+
                                 Text(
                                     text = day,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (index < 5) Color(0xFF6EBE80) else Color(0xFFA0A0A0)
+                                    // Scales up text size and weight only for the active day
+                                    fontSize = if (isActive) 22.sp else 15.sp,
+                                    fontWeight = if (isActive) FontWeight.ExtraBold else FontWeight.Bold,
+                                    color = if (isActive) Color(0xFF6EBE80) else Color(0xFFA0A0A0)
                                 )
                             }
                         }
+
 
                         // Layer 2: THE ANIMATED BAR
                         Box(
                             modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.Center
                         ) {
-                            // The Empty Background Track (Light Gray)
+                            val unfilledColor = Color(0xFFCFE1D4)
+                            val filledColor = Color(0xFF6EBE80)
+
+                            // The Empty Background Track (Unfilled)
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .padding(end = 12.dp) // Padded so the leaf hangs perfectly off the edge
                                     .height(16.dp)
-                                    .background(Color(0xFFF4F5F7).copy(alpha = 0.8f), RoundedCornerShape(8.dp))
+                                    .background(unfilledColor.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
                             )
 
                             // The Animated Fill Bar (Green)
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth(fraction = streakProgress)
+                                    .padding(end = 12.dp)
                                     .height(16.dp)
-                                    .background(Color(0xFF6EBE80), RoundedCornerShape(8.dp))
+                                    .background(filledColor, RoundedCornerShape(8.dp))
                                     .align(Alignment.CenterStart)
+                            )
+
+                            // The "Finish Line" Leaf Icon
+                            Icon(
+                                painter = painterResource(id = R.drawable.leaf__1_),
+                                contentDescription = "Streak Goal Leaf",
+                                modifier = Modifier
+                                    .size(38.dp) // Large enough to completely hide the rounded bar edge
+                                    .align(Alignment.CenterEnd)
+                                    .offset(x = 4.dp), // Pushes it perfectly flush over the tip of the track
+                                // The Magic Trigger: Turns green ONLY when the streak progress reaches 100%
+                                tint = if (streakProgress >= 0.99f) filledColor else unfilledColor
                             )
                         }
                     }
                 }
 
                 // Breathing room above the nav bar
-                Spacer(modifier = Modifier.height(104.dp))
+                Spacer(modifier = Modifier.height(174.dp))
             }
         }
     }
