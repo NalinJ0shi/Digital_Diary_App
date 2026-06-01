@@ -1,12 +1,17 @@
 package com.example.digitaldiary.screens
 
 import android.widget.Toast
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Share
@@ -14,11 +19,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.graphics.drawscope.withTransform
-import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,18 +27,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.digitaldiary.CustomBottomNavBar
+import com.example.digitaldiary.UniversalBackgroundWrapper
 import com.example.digitaldiary.database.DiaryEntry
 import com.example.digitaldiary.database.DiaryItem
 import com.nalin.my_digitaldiary.R
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,22 +66,12 @@ fun CalendarScreen(
     val innerFillColor = Color(0xFFEDE9E1)
     val todayRingColor = Color(0xD3E0FF36)
 
-    // --- GRADIENT & HILLS ---
-    val hillColor = Color(0xFFDAEBC0)
-    val hillPathString = "M285 17.4657C203.574 -21.8322 183.5 17.4659 114.5 17.4658L-3 17.4657V203.801H402V27.8015C402 27.8015 352 49.8013 285 17.4657Z"
-    val hillPath = remember { PathParser().parsePathString(hillPathString).toPath() }
-
-    val hill2Color = Color(0xFFC6D7AC)
-    val hill2PathString = "M309.5 15.5557C225.712 -29.7517 192.778 63.778 117 15.5555C62 -19.4445 -3 15.5557 -3 15.5557V264.055H402V45.5552C402 45.5552 328.771 25.9765 309.5 15.5557Z"
-    val hill2Path = remember { PathParser().parsePathString(hill2PathString).toPath() }
-
     // --- CALENDAR MATH ---
-    // Updated to react to the currently selected displayedMonth and displayedYear
     val calendar = remember(displayedMonth, displayedYear) {
         Calendar.getInstance().apply {
             set(Calendar.YEAR, displayedYear)
             set(Calendar.MONTH, displayedMonth)
-            set(Calendar.DAY_OF_MONTH, 1) // Important for firstDayOfWeek calculation
+            set(Calendar.DAY_OF_MONTH, 1)
         }
     }
 
@@ -124,34 +110,16 @@ fun CalendarScreen(
         }
     }
 
-    // THE FIX: Universal brush reference for downstream canvas logic
-    val gradientBrush = com.example.digitaldiary.AppDesignTokens.UniversalBrush
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(gradientBrush)
-    ) {
-        Canvas(modifier = Modifier.fillMaxWidth().aspectRatio(402f / 204f).align(Alignment.BottomCenter)) {
-            val scaleX = size.width / 402f
-            val scaleY = size.height / 204f
-            withTransform({ scale(scaleX, scaleY, Offset.Zero) }) { translate(top = -40f) { drawPath(path = hill2Path, color = hill2Color) } }
-        }
-        Canvas(modifier = Modifier.fillMaxWidth().aspectRatio(402f / 204f).align(Alignment.BottomCenter)) {
-            val scaleX = size.width / 402f
-            val scaleY = size.height / 204f
-            withTransform({ scale(scaleX, scaleY, Offset.Zero) }) { drawPath(path = hillPath, color = hillColor) }
-        }
-
+    // 1. ALL LOCAL CANVAS MATH DELETED. Wrapped entirely in UniversalBackgroundWrapper
+    UniversalBackgroundWrapper {
         Scaffold(
-            containerColor = Color.Transparent,
+            containerColor = Color.Transparent, // Ensures the wrapper's hills show through
             topBar = {
                 Row(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 62.dp, bottom = 6.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onBack) {
                         Icon(painter = painterResource(id = R.drawable.potted_plant), contentDescription = "Go Home", Modifier.size(32.dp), tint = textColor)
                     }
 
-                    // Added clickable area to open the date picker modal
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.clickable { showDatePicker = true }
@@ -186,7 +154,6 @@ fun CalendarScreen(
                         val emotionDrawableId = when (moodRating) { 1 -> R.drawable.sad; 2 -> R.drawable.tire; 3 -> R.drawable.surprise; 4 -> R.drawable.happy; 5 -> R.drawable.exicted; else -> R.drawable.surprise }
                         val isToday = calendar.get(Calendar.YEAR) == todayYear && calendar.get(Calendar.MONTH) == todayMonth && dayNumber == todayDayNumber
 
-                        // Updated clickCal so it uses the currently viewed month, not the actual current system month
                         val clickCal = Calendar.getInstance().apply {
                             set(Calendar.YEAR, displayedYear)
                             set(Calendar.MONTH, displayedMonth)
@@ -218,7 +185,6 @@ fun CalendarScreen(
             }
         }
 
-        // Trigger the Modal when showDatePicker is true
         if (showDatePicker) {
             MonthYearPickerModal(
                 currentMonth = displayedMonth,
@@ -234,18 +200,17 @@ fun CalendarScreen(
     }
 }
 
-// --- NEW COMPONENTS FOR THE BOTTOM SHEET PICKER ---
+// --- DATE PICKER COMPONENTS ---
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun MonthYearPickerModal(
-    currentMonth: Int, // 0 - 11
+    currentMonth: Int,
     currentYear: Int,
     onDismiss: () -> Unit,
     onConfirm: (month: Int, year: Int) -> Unit
 ) {
     val months = listOf("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
-    // Generate a list of years (e.g., from 5 years ago to 5 years in the future)
     val years = (currentYear - 5..currentYear + 5).map { it.toString() }
 
     var selectedMonth by remember { mutableIntStateOf(currentMonth) }
@@ -264,7 +229,6 @@ fun MonthYearPickerModal(
                 .padding(bottom = 40.dp, top = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header
             Text(
                 text = "Select Month",
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
@@ -272,14 +236,12 @@ fun MonthYearPickerModal(
             )
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Picker Area
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(240.dp),
                 contentAlignment = Alignment.Center
             ) {
-                // The thin horizontal divider lines for the selection zone
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -287,16 +249,13 @@ fun MonthYearPickerModal(
                         .background(Color(0xFFF1F5F9).copy(alpha = 0.5f), RoundedCornerShape(8.dp))
                 )
 
-                // Two-column layout
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    // Month Column
                     WheelPicker(
                         modifier = Modifier.weight(1f),
                         items = months,
                         initialIndex = currentMonth,
                         onItemSelected = { selectedMonth = it }
                     )
-                    // Year Column
                     WheelPicker(
                         modifier = Modifier.weight(1f),
                         items = years,
@@ -308,29 +267,22 @@ fun MonthYearPickerModal(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Secondary Cancel Button
                 Button(
                     onClick = onDismiss,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(56.dp),
+                    modifier = Modifier.weight(1f).height(56.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F5F9)),
                     shape = RoundedCornerShape(100.dp)
                 ) {
                     Text("Cancel", color = Color(0xFF475569), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
 
-                // Primary Confirm Button
                 Button(
                     onClick = { onConfirm(selectedMonth, selectedYear) },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(56.dp),
+                    modifier = Modifier.weight(1f).height(56.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF22C55E)),
                     shape = RoundedCornerShape(100.dp)
                 ) {
@@ -341,7 +293,6 @@ fun MonthYearPickerModal(
     }
 }
 
-// The internal snapping wheel engine
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WheelPicker(
@@ -354,7 +305,6 @@ fun WheelPicker(
     val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
     val itemHeight = 48.dp
 
-    // Pad the list with 2 empty items on top and bottom so first/last items can snap to the center
     val paddedItems = remember(items) { listOf("", "") + items + listOf("", "") }
 
     LaunchedEffect(listState) {
@@ -373,7 +323,6 @@ fun WheelPicker(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         itemsIndexed(paddedItems) { index, item ->
-            // The center item is always exactly 2 slots away from the first visible item
             val isCenter = listState.firstVisibleItemIndex == index - 2
 
             Box(
