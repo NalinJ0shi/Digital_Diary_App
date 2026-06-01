@@ -26,6 +26,7 @@ import com.nalin.my_digitaldiary.R
 @Composable
 fun GardenScreen(
     entries: List<DiaryEntry>,
+    streakCount: Int,
     canAdd: Boolean,
     isDarkMode: Boolean,
     onToggleTheme: () -> Unit,
@@ -41,11 +42,11 @@ fun GardenScreen(
     var startAnimation by remember { mutableStateOf(false) }
 
     // Hardcoded for testing: Simulating that today is Friday (Index 4)
-    val currentDayIndex = 4
+    val currentDayIndex = 2
 
     // 2. The Shared Animation: Drives BOTH the green bar and the Rive Plant
     val streakProgress by animateFloatAsState(
-        targetValue = if (startAnimation) (5f / 7f) else 0f,
+        targetValue = if (startAnimation) (3f / 7f) else 0f,
         animationSpec = tween(durationMillis = 1500, easing = FastOutSlowInEasing),
         label = "StreakFill"
     )
@@ -114,13 +115,13 @@ fun GardenScreen(
                         modifier = Modifier.padding(24.dp)
                     ) {
                         Text(
-                            text = "Keep your garden blooming!",
+                            text = "",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color(0xFF6EBE80)
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
 
                         // Layer 1: The Day Labels (M, T, W...) placed ABOVE the bar
                         Row(

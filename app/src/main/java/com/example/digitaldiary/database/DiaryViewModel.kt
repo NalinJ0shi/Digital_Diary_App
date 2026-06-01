@@ -38,7 +38,38 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     fun getEntryForDate(dateInMillis: Long, entries: List<DiaryEntry>): DiaryEntry? {
         return entries.find { isSameDay(it.timestamp, dateInMillis) }
     }
+    // Add this inside your DiaryViewModel class
+    fun getStreak(entries: List<DiaryEntry>): Int {
+        if (entries.isEmpty()) return 0
 
+        val calendar = Calendar.getInstance()
+        var streak = 0
+        var checkDate = calendar.timeInMillis
+
+        // Sort entries by date descending to make checking easier
+        val entryDates = entries.map {
+            val c = Calendar.getInstance().apply { timeInMillis = it.timestamp }
+            // Normalize to start of day
+            c.set(Calendar.HOUR_OF_DAY, 0)
+            c.set(Calendar.MINUTE, 0)
+            c.set(Calendar.SECOND, 0)
+            c.set(Calendar.MILLISECOND, 0)
+            c.timeInMillis
+        }.distinct()
+
+        while (true) {
+            if (entryDates.contains(checkDate)) {
+                streak++
+                // Move checkDate back one day
+                val c = Calendar.getInstance().apply { timeInMillis = checkDate }
+                c.add(Calendar.DAY_OF_YEAR, -1)
+                checkDate = c.timeInMillis
+            } else {
+                break
+            }
+        }
+        return streak
+    }
     private fun isSameDay(t1: Long, t2: Long): Boolean {
         val c1 = Calendar.getInstance().apply { timeInMillis = t1 }
         val c2 = Calendar.getInstance().apply { timeInMillis = t2 }

@@ -71,12 +71,11 @@ fun DiaryAppNavigation() {
     val navController = rememberNavController()
 
     val context = androidx.compose.ui.platform.LocalContext.current
-    val diaryViewModel: DiaryViewModel = viewModel(
-        factory = androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.getInstance(context.applicationContext as android.app.Application)
-    )
+    val diaryViewModel: DiaryViewModel = viewModel(factory = androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.getInstance(context.applicationContext as android.app.Application))
 
     var isDarkMode by remember { mutableStateOf(false) }
     val entries by diaryViewModel.allEntries.collectAsState(initial = emptyList())
+    val streakCount = diaryViewModel.getStreak(entries)
 
     NavHost(navController = navController, startDestination = "calendar_screen") {
 
@@ -84,6 +83,7 @@ fun DiaryAppNavigation() {
         composable("home") {
             GardenScreen(
                 entries = entries,
+                streakCount = streakCount,
                 canAdd = true,
                 isDarkMode = isDarkMode,
                 onToggleTheme = { isDarkMode = !isDarkMode },
