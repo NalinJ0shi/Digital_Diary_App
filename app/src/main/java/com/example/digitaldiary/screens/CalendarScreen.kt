@@ -32,6 +32,12 @@ import com.nalin.my_digitaldiary.R
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +57,12 @@ fun CalendarScreen(
     val todayMillis = System.currentTimeMillis()
     var selectedDateMillis by remember { mutableLongStateOf(todayMillis) }
 
+    // --- DATE PICKER STATE ---
+    var showDatePicker by remember { mutableStateOf(false) }
+    val initialCal = remember { Calendar.getInstance() }
+    var displayedMonth by remember { mutableIntStateOf(initialCal.get(Calendar.MONTH)) }
+    var displayedYear by remember { mutableIntStateOf(initialCal.get(Calendar.YEAR)) }
+
     // --- DESIGN COLORS ---
     val emptyCircleColor = Color(0xFFEDE9E1)
     val textColor = Color(0xFFE2E8F0)
@@ -68,17 +80,27 @@ fun CalendarScreen(
     val hill2Path = remember { PathParser().parsePathString(hill2PathString).toPath() }
 
     // --- CALENDAR MATH ---
-    val calendar = remember { Calendar.getInstance() }
-    val currentMonthYear = remember { SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(calendar.time) }
-    val firstDayOfWeek = remember { calendar.set(Calendar.DAY_OF_MONTH, 1); calendar.get(Calendar.DAY_OF_WEEK) - 1 }
-    val daysInMonth = remember { calendar.getActualMaximum(Calendar.DAY_OF_MONTH) }
+    // Updated to react to the currently selected displayedMonth and displayedYear
+    val calendar = remember(displayedMonth, displayedYear) {
+        Calendar.getInstance().apply {
+            set(Calendar.YEAR, displayedYear)
+            set(Calendar.MONTH, displayedMonth)
+            set(Calendar.DAY_OF_MONTH, 1) // Important for firstDayOfWeek calculation
+        }
+    }
+
+    val currentMonthYear = remember(calendar) {
+        SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(calendar.time)
+    }
+    val firstDayOfWeek = remember(calendar) { calendar.get(Calendar.DAY_OF_WEEK) - 1 }
+    val daysInMonth = remember(calendar) { calendar.getActualMaximum(Calendar.DAY_OF_MONTH) }
 
     val todayCalc = remember { Calendar.getInstance().apply { timeInMillis = todayMillis } }
     val todayYear = todayCalc.get(Calendar.YEAR)
     val todayMonth = todayCalc.get(Calendar.MONTH)
     val todayDayNumber = todayCalc.get(Calendar.DAY_OF_MONTH)
 
-    val entriesByDay = remember(entries) {
+    val entriesByDay = remember(entries, calendar) {
         val map = mutableMapOf<Int, DiaryEntry>()
         val tempCal = Calendar.getInstance()
         entries.forEach { entry ->
@@ -105,7 +127,6 @@ fun CalendarScreen(
     // THE FIX: Universal brush reference for downstream canvas logic
     val gradientBrush = com.example.digitaldiary.AppDesignTokens.UniversalBrush
 
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -129,11 +150,17 @@ fun CalendarScreen(
                     IconButton(onClick = onBack) {
                         Icon(painter = painterResource(id = R.drawable.potted_plant), contentDescription = "Go Home", Modifier.size(32.dp), tint = textColor)
                     }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+
+                    // Added clickable area to open the date picker modal
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable { showDatePicker = true }
+                    ) {
                         Text(text = currentMonthYear, color = textColor, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.width(1.dp))
                         Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Change Month", tint = textColor)
                     }
+
                     IconButton(onClick = { }) { Icon(Icons.Default.Share, contentDescription = "Share", tint = textColor) }
                 }
             },
@@ -158,7 +185,13 @@ fun CalendarScreen(
                         val moodRating = entryForDay?.dayRating ?: 3
                         val emotionDrawableId = when (moodRating) { 1 -> R.drawable.sad; 2 -> R.drawable.tire; 3 -> R.drawable.surprise; 4 -> R.drawable.happy; 5 -> R.drawable.exicted; else -> R.drawable.surprise }
                         val isToday = calendar.get(Calendar.YEAR) == todayYear && calendar.get(Calendar.MONTH) == todayMonth && dayNumber == todayDayNumber
-                        val clickCal = Calendar.getInstance().apply { set(Calendar.DAY_OF_MONTH, dayNumber) }
+
+                        // Updated clickCal so it uses the currently viewed month, not the actual current system month
+                        val clickCal = Calendar.getInstance().apply {
+                            set(Calendar.YEAR, displayedYear)
+                            set(Calendar.MONTH, displayedMonth)
+                            set(Calendar.DAY_OF_MONTH, dayNumber)
+                        }
                         val isSelected = clickCal.timeInMillis == selectedDateMillis
 
                         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable {
@@ -182,6 +215,181 @@ fun CalendarScreen(
                     else Text(text = "No thoughts logged for this day yet.", color = mutedTextColor, fontSize = 16.sp, textAlign = TextAlign.Center)
                 }
                 Spacer(modifier = Modifier.height(80.dp))
+            }
+        }
+
+        // Trigger the Modal when showDatePicker is true
+        if (showDatePicker) {
+            MonthYearPickerModal(
+                currentMonth = displayedMonth,
+                currentYear = displayedYear,
+                onDismiss = { showDatePicker = false },
+                onConfirm = { newMonth, newYear ->
+                    displayedMonth = newMonth
+                    displayedYear = newYear
+                    showDatePicker = false
+                }
+            )
+        }
+    }
+}
+
+// --- NEW COMPONENTS FOR THE BOTTOM SHEET PICKER ---
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@Composable
+fun MonthYearPickerModal(
+    currentMonth: Int, // 0 - 11
+    currentYear: Int,
+    onDismiss: () -> Unit,
+    onConfirm: (month: Int, year: Int) -> Unit
+) {
+    val months = listOf("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+    // Generate a list of years (e.g., from 5 years ago to 5 years in the future)
+    val years = (currentYear - 5..currentYear + 5).map { it.toString() }
+
+    var selectedMonth by remember { mutableIntStateOf(currentMonth) }
+    var selectedYear by remember { mutableIntStateOf(currentYear) }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = Color(0xFFFFFFFF),
+        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 40.dp, top = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Header
+            Text(
+                text = "Select Month",
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
+                color = Color(0xFF1E293B)
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Picker Area
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(240.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                // The thin horizontal divider lines for the selection zone
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .background(Color(0xFFF1F5F9).copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                )
+
+                // Two-column layout
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    // Month Column
+                    WheelPicker(
+                        modifier = Modifier.weight(1f),
+                        items = months,
+                        initialIndex = currentMonth,
+                        onItemSelected = { selectedMonth = it }
+                    )
+                    // Year Column
+                    WheelPicker(
+                        modifier = Modifier.weight(1f),
+                        items = years,
+                        initialIndex = years.indexOf(currentYear.toString()),
+                        onItemSelected = { selectedYear = years[it].toInt() }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            // Buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Secondary Cancel Button
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F5F9)),
+                    shape = RoundedCornerShape(100.dp)
+                ) {
+                    Text("Cancel", color = Color(0xFF475569), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }
+
+                // Primary Confirm Button
+                Button(
+                    onClick = { onConfirm(selectedMonth, selectedYear) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF22C55E)),
+                    shape = RoundedCornerShape(100.dp)
+                ) {
+                    Text("Confirm", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }
+            }
+        }
+    }
+}
+
+// The internal snapping wheel engine
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun WheelPicker(
+    modifier: Modifier = Modifier,
+    items: List<String>,
+    initialIndex: Int,
+    onItemSelected: (Int) -> Unit
+) {
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = initialIndex)
+    val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
+    val itemHeight = 48.dp
+
+    // Pad the list with 2 empty items on top and bottom so first/last items can snap to the center
+    val paddedItems = remember(items) { listOf("", "") + items + listOf("", "") }
+
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .collect { index ->
+                if (index in items.indices) {
+                    onItemSelected(index)
+                }
+            }
+    }
+
+    LazyColumn(
+        state = listState,
+        flingBehavior = flingBehavior,
+        modifier = modifier.height(itemHeight * 5),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        itemsIndexed(paddedItems) { index, item ->
+            // The center item is always exactly 2 slots away from the first visible item
+            val isCenter = listState.firstVisibleItemIndex == index - 2
+
+            Box(
+                modifier = Modifier
+                    .height(itemHeight)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = item,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = if (isCenter) FontWeight.ExtraBold else FontWeight.Medium,
+                        fontSize = if (isCenter) 20.sp else 16.sp
+                    ),
+                    color = if (isCenter) Color(0xFF0F172A) else Color(0xFF94A3B8)
+                )
             }
         }
     }
