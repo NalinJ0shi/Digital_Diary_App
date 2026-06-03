@@ -42,11 +42,11 @@ fun GardenScreen(
     var startAnimation by remember { mutableStateOf(false) }
 
     // Hardcoded for testing: Simulating that today is Friday (Index 4)
-    val currentDayIndex = 2
+    val currentDayIndex = 1
 
     // 2. The Shared Animation: Drives BOTH the green bar and the Rive Plant
     val streakProgress by animateFloatAsState(
-        targetValue = if (startAnimation) (3f / 7f) else 0f,
+        targetValue = if (startAnimation) (2f / 7f) else 0f,
         animationSpec = tween(durationMillis = 1500, easing = FastOutSlowInEasing),
         label = "StreakFill"
     )
