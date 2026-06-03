@@ -17,9 +17,7 @@ import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-// ==========================================
 // 1. THE DESIGN TOKENS
-// ==========================================
 object AppDesignTokens {
     val backgroundColor = Color(0xFFF5F6F8)
     val surfaceColor = Color(0xFFFFFFFF)
@@ -29,19 +27,15 @@ object AppDesignTokens {
 
     // Baseline fallback background colors & gradient
     val UniversalTopBgColor = Color(0xFFAEBE93)
-    val UniversalBottomBgColor = Color(0xFF707E88)
+    val UniversalBottomBgColor = Color(0xFFD4DAE1)
     val UniversalBrush = Brush.verticalGradient(
         colors = listOf(UniversalTopBgColor, UniversalBottomBgColor)
     )
 }
-
-// ==========================================
-// 2. UNIVERSAL BACKGROUND WRAPPER (YOUR FIGMA HILLS)
-// ==========================================
+// 2. UNIVERSAL BACKGROUND WRAPPER (FIGMA HILLS)
 @Composable
 fun UniversalBackgroundWrapper(
     modifier: Modifier = Modifier,
-    // Decoupled background brush parameter so you can change or switch screen backgrounds easily later!
     backgroundBrush: Brush = AppDesignTokens.UniversalBrush,
     content: @Composable BoxScope.() -> Unit
 ) {
@@ -98,13 +92,11 @@ fun UniversalBackgroundWrapper(
     }
 }
 
-// ==========================================
 // 3. THE MASTER CARD SHELL COMPONENT
-// ==========================================
 @Composable
 fun UniversalDesignCard(
     modifier: Modifier = Modifier,
-    cornerRadius: Dp = 24.dp,
+    cornerRadius: Dp = 20.dp,
     backgroundColor: Color = AppDesignTokens.surfaceColor,
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit

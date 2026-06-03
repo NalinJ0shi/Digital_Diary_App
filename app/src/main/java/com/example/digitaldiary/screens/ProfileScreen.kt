@@ -33,7 +33,7 @@ fun ProfileScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 24.dp)
-                    .padding(top = 130.dp, bottom = 100.dp),
+                    .padding(top = 100.dp, bottom = 100.dp),
                 horizontalAlignment = Alignment.Start
             ) {
 
@@ -86,7 +86,7 @@ fun ProfileScreen(
                 }
 
                 // Generous spacing between sections
-                Spacer(modifier = Modifier.height(40.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 // --- 2. My Records Section ---
                 Text(
@@ -157,6 +157,69 @@ fun ProfileScreen(
                         }
                     }
                 }
+
+                // Generous spacing before the next section
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // --- 3. About Section ---
+                Text(
+                    text = "More",
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                UniversalDesignCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(70.dp),
+                    onClick = { /* TODO: About Action */ }
+                ) { Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 20.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Theme",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.DarkGray,
+                            fontSize = 18.sp
+                        )
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowRight,
+                            contentDescription = "View About",
+                            tint = Color.Gray
+                        )
+                    }}
+                Spacer(modifier = Modifier.height(14.dp))
+                UniversalDesignCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(70.dp),
+                    onClick = { /* TODO: About Action */ }
+                ) { Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Notifications",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.DarkGray,
+                        fontSize = 18.sp
+                    )
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowRight,
+                        contentDescription = "View About",
+                        tint = Color.Gray
+                    )
+                }}
             }
 
             // Bottom Navigation Bar
