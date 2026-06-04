@@ -29,6 +29,8 @@ import com.example.digitaldiary.screens.GardenScreen
 import com.example.digitaldiary.screens.MoodSliderScreen
 import com.example.digitaldiary.screens.ProfileScreen
 import com.example.digitaldiary.ui.theme.AppGlobalGradient
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 
 
 import com.example.digitaldiary.ui.theme.PlantformTheme
@@ -65,7 +67,13 @@ fun DiaryAppNavigation() {
     val entries by diaryViewModel.allEntries.collectAsState(initial = emptyList())
     val streakCount = diaryViewModel.getStreak(entries)
 
-    NavHost(navController = navController, startDestination = "calendar_screen") {
+    NavHost(navController = navController,
+            startDestination = "calendar_screen",
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            popEnterTransition = { EnterTransition.None },
+            popExitTransition = { ExitTransition.None })
+    {
 
         // --- HOME SCREEN ---
         composable("home") {
