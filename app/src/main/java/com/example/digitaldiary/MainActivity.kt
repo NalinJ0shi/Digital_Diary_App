@@ -33,12 +33,6 @@ import com.example.digitaldiary.ui.theme.AppGlobalGradient
 
 import com.example.digitaldiary.ui.theme.PlantformTheme
 
-/**
- * The main entry point of the Digital Diary application.
- *
- * This activity initializes the system splash screen and Rive animations,
- * and sets up the top-level navigation using Jetpack Compose Navigation.
- */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -60,12 +54,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-/**
- * Manages the navigation flow of the application.
- *
- * It defines the routes for the Home, Mood Slider, Calendar, Chart, Game, and Profile screens.
- * The default start destination is set to the Calendar screen.
- */
 @Composable
 fun DiaryAppNavigation() {
     val navController = rememberNavController()
