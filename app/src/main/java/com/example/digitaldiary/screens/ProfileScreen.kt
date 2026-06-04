@@ -225,7 +225,7 @@ fun ProfileScreen(
             // Bottom Navigation Bar
             Box(modifier = Modifier.align(Alignment.BottomCenter)) {
                 CustomBottomNavBar(
-                    selectedTab = 4,
+                    selectedTab = 3,
                     onCalendarClick = onCalendarClick,
                     onChartClick = onChartClick,
                     onGameClick = onGameClick,
