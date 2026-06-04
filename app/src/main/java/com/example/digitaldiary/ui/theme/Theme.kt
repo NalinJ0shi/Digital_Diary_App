@@ -4,12 +4,15 @@ package com.example.digitaldiary.ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -32,7 +35,7 @@ private val LightColorScheme = lightColorScheme(
     tertiary = Pink40
 )
 
-// Define a very soft, calming off-white companion color (e.g., Creamy Alabaster or Soft Lavender/Blue hint)
+// Define a very soft, calming off-white companion color
 val SoftCream = Color(0xFF377CC2)
 val PureWhite = Color(0xFFFF8C8C)
 
@@ -41,6 +44,7 @@ val AppGlobalGradient = Brush.verticalGradient(
     colors = listOf(PureWhite, SoftCream)
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlantformTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -65,9 +69,15 @@ fun PlantformTheme(
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    // FIXED: Removed 'LocalIndication provides null' to eliminate the non-null compilation crash.
+    // Keeping 'LocalRippleConfiguration provides null' safely turns off ripples globally for all Material 3 buttons and components.
+    CompositionLocalProvider(
+        LocalRippleConfiguration provides null
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }
