@@ -88,7 +88,7 @@ fun GardenScreen(
                         factory = { context ->
                             RiveAnimationView(context).apply {
                                 setRiveResource(
-                                    resId = R.raw.work,
+                                    resId = R.raw.treeyo,
                                     stateMachineName = "State Machine 1"
                                 )
                             }

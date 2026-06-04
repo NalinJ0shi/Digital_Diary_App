@@ -30,6 +30,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import app.rive.runtime.kotlin.RiveAnimationView
 import com.example.digitaldiary.CustomBottomNavBar
 import com.example.digitaldiary.UniversalBackgroundWrapper
+import com.example.digitaldiary.ui.theme.JosefinSans
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
@@ -115,6 +116,16 @@ fun ExerciseCarouselView(onExerciseSelected: (BreathingExercise) -> Unit) {
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
     ) {
+        Text(
+            text = "Breathing Exercises",
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1E293B),
+                fontFamily = JosefinSans
+            ),
+            modifier = Modifier
+                .padding(start = 34.dp, bottom = 32.dp)
+        )
         
         LazyRow(
             state = listState,
@@ -170,7 +181,10 @@ fun ExerciseCarouselView(onExerciseSelected: (BreathingExercise) -> Unit) {
                     ) {
                         Text(
                             text = exercise.title,
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = JosefinSans
+                            ),
                             // I set the text color to a dark slate gray for great contrast against both green backgrounds
                             color = Color(0xFF1E293B),
                             textAlign = TextAlign.Center
@@ -280,7 +294,8 @@ fun ActiveBreathingView(onClose: () -> Unit) {
                 text = if (isPressed) "Breath in!" else "Breath out!",
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontSize = 24.sp,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    fontFamily = JosefinSans
                 ),
                 color = Color(0xFF475569)
             )
