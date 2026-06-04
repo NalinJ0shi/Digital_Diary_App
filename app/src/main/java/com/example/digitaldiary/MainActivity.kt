@@ -112,7 +112,6 @@ fun DiaryAppNavigation() {
                 onDeleteEntry = { entry -> diaryViewModel.delete(entry) }
             )
         }
-
         // --- MOOD SLIDER ---
         composable(
             route = "mood_screen?timestamp={timestamp}",
