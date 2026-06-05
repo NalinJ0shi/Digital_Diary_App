@@ -34,6 +34,20 @@ fun CustomBottomNavBar(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
+    // Tracks the native view reference so we can update its boolean inputs
+    var riveView by remember { mutableStateOf<RiveAnimationView?>(null) }
+
+    // TIMER LOGIC: Controls the state machine's idleLoop input layer dynamically
+    LaunchedEffect(selectedTab) {
+        // Ensure it starts as false when switching screens
+        riveView?.setBooleanState("State Machine 1", "idleLoop", false)
+
+        delay(5000) // Wait 5 seconds
+
+        // Tell the second layer to switch from NoActive to LoopAnimation
+        riveView?.setBooleanState("State Machine 1", "idleLoop", true)
+    }
+
     val groundColor = Color(0xFF042F2E)
     val navBarColor = Color(0xFFF8FAFC)
     val activeIconColor = Color(0xFF4CA18A)
@@ -41,10 +55,10 @@ fun CustomBottomNavBar(
 
     val totalClickableHeight = 120.dp
     val visualBarHeight = 100.dp
-    val curveWidthPx = 360f // How wide the top gap is
-    val curveDepthPx = 140f // How deep the U-shape dips down
-    val cornerSmoothingPx = 70f  // How wide the smooth transition corners are
-    val iconSeparationWidth = 190.dp  // --- CONTROL: ICON DEAD-ZONE (Pushes left/right icons apart) ---
+    val curveWidthPx = 360f
+    val curveDepthPx = 140f
+    val cornerSmoothingPx = 70f
+    val iconSeparationWidth = 190.dp
 
     Box(
         modifier = Modifier
@@ -142,20 +156,31 @@ fun CustomBottomNavBar(
             factory = { context ->
                 RiveAnimationView(context).apply {
                     setRiveResource(
-                        resId = R.raw.happ_button2,
+                        resId = R.raw.smiley,
                         stateMachineName = "State Machine 1",
-                        autoplay = true
+                        autoplay = true // Run State Machine layers immediately
                     )
+                }.also {
+                    riveView = it
                 }
             },
             update = { view ->
+                riveView = view
+
                 view.setOnTouchListener { v, event ->
                     v.onTouchEvent(event)
-                    if (event.action == android.view.MotionEvent.ACTION_UP) {
-                        v.performClick()
-                        coroutineScope.launch {
-                            delay(300)
-                            onAddEntry()
+                    when (event.action) {
+                        android.view.MotionEvent.ACTION_DOWN -> {
+                            // Change your primary pointer interaction state
+                            view.setBooleanState("State Machine 1", "active", true)
+                        }
+                        android.view.MotionEvent.ACTION_UP -> {
+                            v.performClick()
+                            view.setBooleanState("State Machine 1", "active", false)
+                            coroutineScope.launch {
+                                delay(300)
+                                onAddEntry()
+                            }
                         }
                     }
                     true
