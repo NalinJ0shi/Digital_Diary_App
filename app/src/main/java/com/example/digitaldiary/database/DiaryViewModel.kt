@@ -10,11 +10,14 @@ import java.util.Calendar
 
 class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     private val dao = DiaryDatabase.getDatabase(application).diaryDao()
-    val allEntries: Flow<List<DiaryEntry>> = dao.getAllEntries()
 
+    val allEntries: Flow<List<DiaryEntry>> = dao.getAllEntries()
     val latestEntry: Flow<DiaryEntry?> = allEntries.map { list ->
         list.maxByOrNull { it.timestamp }
     }
+
+    // NEW: Flow to observe the user's earned plant collection
+    val unlockedPlants: Flow<List<UnlockedPlant>> = dao.getAllUnlockedPlants()
 
     fun saveEntry(
         title: String,
@@ -24,7 +27,6 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         dayRating: Int
     ) {
         viewModelScope.launch {
-            // FIX: dayRating is now actually being saved to your database!
             val entry = existingEntry?.copy(title = title, content = content, timestamp = date, dayRating = dayRating)
                 ?: DiaryEntry(title = title, content = content, timestamp = date, dayRating = dayRating)
             dao.insertEntry(entry)
@@ -38,7 +40,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     fun getEntryForDate(dateInMillis: Long, entries: List<DiaryEntry>): DiaryEntry? {
         return entries.find { isSameDay(it.timestamp, dateInMillis) }
     }
-    // Add this inside your DiaryViewModel class
+
     fun getStreak(entries: List<DiaryEntry>): Int {
         if (entries.isEmpty()) return 0
 
@@ -46,10 +48,8 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         var streak = 0
         var checkDate = calendar.timeInMillis
 
-        // Sort entries by date descending to make checking easier
         val entryDates = entries.map {
             val c = Calendar.getInstance().apply { timeInMillis = it.timestamp }
-            // Normalize to start of day
             c.set(Calendar.HOUR_OF_DAY, 0)
             c.set(Calendar.MINUTE, 0)
             c.set(Calendar.SECOND, 0)
@@ -60,7 +60,6 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         while (true) {
             if (entryDates.contains(checkDate)) {
                 streak++
-                // Move checkDate back one day
                 val c = Calendar.getInstance().apply { timeInMillis = checkDate }
                 c.add(Calendar.DAY_OF_YEAR, -1)
                 checkDate = c.timeInMillis
@@ -70,10 +69,24 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         }
         return streak
     }
+
     private fun isSameDay(t1: Long, t2: Long): Boolean {
         val c1 = Calendar.getInstance().apply { timeInMillis = t1 }
         val c2 = Calendar.getInstance().apply { timeInMillis = t2 }
         return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR) &&
                 c1.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR)
+    }
+
+    // NEW: Function to permanently save a new plant to the library
+    fun unlockNewPlant(tier: Int) {
+        viewModelScope.launch {
+            dao.insertUnlockedPlant(
+                UnlockedPlant(
+                    plantTier = tier,
+                    unlockDate = System.currentTimeMillis(),
+                    isViewed = false
+                )
+            )
+        }
     }
 }

@@ -1,8 +1,11 @@
 package com.example.digitaldiary.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +24,7 @@ import com.example.digitaldiary.CustomBottomNavBar
 import com.example.digitaldiary.UniversalBackgroundWrapper
 import com.example.digitaldiary.database.DiaryEntry
 import com.nalin.my_digitaldiary.R
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,6 +33,8 @@ fun GardenScreen(
     streakCount: Int,
     canAdd: Boolean,
     isDarkMode: Boolean,
+    currentPlantTier: Int,           // NEW
+    onUnlockPlant: (Int) -> Unit,    // NEW
     onToggleTheme: () -> Unit,
     onAddEntry: () -> Unit,
     onOpenCalendar: () -> Unit,
@@ -38,161 +44,198 @@ fun GardenScreen(
     onNavigateToGame: () -> Unit,
     onNavigateToProfile: () -> Unit
 ) {
-    // 1. The Trigger: Flips to true instantly when the screen opens
-    var startAnimation by remember { mutableStateOf(false) }
+    var progressTarget by remember { mutableFloatStateOf(0f) }
+    var showLevelUpScreen by remember { mutableStateOf(false) }
 
-    // Hardcoded for testing: Simulating that today is Friday (Index 4)
     val currentDayIndex = 1
 
-    // 2. The Shared Animation: Drives BOTH the green bar and the Rive Plant
     val streakProgress by animateFloatAsState(
-        targetValue = if (startAnimation) (2f / 7f) else 0f,
+        targetValue = progressTarget,
         animationSpec = tween(durationMillis = 1500, easing = FastOutSlowInEasing),
-        label = "StreakFill"
+        label = "StreakFill",
+        finishedListener = { finalValue ->
+            // Trigger Level Up sequence if streak hits max on Tier 1
+            if (finalValue >= 0.99f && currentPlantTier == 1) {
+                showLevelUpScreen = true
+            }
+        }
     )
 
-    // Fires instantly on screen load
+    LaunchedEffect(showLevelUpScreen) {
+        if (showLevelUpScreen) {
+            delay(600)
+            // Save current plant to library database and progress to next level
+            onUnlockPlant(1)
+            progressTarget = 0f
+
+            delay(2000) // Stays visible for at least 2 full seconds as requested
+            showLevelUpScreen = false
+        }
+    }
+
     LaunchedEffect(Unit) {
-        startAnimation = true
+        // Hardcoded to 1f for quick level-up sequence testing
+        progressTarget = 1f
     }
 
     UniversalBackgroundWrapper {
-        Scaffold(
-            containerColor = Color.Transparent,
-            bottomBar = {
-                CustomBottomNavBar(
-                    selectedTab = 0,
-                    onCalendarClick = onOpenCalendar,
-                    onChartClick = onNavigateToChart,
-                    onGameClick = onNavigateToGame,
-                    onProfileClick = onNavigateToProfile,
-                    onAddEntry = onAddEntry
-                )
-            }
-        ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                // --- 3. THE RIVE PLANT ANIMATION ---
-                Box(
-                    modifier = Modifier.weight(1f).fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    AndroidView(
-                        modifier = Modifier.size(400.dp), // Adjust plant size here
-                        factory = { context ->
-                            RiveAnimationView(context).apply {
-                                setRiveResource(
-                                    resId = R.raw.treeyo,
-                                    stateMachineName = "State Machine 1"
-                                )
-                            }
-                        },
-                        update = { view ->
-                            try {
-                                // Maps the 0.0-1.0 Compose float directly to your 0-100 Rive input
-                                view.setNumberState("State Machine 1", "Number 1", streakProgress * 100f)
-                            } catch (e: Exception) {
-                                println("RIVE ERROR: Could not find State Machine or Input name!")
-                            }
-                        }
+        Box(modifier = Modifier.fillMaxSize()) {
+            Scaffold(
+                containerColor = Color.Transparent,
+                bottomBar = {
+                    CustomBottomNavBar(
+                        selectedTab = 0,
+                        onCalendarClick = onOpenCalendar,
+                        onChartClick = onNavigateToChart,
+                        onGameClick = onNavigateToGame,
+                        onProfileClick = onNavigateToProfile,
+                        onAddEntry = onAddEntry
                     )
                 }
-
-                // --- 4. THE DUOLINGO STYLE STREAK CARD ---
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(24.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFC8D2C8).copy(alpha = 0.9f)),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) { paddingValues ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(
-                        modifier = Modifier.padding(24.dp)
+
+                    // --- 3. THE RIVE PLANT ANIMATION ---
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color(0xFF6EBE80)
-                        )
+                        val riveResource = if (currentPlantTier == 1) R.raw.treeyo else R.raw.treeyo2
+                        val stateMachine = "State Machine 1"
 
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        // Layer 1: The Day Labels (M, T, W...) placed ABOVE the bar
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 8.dp)
-                                .padding(bottom = 8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            // Align bottom so the bigger active letter pops UP, not down
-                            verticalAlignment = Alignment.Bottom
-                        ) {
-                            val days = listOf( "Su","Mo", "Tu", "We", "Th", "Fr", "Sa")
-                            days.forEachIndexed { index, day ->
-                                // ISOLATES THE HIGHLIGHT TO JUST THE ACTIVE DAY
-                                val isActive = index == currentDayIndex
-
-                                Text(
-                                    text = day,
-                                    // Scales up text size and weight only for the active day
-                                    fontSize = if (isActive) 22.sp else 15.sp,
-                                    fontWeight = if (isActive) FontWeight.ExtraBold else FontWeight.Bold,
-                                    color = if (isActive) Color(0xFF6EBE80) else Color(0xFFA0A0A0)
-                                )
-                            }
-                        }
-
-
-                        // Layer 2: THE ANIMATED BAR
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            val unfilledColor = Color(0xFFCFE1D4)
-                            val filledColor = Color(0xFF6EBE80)
-
-                            // The Empty Background Track (Unfilled)
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(end = 12.dp) // Padded so the leaf hangs perfectly off the edge
-                                    .height(16.dp)
-                                    .background(unfilledColor.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
-                            )
-
-                            // The Animated Fill Bar (Green)
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth(fraction = streakProgress)
-                                    .padding(end = 12.dp)
-                                    .height(16.dp)
-                                    .background(filledColor, RoundedCornerShape(8.dp))
-                                    .align(Alignment.CenterStart)
-                            )
-
-                            // The "Finish Line" Leaf Icon
-                            Icon(
-                                painter = painterResource(id = R.drawable.leaf__1_),
-                                contentDescription = "Streak Goal Leaf",
-                                modifier = Modifier
-                                    .size(38.dp) // Large enough to completely hide the rounded bar edge
-                                    .align(Alignment.CenterEnd)
-                                    .offset(x = 4.dp), // Pushes it perfectly flush over the tip of the track
-                                // The Magic Trigger: Turns green ONLY when the streak progress reaches 100%
-                                tint = if (streakProgress >= 0.99f) filledColor else unfilledColor
+                        key(currentPlantTier) {
+                            AndroidView(
+                                modifier = Modifier.size(400.dp),
+                                factory = { context ->
+                                    RiveAnimationView(context).apply {
+                                        setRiveResource(
+                                            resId = riveResource,
+                                            stateMachineName = stateMachine
+                                        )
+                                    }
+                                },
+                                update = { view ->
+                                    try {
+                                        // Since BOTH treeyo and treeyo2 now use the number input "Number 1",
+                                        // we can pass the streak progress directly to both of them seamlessly!
+                                        view.setNumberState(stateMachine, "Number 1", streakProgress * 100f)
+                                    } catch (e: Exception) {
+                                        println("RIVE ERROR: Input parameters mapping failed!")
+                                    }
+                                }
                             )
                         }
                     }
-                }
 
-                // Breathing room above the nav bar
-                Spacer(modifier = Modifier.height(174.dp))
+                    // --- 4. THE DUOLINGO STYLE STREAK CARD ---
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFC8D2C8).copy(alpha = 0.9f)),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(24.dp)
+                        ) {
+                            Text(
+                                text = if (currentPlantTier == 1) "Week 1 Growing" else "Week 2 Growing",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color(0xFF6EBE80)
+                            )
+
+                            Spacer(modifier = Modifier.height(6.dp))
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp)
+                                    .padding(bottom = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.Bottom
+                            ) {
+                                val days = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
+                                days.forEachIndexed { index, day ->
+                                    val isActive = index == currentDayIndex
+
+                                    Text(
+                                        text = day,
+                                        fontSize = if (isActive) 22.sp else 15.sp,
+                                        fontWeight = if (isActive) FontWeight.ExtraBold else FontWeight.Bold,
+                                        color = if (isActive) Color(0xFF6EBE80) else Color(0xFFA0A0A0)
+                                    )
+                                }
+                            }
+
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                val unfilledColor = Color(0xFFCFE1D4)
+                                val filledColor = Color(0xFF6EBE80)
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(end = 12.dp)
+                                        .height(16.dp)
+                                        .background(unfilledColor.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                                )
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(fraction = streakProgress)
+                                        .padding(end = 12.dp)
+                                        .height(16.dp)
+                                        .background(filledColor, RoundedCornerShape(8.dp))
+                                        .align(Alignment.CenterStart)
+                                )
+
+                                Icon(
+                                    painter = painterResource(id = R.drawable.leaf__1_),
+                                    contentDescription = "Streak Goal Leaf",
+                                    modifier = Modifier
+                                        .size(38.dp)
+                                        .align(Alignment.CenterEnd)
+                                        .offset(x = 4.dp),
+                                    tint = if (streakProgress >= 0.99f) filledColor else unfilledColor
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(174.dp))
+                }
+            }
+
+            // --- 5. VISUAL LEVEL UP OVERLAY REVEAL ---
+            AnimatedVisibility(
+                visible = showLevelUpScreen,
+                enter = fadeIn(animationSpec = tween(600)),
+                exit = fadeOut(animationSpec = tween(800)),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White.copy(alpha = 0.95f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "PLANT UNLOCKED!",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFF6EBE80)
+                    )
+                }
             }
         }
     }

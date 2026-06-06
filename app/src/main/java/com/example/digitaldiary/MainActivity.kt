@@ -1,4 +1,3 @@
-// app/src/main/java/com/example/digitaldiary/MainActivity.kt
 package com.example.digitaldiary
 
 import android.os.Bundle
@@ -28,11 +27,10 @@ import com.example.digitaldiary.screens.ChartScreen
 import com.example.digitaldiary.screens.GardenScreen
 import com.example.digitaldiary.screens.MoodSliderScreen
 import com.example.digitaldiary.screens.ProfileScreen
+import com.example.digitaldiary.database.PlantCollectionScreen
 import com.example.digitaldiary.ui.theme.AppGlobalGradient
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-
-
 import com.example.digitaldiary.ui.theme.PlantformTheme
 
 class MainActivity : ComponentActivity() {
@@ -47,7 +45,7 @@ class MainActivity : ComponentActivity() {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(AppGlobalGradient) // Crucial line: attaches your white/soft gradient
+                        .background(AppGlobalGradient)
                 ) {
                     DiaryAppNavigation()
                 }
@@ -65,27 +63,29 @@ fun DiaryAppNavigation() {
 
     var isDarkMode by remember { mutableStateOf(false) }
     val entries by diaryViewModel.allEntries.collectAsState(initial = emptyList())
+    val unlockedPlants by diaryViewModel.unlockedPlants.collectAsState(initial = emptyList())
+
     val streakCount = diaryViewModel.getStreak(entries)
+    val currentPlantTier = if (unlockedPlants.any { it.plantTier == 1 }) 2 else 1
 
     NavHost(navController = navController,
-            startDestination = "calendar_screen",
-            enterTransition = { EnterTransition.None },
-            exitTransition = { ExitTransition.None },
-            popEnterTransition = { EnterTransition.None },
-            popExitTransition = { ExitTransition.None })
+        startDestination = "calendar_screen",
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None },
+        popEnterTransition = { EnterTransition.None },
+        popExitTransition = { ExitTransition.None })
     {
 
-        // --- HOME SCREEN ---
         composable("home") {
             GardenScreen(
                 entries = entries,
                 streakCount = streakCount,
                 canAdd = true,
                 isDarkMode = isDarkMode,
+                currentPlantTier = currentPlantTier,
+                onUnlockPlant = { tier -> diaryViewModel.unlockNewPlant(tier) },
                 onToggleTheme = { isDarkMode = !isDarkMode },
                 onAddEntry = { navController.navigate("mood_screen") },
-
-                // Clicking navbar items from Home page
                 onOpenCalendar = {
                     navController.navigate("calendar_screen") {
                         popUpTo("home") { saveState = true }
@@ -120,17 +120,23 @@ fun DiaryAppNavigation() {
                 onDeleteEntry = { entry -> diaryViewModel.delete(entry) }
             )
         }
-        // --- MOOD SLIDER ---
+
+        composable("plant_collection") {
+            PlantCollectionScreen(
+                viewModel = diaryViewModel,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
         composable(
             route = "mood_screen?timestamp={timestamp}",
             arguments = listOf(navArgument("timestamp") {
                 type = androidx.navigation.NavType.LongType
-                defaultValue = -1L // Indicates a new entry
+                defaultValue = -1L
             } )
         ) { backStackEntry ->
             val timestamp = backStackEntry.arguments?.getLong("timestamp") ?: -1L
 
-            // Find entry if timestamp is passed
             val existingEntry = if (timestamp != -1L) {
                 entries.find { it.timestamp == timestamp }
             } else null
@@ -151,23 +157,19 @@ fun DiaryAppNavigation() {
             )
         }
 
-        // --- CALENDAR SCREEN ---
         composable("calendar_screen") {
             CalendarScreen(
                 entries = entries,
                 onDateSelected = { dateInMillis ->
                     navController.navigate("mood_screen?timestamp=$dateInMillis")
                 },
-                onCalendarClick = { /* Already on calendar */ },
-
-                // --- THIS IS THE FORCE CLEAR RULE FOR THE HOUSE_LINE ---
+                onCalendarClick = {  },
                 onBack = {
                     navController.navigate("home") {
                         popUpTo(0) { inclusive = true }
                         launchSingleTop = true
                     }
                 },
-
                 onChartClick = {
                     navController.navigate("chart_screen") {
                         popUpTo("home") { saveState = true }
@@ -190,8 +192,6 @@ fun DiaryAppNavigation() {
                     }
                 },
                 onAddEntry = { navController.navigate("mood_screen") },
-
-                // --- FIXED: Added the required parameters here so the compiler knows how to handle the DiaryItem cards edits/deletes ---
                 onEditEntry = { entry ->
                     navController.navigate("mood_screen?timestamp=${entry.timestamp}")
                 },
@@ -201,7 +201,6 @@ fun DiaryAppNavigation() {
             )
         }
 
-        // --- CHART SCREEN ---
         composable("chart_screen") {
             ChartScreen(
                 entries = entries,
@@ -218,7 +217,7 @@ fun DiaryAppNavigation() {
                         restoreState = true
                     }
                 },
-                onChartClick = { /* Already here */ },
+                onChartClick = {  },
                 onGameClick = {
                     navController.navigate("game_screen") {
                         popUpTo("home") { saveState = true }
@@ -237,7 +236,6 @@ fun DiaryAppNavigation() {
             )
         }
 
-        // --- GAME SCREEN ---
         composable("game_screen") {
             BreathingScreen(
                 onBack = {
@@ -260,7 +258,7 @@ fun DiaryAppNavigation() {
                         restoreState = true
                     }
                 },
-                onGameClick = { /* Already here */ },
+                onGameClick = {  },
                 onProfileClick = {
                     navController.navigate("profile_screen") {
                         popUpTo("home") { saveState = true }
@@ -272,7 +270,6 @@ fun DiaryAppNavigation() {
             )
         }
 
-        // --- PROFILE SCREEN ---
         composable("profile_screen") {
             ProfileScreen(
                 onBack = {
@@ -302,8 +299,9 @@ fun DiaryAppNavigation() {
                         restoreState = true
                     }
                 },
-                onProfileClick = { /* Already here */ },
-                onAddEntry = { navController.navigate("mood_screen") }
+                onProfileClick = {  },
+                onAddEntry = { navController.navigate("mood_screen") },
+                onNavigateToPlantCollection = { navController.navigate("plant_collection") } // new
             )
         }
     }

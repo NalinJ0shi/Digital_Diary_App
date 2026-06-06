@@ -23,12 +23,12 @@ fun ProfileScreen(
     onChartClick: () -> Unit,
     onGameClick: () -> Unit,
     onProfileClick: () -> Unit,
-    onAddEntry: () -> Unit
+    onAddEntry: () -> Unit,
+    onNavigateToPlantCollection: () -> Unit // new
 ) {
     UniversalBackgroundWrapper {
         Box(modifier = Modifier.fillMaxSize()) {
 
-            // Main Content Column - Changed to Start alignment for left-aligned text
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -50,7 +50,7 @@ fun ProfileScreen(
                 UniversalDesignCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(100.dp), // Large account card
+                        .height(100.dp),
                     onClick = { /* TODO: Account Action */ }
                 ) {
                     Row(
@@ -60,10 +60,9 @@ fun ProfileScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        // Left side of the card: Username and ID
                         Column(verticalArrangement = Arrangement.Center) {
                             Text(
-                                text = "Username", // Replace with actual user state later
+                                text = "Username",
                                 fontWeight = FontWeight.Bold,
                                 color = Color.DarkGray,
                                 fontSize = 20.sp
@@ -76,7 +75,6 @@ fun ProfileScreen(
                             )
                         }
 
-                        // Right side of the card: Chevron
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
                             contentDescription = "Go to Account",
@@ -85,7 +83,6 @@ fun ProfileScreen(
                     }
                 }
 
-                // Generous spacing between sections
                 Spacer(modifier = Modifier.height(20.dp))
 
                 // --- 2. My Records Section ---
@@ -98,7 +95,6 @@ fun ProfileScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // 2-Column Grid using a Row with weighted items
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -116,7 +112,7 @@ fun ProfileScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "14", // Replace with real diary entry count
+                                text = "14",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 28.sp,
                                 color = AppDesignTokens.primaryText
@@ -130,12 +126,12 @@ fun ProfileScreen(
                         }
                     }
 
-                    // Stat Card 2
+                    // Stat Card 2 - The "Plants" Card
                     UniversalDesignCard(
                         modifier = Modifier
                             .weight(1f)
                             .height(110.dp),
-                        onClick = { /* TODO: Action */ }
+                        onClick = onNavigateToPlantCollection // new
                     ) {
                         Column(
                             modifier = Modifier.fillMaxSize(),
@@ -143,14 +139,14 @@ fun ProfileScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "5", // Replace with real streak count
+                                text = "5",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 28.sp,
                                 color = AppDesignTokens.primaryText
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Plants",
+                                text = "Plants", // new
                                 color = Color.Gray,
                                 fontSize = 14.sp
                             )
@@ -158,7 +154,6 @@ fun ProfileScreen(
                     }
                 }
 
-                // Generous spacing before the next section
                 Spacer(modifier = Modifier.height(20.dp))
 
                 // --- 3. About Section ---
@@ -177,24 +172,24 @@ fun ProfileScreen(
                         .height(70.dp),
                     onClick = { /* TODO: About Action */ }
                 ) { Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 20.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Theme",
-                            fontWeight = FontWeight.Bold,
-                            color = Color.DarkGray,
-                            fontSize = 18.sp
-                        )
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowRight,
-                            contentDescription = "View About",
-                            tint = Color.Gray
-                        )
-                    }}
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Theme",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.DarkGray,
+                        fontSize = 18.sp
+                    )
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowRight,
+                        contentDescription = "View About",
+                        tint = Color.Gray
+                    )
+                }}
                 Spacer(modifier = Modifier.height(14.dp))
                 UniversalDesignCard(
                     modifier = Modifier
@@ -222,7 +217,6 @@ fun ProfileScreen(
                 }}
             }
 
-            // Bottom Navigation Bar
             Box(modifier = Modifier.align(Alignment.BottomCenter)) {
                 CustomBottomNavBar(
                     selectedTab = 3,
