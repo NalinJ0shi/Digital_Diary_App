@@ -10,37 +10,20 @@ import java.util.Calendar
 
 class DiaryViewModel(application: Application) : AndroidViewModel(application) {
     private val dao = DiaryDatabase.getDatabase(application).diaryDao()
-
     val allEntries: Flow<List<DiaryEntry>> = dao.getAllEntries()
-    val latestEntry: Flow<DiaryEntry?> = allEntries.map { list ->
-        list.maxByOrNull { it.timestamp }
-    }
 
-    // NEW: Flow to observe the user's earned plant collection
+    val latestEntry: Flow<DiaryEntry?> = allEntries.map { list -> list.maxByOrNull { it.timestamp } }
     val unlockedPlants: Flow<List<UnlockedPlant>> = dao.getAllUnlockedPlants()
-
-    fun saveEntry(
-        title: String,
-        content: String,
-        date: Long,
-        existingEntry: DiaryEntry? = null,
-        dayRating: Int
-    ) {
+    fun saveEntry(title: String, content: String, date: Long, existingEntry: DiaryEntry? = null, dayRating: Int) {
         viewModelScope.launch {
             val entry = existingEntry?.copy(title = title, content = content, timestamp = date, dayRating = dayRating)
                 ?: DiaryEntry(title = title, content = content, timestamp = date, dayRating = dayRating)
             dao.insertEntry(entry)
         }
     }
+    fun delete(entry: DiaryEntry) { viewModelScope.launch { dao.deleteEntry(entry) } }
 
-    fun delete(entry: DiaryEntry) {
-        viewModelScope.launch { dao.deleteEntry(entry) }
-    }
-
-    fun getEntryForDate(dateInMillis: Long, entries: List<DiaryEntry>): DiaryEntry? {
-        return entries.find { isSameDay(it.timestamp, dateInMillis) }
-    }
-
+    fun getEntryForDate(dateInMillis: Long, entries: List<DiaryEntry>): DiaryEntry? { return entries.find { isSameDay(it.timestamp, dateInMillis) } }
     fun getStreak(entries: List<DiaryEntry>): Int {
         if (entries.isEmpty()) return 0
 
@@ -69,15 +52,12 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         }
         return streak
     }
-
     private fun isSameDay(t1: Long, t2: Long): Boolean {
         val c1 = Calendar.getInstance().apply { timeInMillis = t1 }
         val c2 = Calendar.getInstance().apply { timeInMillis = t2 }
         return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR) &&
                 c1.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR)
     }
-
-    // NEW: Function to permanently save a new plant to the library
     fun unlockNewPlant(tier: Int) {
         viewModelScope.launch {
             dao.insertUnlockedPlant(
