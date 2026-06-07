@@ -3,6 +3,7 @@ package com.example.digitaldiary.database
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -14,6 +15,7 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
 
     val latestEntry: Flow<DiaryEntry?> = allEntries.map { list -> list.maxByOrNull { it.timestamp } }
     val unlockedPlants: Flow<List<UnlockedPlant>> = dao.getAllUnlockedPlants()
+
     fun saveEntry(title: String, content: String, date: Long, existingEntry: DiaryEntry? = null, dayRating: Int) {
         viewModelScope.launch {
             val entry = existingEntry?.copy(title = title, content = content, timestamp = date, dayRating = dayRating)
@@ -21,9 +23,11 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
             dao.insertEntry(entry)
         }
     }
+
     fun delete(entry: DiaryEntry) { viewModelScope.launch { dao.deleteEntry(entry) } }
 
     fun getEntryForDate(dateInMillis: Long, entries: List<DiaryEntry>): DiaryEntry? { return entries.find { isSameDay(it.timestamp, dateInMillis) } }
+
     fun getStreak(entries: List<DiaryEntry>): Int {
         if (entries.isEmpty()) return 0
 
@@ -52,12 +56,14 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         }
         return streak
     }
+
     private fun isSameDay(t1: Long, t2: Long): Boolean {
         val c1 = Calendar.getInstance().apply { timeInMillis = t1 }
         val c2 = Calendar.getInstance().apply { timeInMillis = t2 }
         return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR) &&
                 c1.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR)
     }
+
     fun unlockNewPlant(tier: Int) {
         viewModelScope.launch {
             dao.insertUnlockedPlant(
@@ -67,6 +73,13 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
                     isViewed = false
                 )
             )
+        }
+    }
+
+    fun resetPlantLibrary() {
+        viewModelScope.launch(Dispatchers.IO) {
+            // new
+            dao.clearAllUnlockedPlants()
         }
     }
 }

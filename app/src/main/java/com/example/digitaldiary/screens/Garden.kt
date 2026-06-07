@@ -26,6 +26,7 @@ import com.example.digitaldiary.database.DiaryEntry
 import com.nalin.my_digitaldiary.R
 import kotlinx.coroutines.delay
 
+//github.com/NalinJ0shi/Digital_Diary_App
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GardenScreen(
@@ -47,8 +48,7 @@ fun GardenScreen(
     var progressTarget by remember { mutableFloatStateOf(0f) }
     var showLevelUpScreen by remember { mutableStateOf(false) }
 
-    val currentDayIndex = 1
-
+    val currentDayIndex = (((progressTarget * 7).toInt()) - 1).coerceIn(0, 6)
     val streakProgress by animateFloatAsState(
         targetValue = progressTarget,
         animationSpec = tween(durationMillis = 1500, easing = FastOutSlowInEasing),
@@ -74,8 +74,9 @@ fun GardenScreen(
     }
 
     LaunchedEffect(Unit) {
-        // Hardcoded to 1f for quick level-up sequence testing
-        progressTarget = 1f
+//            progressTarget = (streakCount % 7) / 7f
+        progressTarget = 7f/7f
+
     }
 
     UniversalBackgroundWrapper {
@@ -124,8 +125,9 @@ fun GardenScreen(
                                 },
                                 update = { view ->
                                     try {
-                                        // Since BOTH treeyo and treeyo2 now use the number input "Number 1",
-                                        // we can pass the streak progress directly to both of them seamlessly!
+                                        // new
+                                        // This sends the slider progress (0-100) to BOTH treeyo and treeyo2
+                                        // so neither of them freeze!
                                         view.setNumberState(stateMachine, "Number 1", streakProgress * 100f)
                                     } catch (e: Exception) {
                                         println("RIVE ERROR: Input parameters mapping failed!")
@@ -164,6 +166,7 @@ fun GardenScreen(
                             ) {
                                 val days = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
                                 days.forEachIndexed { index, day ->
+                                    // This condition evaluates true for the new dynamic index value
                                     val isActive = index == currentDayIndex
 
                                     Text(

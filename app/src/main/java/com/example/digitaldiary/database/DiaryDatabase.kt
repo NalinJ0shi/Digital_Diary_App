@@ -7,9 +7,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 
-// ==========================================
-// 1. DATA CLASSES (The Blueprints)
-// ==========================================
 @Entity(tableName = "diary_entries")
 data class DiaryEntry(
     @PrimaryKey
@@ -22,7 +19,6 @@ data class DiaryEntry(
     val dayRating: Int = 5
 )
 
-// NEW: The blueprint for the plants you earn
 @Entity(tableName = "unlocked_plants")
 data class UnlockedPlant(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
@@ -31,12 +27,8 @@ data class UnlockedPlant(
     val isViewed: Boolean = false
 )
 
-// ==========================================
-// 2. DATABASE ACCESS OBJECT (The Commands)
-// ==========================================
 @Dao
 interface DiaryDao {
-    // Existing Diary Queries
     @Query("SELECT * FROM diary_entries ORDER BY timestamp DESC")
     fun getAllEntries(): Flow<List<DiaryEntry>>
 
@@ -46,18 +38,17 @@ interface DiaryDao {
     @Delete
     suspend fun deleteEntry(entry: DiaryEntry)
 
-    // NEW: Plant Collection Queries
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUnlockedPlant(plant: UnlockedPlant)
 
     @Query("SELECT * FROM unlocked_plants ORDER BY plantTier ASC")
     fun getAllUnlockedPlants(): Flow<List<UnlockedPlant>>
+
+    // new
+    @Query("DELETE FROM unlocked_plants")
+    suspend fun clearAllUnlockedPlants()
 }
 
-// ==========================================
-// 3. DATABASE CLIENT (The Vault Engine)
-// ==========================================
-// UPDATED: Added UnlockedPlant::class and changed version to 3
 @Database(entities = [DiaryEntry::class, UnlockedPlant::class], version = 3)
 abstract class DiaryDatabase : RoomDatabase() {
     abstract fun diaryDao(): DiaryDao
@@ -69,7 +60,6 @@ abstract class DiaryDatabase : RoomDatabase() {
             }
         }
 
-        // NEW: Migration for adding the plant table
         private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("CREATE TABLE IF NOT EXISTS `unlocked_plants` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `plantTier` INTEGER NOT NULL, `unlockDate` INTEGER NOT NULL, `isViewed` INTEGER NOT NULL)")
@@ -86,7 +76,7 @@ abstract class DiaryDatabase : RoomDatabase() {
                     DiaryDatabase::class.java,
                     "diary_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3) // Added MIGRATION_2_3
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
