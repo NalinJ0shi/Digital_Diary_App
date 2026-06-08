@@ -104,7 +104,7 @@ fun ExerciseCarouselView(onExerciseSelected: (BreathingExercise) -> Unit) {
     val screenWidth = configuration.screenWidthDp.dp
 
     // Width ~40% of screen & Reduced height
-    val cardWidth = screenWidth * 0.50f
+    val cardWidth = 230.dp
     val cardHeight = 340.dp
 
     // Padding to ensure the first and last items can snap exactly to the center

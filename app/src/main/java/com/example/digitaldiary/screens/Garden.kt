@@ -75,7 +75,7 @@ fun GardenScreen(
 
     LaunchedEffect(Unit) {
 //            progressTarget = (streakCount % 7) / 7f
-        progressTarget = 7f/7f
+        progressTarget = 4f/7f
 
     }
 
