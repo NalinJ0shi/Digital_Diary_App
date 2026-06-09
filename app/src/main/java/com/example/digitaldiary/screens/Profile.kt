@@ -11,10 +11,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.digitaldiary.AppDesignTokens
-import com.example.digitaldiary.CustomBottomNavBar
-import com.example.digitaldiary.UniversalBackgroundWrapper
-import com.example.digitaldiary.UniversalDesignCard
+import com.example.digitaldiary.main.AppDesignTokens
+import com.example.digitaldiary.main.CustomBottomNavBar
+import com.example.digitaldiary.main.UniversalBackgroundWrapper
+import com.example.digitaldiary.main.UniversalDesignCard
 
 @Composable
 fun ProfileScreen(

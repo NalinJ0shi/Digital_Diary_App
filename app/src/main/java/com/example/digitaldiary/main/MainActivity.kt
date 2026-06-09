@@ -1,5 +1,6 @@
-package com.example.digitaldiary
+package com.example.digitaldiary.main
 
+import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -31,6 +32,9 @@ import com.example.digitaldiary.database.PlantCollectionScreen
 import com.example.digitaldiary.ui.theme.AppGlobalGradient
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavType
 import com.example.digitaldiary.ui.theme.PlantformTheme
 
 class MainActivity : ComponentActivity() {
@@ -58,8 +62,8 @@ class MainActivity : ComponentActivity() {
 fun DiaryAppNavigation() {
     val navController = rememberNavController()
 
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val diaryViewModel: DiaryViewModel = viewModel(factory = androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.getInstance(context.applicationContext as android.app.Application))
+    val context = LocalContext.current
+    val diaryViewModel: DiaryViewModel = viewModel(factory = ViewModelProvider.AndroidViewModelFactory.getInstance(context.applicationContext as Application))
 
     var isDarkMode by remember { mutableStateOf(false) }
     val entries by diaryViewModel.allEntries.collectAsState(initial = emptyList())
@@ -131,7 +135,7 @@ fun DiaryAppNavigation() {
         composable(
             route = "mood_screen?timestamp={timestamp}",
             arguments = listOf(navArgument("timestamp") {
-                type = androidx.navigation.NavType.LongType
+                type = NavType.LongType
                 defaultValue = -1L
             } )
         ) { backStackEntry ->

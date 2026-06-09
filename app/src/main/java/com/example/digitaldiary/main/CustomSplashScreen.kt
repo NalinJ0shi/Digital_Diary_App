@@ -1,4 +1,4 @@
-package com.example.digitaldiary // Make sure this is at the top of the file
+package com.example.digitaldiary.main // Make sure this is at the top of the file
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

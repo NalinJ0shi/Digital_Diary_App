@@ -1,6 +1,7 @@
 // app/src/main/java/com/example/digitaldiary/CustomBottomNavBar.kt
-package com.example.digitaldiary
+package com.example.digitaldiary.main
 
+import android.view.MotionEvent
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import androidx.compose.foundation.background
@@ -170,11 +171,11 @@ fun CustomBottomNavBar(
                 view.setOnTouchListener { v, event ->
                     v.onTouchEvent(event)
                     when (event.action) {
-                        android.view.MotionEvent.ACTION_DOWN -> {
+                        MotionEvent.ACTION_DOWN -> {
                             // Change your primary pointer interaction state
                             view.setBooleanState("State Machine 1", "active", true)
                         }
-                        android.view.MotionEvent.ACTION_UP -> {
+                        MotionEvent.ACTION_UP -> {
                             v.performClick()
                             view.setBooleanState("State Machine 1", "active", false)
                             coroutineScope.launch {
