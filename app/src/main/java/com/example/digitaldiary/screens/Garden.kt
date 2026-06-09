@@ -26,7 +26,7 @@ import com.example.digitaldiary.database.DiaryEntry
 import com.nalin.my_digitaldiary.R
 import kotlinx.coroutines.delay
 
-//github.com/NalinJ0shi/Digital_Diary_App
+//github.com/NalinJ0shi/Feelsy
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GardenScreen(
