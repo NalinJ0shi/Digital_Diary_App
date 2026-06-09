@@ -26,7 +26,7 @@ import com.example.digitaldiary.database.DiaryEntry
 import com.nalin.my_digitaldiary.R
 import kotlinx.coroutines.delay
 
-//github.com/NalinJ0shi/Feelsy
+//github.com/NalinJ0shi/Digital_Diary_App
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GardenScreen(
@@ -34,8 +34,8 @@ fun GardenScreen(
     streakCount: Int,
     canAdd: Boolean,
     isDarkMode: Boolean,
-    currentPlantTier: Int,           // NEW
-    onUnlockPlant: (Int) -> Unit,    // NEW
+    currentPlantTier: Int,
+    onUnlockPlant: (Int) -> Unit,
     onToggleTheme: () -> Unit,
     onAddEntry: () -> Unit,
     onOpenCalendar: () -> Unit,
@@ -54,8 +54,8 @@ fun GardenScreen(
         animationSpec = tween(durationMillis = 1500, easing = FastOutSlowInEasing),
         label = "StreakFill",
         finishedListener = { finalValue ->
-            // Trigger Level Up sequence if streak hits max on Tier 1
-            if (finalValue >= 0.99f && currentPlantTier == 1) {
+            // Trigger Level Up sequence if streak hits max and there is a next tier to unlock
+            if (finalValue >= 0.99f && currentPlantTier < 8) {
                 showLevelUpScreen = true
             }
         }
@@ -64,7 +64,8 @@ fun GardenScreen(
     LaunchedEffect(showLevelUpScreen) {
         if (showLevelUpScreen) {
             delay(600)
-            onUnlockPlant(1)
+            // NEW: Dynamically unlock the next subsequent week's tier instead of hardcoded 1
+            onUnlockPlant(currentPlantTier)
             progressTarget = 0f
             delay(2000)
             showLevelUpScreen = false
@@ -72,7 +73,7 @@ fun GardenScreen(
     }
 
     LaunchedEffect(Unit) {
-        progressTarget = 1f/7f
+        progressTarget = 7f/7f
     }
 
     UniversalBackgroundWrapper {
@@ -105,7 +106,18 @@ fun GardenScreen(
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        val riveResource = if (currentPlantTier == 1) R.raw.treeyo else R.raw.treeyo2
+                        // NEW: Dynamic resource mapping supporting treeyo through tree8.riv
+                        val riveResource = when (currentPlantTier) {
+                            1 -> R.raw.treeyo
+                            2 -> R.raw.treeyo2
+                            3 -> R.raw.tree3
+                            4 -> R.raw.tree4
+                            5 -> R.raw.tree5
+                            6 -> R.raw.tree6
+                            7 -> R.raw.tree7
+                            8 -> R.raw.tree8
+                            else -> R.raw.treeyo
+                        }
                         val stateMachine = "State Machine 1"
 
                         key(currentPlantTier) {
@@ -121,9 +133,7 @@ fun GardenScreen(
                                 },
                                 update = { view ->
                                     try {
-                                        // new
-                                        // This sends the slider progress (0-100) to BOTH treeyo and treeyo2
-                                        // so neither of them freeze!
+                                        // This sends the slider progress (0-100) to whichever animation is active
                                         view.setNumberState(stateMachine, "Number 1", streakProgress * 100f)
                                     } catch (e: Exception) {
                                         println("RIVE ERROR: Input parameters mapping failed!")
@@ -144,7 +154,8 @@ fun GardenScreen(
                             modifier = Modifier.padding(24.dp)
                         ) {
                             Text(
-                                text = if (currentPlantTier == 1) "Week 1 Growing" else "Week 2 Growing",
+                                // NEW: Displays the accurate dynamic growing milestone week name text header
+                                text = "Week $currentPlantTier Growing",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = Color(0xFF6EBE80)
@@ -162,7 +173,6 @@ fun GardenScreen(
                             ) {
                                 val days = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
                                 days.forEachIndexed { index, day ->
-                                    // This condition evaluates true for the new dynamic index value
                                     val isActive = index == currentDayIndex
 
                                     Text(

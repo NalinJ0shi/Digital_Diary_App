@@ -64,6 +64,14 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
                 c1.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR)
     }
 
+    // NEW: Dynamic helper to calculate the current active plant tier (Max unlocked tier, defaults to 1)
+    fun getCurrentPlantTier(unlocked: List<UnlockedPlant>): Int {
+        if (unlocked.isEmpty()) return 1
+        val maxUnlocked = unlocked.maxOf { it.plantTier }
+        // If they unlocked week 1, they are working on growing/displaying week 1 or transitioning up to 8
+        return maxUnlocked.coerceIn(1, 8)
+    }
+
     fun unlockNewPlant(tier: Int) {
         viewModelScope.launch {
             dao.insertUnlockedPlant(

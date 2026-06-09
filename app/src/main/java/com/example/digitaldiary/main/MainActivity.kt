@@ -70,7 +70,9 @@ fun DiaryAppNavigation() {
     val unlockedPlants by diaryViewModel.unlockedPlants.collectAsState(initial = emptyList())
 
     val streakCount = diaryViewModel.getStreak(entries)
-    val currentPlantTier = if (unlockedPlants.any { it.plantTier == 1 }) 2 else 1
+
+    // NEW: Replaced the hardcoded binary check with our dynamic evaluation tracker method
+    val currentPlantTier = diaryViewModel.getCurrentPlantTier(unlockedPlants)
 
     NavHost(navController = navController,
         startDestination = "calendar_screen",
@@ -87,7 +89,8 @@ fun DiaryAppNavigation() {
                 canAdd = true,
                 isDarkMode = isDarkMode,
                 currentPlantTier = currentPlantTier,
-                onUnlockPlant = { tier -> diaryViewModel.unlockNewPlant(tier) },
+                // NEW: Ensure we register the next milestone sequential week cleanly
+                onUnlockPlant = { tier -> diaryViewModel.unlockNewPlant(tier + 1) },
                 onToggleTheme = { isDarkMode = !isDarkMode },
                 onAddEntry = { navController.navigate("mood_screen") },
                 onOpenCalendar = {
@@ -305,7 +308,7 @@ fun DiaryAppNavigation() {
                 },
                 onProfileClick = {  },
                 onAddEntry = { navController.navigate("mood_screen") },
-                onNavigateToPlantCollection = { navController.navigate("plant_collection") } // new
+                onNavigateToPlantCollection = { navController.navigate("plant_collection") }
             )
         }
     }

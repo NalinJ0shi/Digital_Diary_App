@@ -3,7 +3,6 @@ package com.example.digitaldiary.database
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -12,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,12 +45,11 @@ fun PlantCollectionScreen(
                             Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                         }
                     },
-                    // new: Quick developer tool action added to the top right bar
                     actions = {
                         IconButton(
                             onClick = {
                                 viewModel.resetPlantLibrary()
-                                onBack() // Send user back to refresh the home navigation states
+                                onBack()
                             }
                         ) {
                             Icon(Icons.Default.Refresh, contentDescription = "Reset Data", tint = Color.Red)
@@ -65,6 +64,7 @@ fun PlantCollectionScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
+                // NEW: Streamlined to dynamically map a grid of all 8 weeks
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     contentPadding = PaddingValues(24.dp),
@@ -72,15 +72,30 @@ fun PlantCollectionScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    item {
-                        PlantCardItem(tier = 1, label = "Week 1 Plant", subtitle = "Default Unlocked")
-                    }
+                    items(8) { index ->
+                        val currentTier = index + 1
 
-                    items(unlockedPlants) { plant ->
-                        if (plant.plantTier == 1) {
-                            val dateStr = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(plant.unlockDate))
-                            PlantCardItem(tier = 2, label = "Week 2 Plant", subtitle = dateStr)
+                        // Week 1 is always unlocked by default. Higher tiers check the database.
+                        val matchingUnlock = unlockedPlants.find { it.plantTier == currentTier }
+                        val isUnlocked = currentTier == 1 || matchingUnlock != null
+
+                        val subtitle = if (isUnlocked) {
+                            if (currentTier == 1) {
+                                "Default Unlocked"
+                            } else {
+                                SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                                    .format(Date(matchingUnlock?.unlockDate ?: System.currentTimeMillis()))
+                            }
+                        } else {
+                            "Locked"
                         }
+
+                        PlantCardItem(
+                            tier = currentTier,
+                            label = "Week $currentTier Plant",
+                            subtitle = subtitle,
+                            isUnlocked = isUnlocked
+                        )
                     }
                 }
             }
@@ -89,13 +104,17 @@ fun PlantCollectionScreen(
 }
 
 @Composable
-fun PlantCardItem(tier: Int, label: String, subtitle: String) {
+fun PlantCardItem(tier: Int, label: String, subtitle: String, isUnlocked: Boolean) {
+    // NEW: Card fades slightly if the milestone plant is still locked
+    val containerAlpha = if (isUnlocked) 0.3f else 0.1f
+    val contentAlpha = if (isUnlocked) 1.0f else 0.4f
+
     Card(
         modifier = Modifier
             .aspectRatio(0.8f)
             .fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFC8D2C8).copy(alpha = 0.3f))
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFC8D2C8).copy(alpha = containerAlpha))
     ) {
         Column(
             modifier = Modifier
@@ -110,21 +129,48 @@ fun PlantCardItem(tier: Int, label: String, subtitle: String) {
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
+                // NEW: Standardized asset loading fallback tree definitions
+                val resId = remember(tier) {
+                    when (tier) {
+                        1 -> R.raw.treeyo
+                        2 -> R.raw.treeyo2
+                        3 -> R.raw.tree3
+                        4 -> R.raw.tree4
+                        5 -> R.raw.tree5
+                        6 -> R.raw.tree6
+                        7 -> R.raw.tree7
+                        8 -> R.raw.tree8
+                        else -> R.raw.treeyo
+                    }
+                }
+
                 AndroidView(
                     modifier = Modifier.size(150.dp),
                     factory = { context ->
                         RiveAnimationView(context).apply {
-                            val resId = if (tier == 1) R.raw.treeyo else R.raw.treeyo2
                             setRiveResource(resId = resId, stateMachineName = "State Machine 1")
                         }
+                    },
+                    update = { view ->
+                        // Optional styling alpha overlay adjustments for non-active items
+                        view.alpha = contentAlpha
                     }
                 )
             }
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = label, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 16.sp)
+                Text(
+                    text = label,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White.copy(alpha = contentAlpha),
+                    fontSize = 16.sp
+                )
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(text = subtitle, color = Color.White.copy(alpha = 0.6f), fontSize = 12.sp)
+                Text(
+                    text = subtitle,
+                    color = Color.White.copy(alpha = if (isUnlocked) 0.6f else 0.3f),
+                    fontSize = 12.sp
+                )
             }
         }
     }

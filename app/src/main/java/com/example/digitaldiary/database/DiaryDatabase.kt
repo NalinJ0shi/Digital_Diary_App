@@ -49,7 +49,8 @@ interface DiaryDao {
     suspend fun clearAllUnlockedPlants()
 }
 
-@Database(entities = [DiaryEntry::class, UnlockedPlant::class], version = 3)
+// BUMPED VERSION FROM 3 TO 4 TO SUPPORT EXPANDED WEEKS LOGIC
+@Database(entities = [DiaryEntry::class, UnlockedPlant::class], version = 4)
 abstract class DiaryDatabase : RoomDatabase() {
     abstract fun diaryDao(): DiaryDao
 
@@ -66,6 +67,13 @@ abstract class DiaryDatabase : RoomDatabase() {
             }
         }
 
+        // NEW: Blank migration for schema stability during version bump
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // No SQL table schema changes required since plantTier handles 1-8 natively
+            }
+        }
+
         @Volatile
         private var INSTANCE: DiaryDatabase? = null
 
@@ -76,7 +84,7 @@ abstract class DiaryDatabase : RoomDatabase() {
                     DiaryDatabase::class.java,
                     "diary_database"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
