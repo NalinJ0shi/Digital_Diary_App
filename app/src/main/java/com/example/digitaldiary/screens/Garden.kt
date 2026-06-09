@@ -64,19 +64,15 @@ fun GardenScreen(
     LaunchedEffect(showLevelUpScreen) {
         if (showLevelUpScreen) {
             delay(600)
-            // Save current plant to library database and progress to next level
             onUnlockPlant(1)
             progressTarget = 0f
-
-            delay(2000) // Stays visible for at least 2 full seconds as requested
+            delay(2000)
             showLevelUpScreen = false
         }
     }
 
     LaunchedEffect(Unit) {
-//            progressTarget = (streakCount % 7) / 7f
-        progressTarget = 4f/7f
-
+        progressTarget = 1f/7f
     }
 
     UniversalBackgroundWrapper {
