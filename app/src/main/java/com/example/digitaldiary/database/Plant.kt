@@ -2,19 +2,19 @@ package com.example.digitaldiary.database
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,6 +33,7 @@ fun PlantCollectionScreen(
     onBack: () -> Unit
 ) {
     val unlockedPlants by viewModel.unlockedPlants.collectAsState(initial = emptyList())
+    val gridState = rememberLazyGridState()
 
     UniversalBackgroundWrapper {
         Scaffold(
@@ -64,18 +65,17 @@ fun PlantCollectionScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                // NEW: Streamlined to dynamically map a grid of all 8 weeks
                 LazyVerticalGrid(
+                    state = gridState,
                     columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(24.dp),
+                    contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 32.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
+                    // 1. The 8 dynamic plant milestone library cards
                     items(8) { index ->
                         val currentTier = index + 1
-
-                        // Week 1 is always unlocked by default. Higher tiers check the database.
                         val matchingUnlock = unlockedPlants.find { it.plantTier == currentTier }
                         val isUnlocked = currentTier == 1 || matchingUnlock != null
 
@@ -97,6 +97,29 @@ fun PlantCollectionScreen(
                             isUnlocked = isUnlocked
                         )
                     }
+
+                    // 2. FIXED: Appended directly inside the scroll timeline using GridItemSpan.
+                    // This destroys the green rectangular bar overlay entirely, and forces the text
+                    // to show up naturally ONLY when you pull up past the last row of cards.
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 32.dp, bottom = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "more coming " +
+                                        " "+
+
+                                        "soon...",
+                                fontSize = 45.sp,
+                                fontWeight = FontWeight.Medium,
+                                letterSpacing = 1.sp,
+                                color = Color(0xFF2B312B).copy(alpha = 0.4f)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -105,7 +128,6 @@ fun PlantCollectionScreen(
 
 @Composable
 fun PlantCardItem(tier: Int, label: String, subtitle: String, isUnlocked: Boolean) {
-    // NEW: Card fades slightly if the milestone plant is still locked
     val containerAlpha = if (isUnlocked) 0.3f else 0.1f
     val contentAlpha = if (isUnlocked) 1.0f else 0.4f
 
@@ -129,33 +151,40 @@ fun PlantCardItem(tier: Int, label: String, subtitle: String, isUnlocked: Boolea
                     .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                // NEW: Standardized asset loading fallback tree definitions
-                val resId = remember(tier) {
-                    when (tier) {
-                        1 -> R.raw.treeyo
-                        2 -> R.raw.treeyo2
-                        3 -> R.raw.tree3
-                        4 -> R.raw.tree4
-                        5 -> R.raw.tree5
-                        6 -> R.raw.tree6
-                        7 -> R.raw.tree7
-                        8 -> R.raw.tree8
-                        else -> R.raw.treeyo
-                    }
-                }
-
-                AndroidView(
-                    modifier = Modifier.size(150.dp),
-                    factory = { context ->
-                        RiveAnimationView(context).apply {
-                            setRiveResource(resId = resId, stateMachineName = "State Machine 1")
+                if (isUnlocked) {
+                    val resId = remember(tier) {
+                        when (tier) {
+                            1 -> R.raw.treeyo
+                            2 -> R.raw.treeyo2
+                            3 -> R.raw.tree3
+                            4 -> R.raw.tree4
+                            5 -> R.raw.tree5
+                            6 -> R.raw.tree6
+                            7 -> R.raw.tree7
+                            8 -> R.raw.tree8
+                            else -> R.raw.treeyo
                         }
-                    },
-                    update = { view ->
-                        // Optional styling alpha overlay adjustments for non-active items
-                        view.alpha = contentAlpha
                     }
-                )
+
+                    AndroidView(
+                        modifier = Modifier.size(150.dp),
+                        factory = { context ->
+                            RiveAnimationView(context).apply {
+                                setRiveResource(resId = resId, stateMachineName = "State Machine 1")
+                            }
+                        },
+                        update = { view ->
+                            view.alpha = contentAlpha
+                        }
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(id = R.drawable.lock_simple),
+                        contentDescription = "Plant Locked Milestone",
+                        modifier = Modifier.size(36.dp),
+                        tint = Color.White.copy(alpha = contentAlpha)
+                    )
+                }
             }
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
