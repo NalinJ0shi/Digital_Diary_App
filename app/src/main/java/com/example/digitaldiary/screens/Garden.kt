@@ -25,6 +25,7 @@ import com.example.digitaldiary.main.UniversalBackgroundWrapper
 import com.example.digitaldiary.database.DiaryEntry
 import com.nalin.my_digitaldiary.R
 import kotlinx.coroutines.delay
+import java.util.Calendar
 
 //github.com/NalinJ0shi/Digital_Diary_App
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,16 +46,54 @@ fun GardenScreen(
     onNavigateToGame: () -> Unit,
     onNavigateToProfile: () -> Unit
 ) {
-    var progressTarget by remember { mutableFloatStateOf(0f) }
     var showLevelUpScreen by remember { mutableStateOf(false) }
 
-    val currentDayIndex = (((progressTarget * 7).toInt()) - 1).coerceIn(0, 6)
+    // Calculate the 0.0f to 1.0f progress bar fill from the active streak count
+    val realProgressFraction = remember(streakCount) {
+        if (streakCount == 0) 0f
+        else {
+            val remainder = streakCount % 7
+            if (remainder == 0 && streakCount > 0) 1f else remainder / 7f
+        }
+    }
+
+    // NEW SHIFTER LOGIC: Dynamically rearranges the text labels based on when the streak began
+    val shiftedDays = remember(streakCount) {
+        val standardWeek = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
+
+        // Find today's real weekday index (Sun = 1, Mon = 2 ... Sat = 7)
+        val todayWeekdayIndex = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1
+
+        if (streakCount <= 1) {
+            // If there's no streak or it's Day 1, today's weekday becomes Day 1 (the first column)
+            val shiftOffset = todayWeekdayIndex
+            standardWeek.drop(shiftOffset) + standardWeek.take(shiftOffset)
+        } else {
+            // Find how many days back this current 7-day row page block started
+            val daysBackToStart = (streakCount - 1) % 7
+
+            // Subtract that offset to calculate the weekday index when the streak segment began
+            val startWeekdayIndex = (todayWeekdayIndex - daysBackToStart + 7) % 7
+
+            // Slice and rotate the list so the streak start day moves to the front index 0
+            standardWeek.drop(startWeekdayIndex) + standardWeek.take(startWeekdayIndex)
+        }
+    }
+
+    // The active highlighted item index always moves sequentially from 0 to 6 in sync with progress
+    val currentDayIndex = remember(streakCount) {
+        if (streakCount == 0) -1
+        else {
+            val position = (streakCount - 1) % 7
+            position.coerceIn(0, 6)
+        }
+    }
+
     val streakProgress by animateFloatAsState(
-        targetValue = progressTarget,
+        targetValue = realProgressFraction,
         animationSpec = tween(durationMillis = 1500, easing = FastOutSlowInEasing),
         label = "StreakFill",
         finishedListener = { finalValue ->
-            // Trigger Level Up sequence if streak hits max and there is a next tier to unlock
             if (finalValue >= 0.99f && currentPlantTier < 8) {
                 showLevelUpScreen = true
             }
@@ -64,16 +103,10 @@ fun GardenScreen(
     LaunchedEffect(showLevelUpScreen) {
         if (showLevelUpScreen) {
             delay(600)
-            // NEW: Dynamically unlock the next subsequent week's tier instead of hardcoded 1
             onUnlockPlant(currentPlantTier)
-            progressTarget = 0f
             delay(2000)
             showLevelUpScreen = false
         }
-    }
-
-    LaunchedEffect(Unit) {
-        progressTarget = 7f/7f
     }
 
     UniversalBackgroundWrapper {
@@ -106,7 +139,6 @@ fun GardenScreen(
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        // NEW: Dynamic resource mapping supporting treeyo through tree8.riv
                         val riveResource = when (currentPlantTier) {
                             1 -> R.raw.treeyo
                             2 -> R.raw.treeyo2
@@ -133,7 +165,6 @@ fun GardenScreen(
                                 },
                                 update = { view ->
                                     try {
-                                        // This sends the slider progress (0-100) to whichever animation is active
                                         view.setNumberState(stateMachine, "Number 1", streakProgress * 100f)
                                     } catch (e: Exception) {
                                         println("RIVE ERROR: Input parameters mapping failed!")
@@ -154,8 +185,7 @@ fun GardenScreen(
                             modifier = Modifier.padding(24.dp)
                         ) {
                             Text(
-                                // NEW: Displays the accurate dynamic growing milestone week name text header
-                                text = "Week $currentPlantTier Growing",
+                                text = "Week $currentPlantTier Growing (Streak: $streakCount Days)",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = Color(0xFF6EBE80)
@@ -171,8 +201,8 @@ fun GardenScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.Bottom
                             ) {
-                                val days = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
-                                days.forEachIndexed { index, day ->
+                                // Updated to iterate over our new shiftedDays collection instead of hardcoded strings
+                                shiftedDays.forEachIndexed { index, day ->
                                     val isActive = index == currentDayIndex
 
                                     Text(

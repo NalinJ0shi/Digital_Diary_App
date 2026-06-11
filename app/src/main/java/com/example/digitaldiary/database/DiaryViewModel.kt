@@ -32,9 +32,18 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
         if (entries.isEmpty()) return 0
 
         val calendar = Calendar.getInstance()
-        var streak = 0
-        var checkDate = calendar.timeInMillis
+        val todayStart = calendar.apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
 
+        val yesterdayStart = calendar.apply {
+            add(Calendar.DAY_OF_YEAR, -1)
+        }.timeInMillis
+
+        // Extract and normalize all unique entry dates down to midnight boundaries
         val entryDates = entries.map {
             val c = Calendar.getInstance().apply { timeInMillis = it.timestamp }
             c.set(Calendar.HOUR_OF_DAY, 0)
@@ -43,6 +52,20 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
             c.set(Calendar.MILLISECOND, 0)
             c.timeInMillis
         }.distinct()
+
+        // CRITICAL UPDATE: If there is no entry for today AND no entry for yesterday, the streak is broken
+        if (!entryDates.contains(todayStart) && !entryDates.contains(yesterdayStart)) {
+            return 0
+        }
+
+        // Reset tracking pointer back to today to begin counting backwards consecutive matches
+        var streak = 0
+        var checkDate = todayStart
+
+        // If today is empty but yesterday has an entry, start counting backwards from yesterday directly
+        if (!entryDates.contains(todayStart) && entryDates.contains(yesterdayStart)) {
+            checkDate = yesterdayStart
+        }
 
         while (true) {
             if (entryDates.contains(checkDate)) {
@@ -64,11 +87,9 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
                 c1.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR)
     }
 
-    // NEW: Dynamic helper to calculate the current active plant tier (Max unlocked tier, defaults to 1)
     fun getCurrentPlantTier(unlocked: List<UnlockedPlant>): Int {
         if (unlocked.isEmpty()) return 1
         val maxUnlocked = unlocked.maxOf { it.plantTier }
-        // If they unlocked week 1, they are working on growing/displaying week 1 or transitioning up to 8
         return maxUnlocked.coerceIn(1, 8)
     }
 
@@ -86,7 +107,6 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
 
     fun resetPlantLibrary() {
         viewModelScope.launch(Dispatchers.IO) {
-            // new
             dao.clearAllUnlockedPlants()
         }
     }
