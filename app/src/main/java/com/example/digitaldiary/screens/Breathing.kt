@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -34,7 +35,6 @@ import com.example.digitaldiary.ui.theme.JosefinSans
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
-// Simple data class to hold our exercise info
 data class BreathingExercise(
     val title: String,
     val isAvailable: Boolean
@@ -49,10 +49,8 @@ fun BreathingScreen(
     onProfileClick: () -> Unit,
     onAddEntry: () -> Unit
 ) {
-    // State to track if we are in the carousel view (null) or inside an exercise
     var selectedExercise by remember { mutableStateOf<BreathingExercise?>(null) }
 
-    // 1. Wrap the layout inside the DesignSystem Scenery wrapper
     UniversalBackgroundWrapper {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -75,7 +73,8 @@ fun BreathingScreen(
                     ExerciseCarouselView(
                         onExerciseSelected = { exercise ->
                             selectedExercise = exercise
-                        }
+                        },
+                        onBackClick = onBack // Pass the back navigation action down
                     )
                 } else {
                     // Show your Rive Animation if an exercise is selected
@@ -88,34 +87,51 @@ fun BreathingScreen(
     }
 }
 
-// Updated data class: Description removed
-
 @Composable
-fun ExerciseCarouselView(onExerciseSelected: (BreathingExercise) -> Unit) {
-    // List of cards for the carousel (updated to match new data class)
+fun ExerciseCarouselView(
+    onExerciseSelected: (BreathingExercise) -> Unit,
+    onBackClick: () -> Unit
+) {
     val exercises = listOf(
         BreathingExercise("Box Breathing", true),
         BreathingExercise("4-7-8 Method", false),
         BreathingExercise("Lion's Breath", false)
     )
 
-    // Sizing Calculations
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
-
-    // Width ~40% of screen & Reduced height
     val cardWidth = 230.dp
     val cardHeight = 340.dp
-
-    // Padding to ensure the first and last items can snap exactly to the center
     val horizontalPadding = (screenWidth - cardWidth) / 2
-
     val listState = rememberLazyListState()
 
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top // Changed to Top so top elements sit appropriately
     ) {
+
+        // --- ADDED: TOP ACTION BAR FOR THE POTTED PLANT BUTTON ---
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, top = 16.dp, end = 16.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBackClick) {
+                // Using your leaf drawable or a placeholder resource id for your plant/leaf asset
+                Icon(
+                    painter = painterResource(id = R.drawable.potted_plant),
+                    contentDescription = "Navigate to Garden",
+                    tint = Color(0xFFFFFFFF),
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+        }
+
+        // Keeps your content beautifully separated
+        Spacer(modifier = Modifier.weight(0.5f))
+
         Text(
             text = "Breathing Exercises",
             style = MaterialTheme.typography.headlineMedium.copy(
@@ -129,7 +145,6 @@ fun ExerciseCarouselView(onExerciseSelected: (BreathingExercise) -> Unit) {
 
         LazyRow(
             state = listState,
-            // Snapping behavior so it locks onto the center card
             flingBehavior = rememberSnapFlingBehavior(lazyListState = listState),
             contentPadding = PaddingValues(horizontal = horizontalPadding),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -140,7 +155,6 @@ fun ExerciseCarouselView(onExerciseSelected: (BreathingExercise) -> Unit) {
                     modifier = Modifier
                         .width(cardWidth)
                         .height(cardHeight)
-                        // Dynamic Scaling & Positioning based on scroll offset
                         .graphicsLayer {
                             val itemInfo = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == index }
                             if (itemInfo != null) {
@@ -149,17 +163,14 @@ fun ExerciseCarouselView(onExerciseSelected: (BreathingExercise) -> Unit) {
                                 val distance = abs(viewportCenter - itemCenter).toFloat()
                                 val maxDistance = listState.layoutInfo.viewportEndOffset.toFloat()
 
-                                // Scale down items as they move away from the center (Max shrink to 80%)
                                 val scale = 1f - (distance / maxDistance) * 0.4f
                                 val coercedScale = scale.coerceIn(0.80f, 1f)
                                 scaleX = coercedScale
                                 scaleY = coercedScale
 
-                                // Push side items down slightly to make the center item look "higher"
                                 translationY = distance * 0.1f
                             }
                         }
-                        // Applied custom colors here based on availability
                         .clickable(enabled = exercise.isAvailable) {
                             onExerciseSelected(exercise)
                         },
@@ -185,7 +196,6 @@ fun ExerciseCarouselView(onExerciseSelected: (BreathingExercise) -> Unit) {
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = JosefinSans
                             ),
-                            // I set the text color to a dark slate gray for great contrast against both green backgrounds
                             color = Color(0xFF1E293B),
                             textAlign = TextAlign.Center
                         )
@@ -193,6 +203,8 @@ fun ExerciseCarouselView(onExerciseSelected: (BreathingExercise) -> Unit) {
                 }
             }
         }
+
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
@@ -207,7 +219,6 @@ fun ActiveBreathingView(onClose: () -> Unit) {
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Back Button to return to Carousel
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -225,7 +236,6 @@ fun ActiveBreathingView(onClose: () -> Unit) {
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Interactive Tracking Stack (Your original code)
         Box(contentAlignment = Alignment.Center) {
             CircularProgressIndicator(
                 progress = { progress.value },
@@ -255,7 +265,6 @@ fun ActiveBreathingView(onClose: () -> Unit) {
                     }
                 )
 
-                // Glass interaction shielding target layer overlay
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -288,7 +297,6 @@ fun ActiveBreathingView(onClose: () -> Unit) {
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        // Guided breathing label indicators
         if (progress.value > 0f || isPressed) {
             Text(
                 text = if (isPressed) "Breath in!" else "Breath out!",

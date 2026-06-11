@@ -113,7 +113,7 @@ fun CalendarScreen(
     // 1. ALL LOCAL CANVAS MATH DELETED. Wrapped entirely in UniversalBackgroundWrapper
     UniversalBackgroundWrapper {
         Scaffold(
-            containerColor = Color.Transparent, // Ensures the wrapper's hills show through
+            containerColor = Color.Transparent,
             topBar = {
                 Row(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 62.dp, bottom = 6.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onBack) {
@@ -132,6 +132,8 @@ fun CalendarScreen(
                     IconButton(onClick = { }) { Icon(Icons.Default.Share, contentDescription = "Share", tint = textColor) }
                 }
             },
+
+
             bottomBar = {
                 CustomBottomNavBar(0, onCalendarClick, onChartClick, onGameClick, onProfileClick, onAddEntry)
             }
@@ -216,77 +218,82 @@ fun MonthYearPickerModal(
     var selectedMonth by remember { mutableIntStateOf(currentMonth) }
     var selectedYear by remember { mutableIntStateOf(currentYear) }
 
-    ModalBottomSheet(
+    BasicAlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFFFFFFFF),
-        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-        dragHandle = { BottomSheetDefaults.DragHandle() }
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .padding(bottom = 40.dp, top = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Card(
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)),
+            shape = RoundedCornerShape(24.dp),
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text(
-                text = "Select Month",
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
-                color = Color(0xFF1E293B)
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(240.dp),
-                contentAlignment = Alignment.Center
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Text(
+                    text = "Select Month",
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
+                    color = Color(0xFF1E293B)
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp)
-                        .background(Color(0xFFF1F5F9).copy(alpha = 0.5f), RoundedCornerShape(8.dp))
-                )
-
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    WheelPicker(
-                        modifier = Modifier.weight(1f),
-                        items = months,
-                        initialIndex = currentMonth,
-                        onItemSelected = { selectedMonth = it }
-                    )
-                    WheelPicker(
-                        modifier = Modifier.weight(1f),
-                        items = years,
-                        initialIndex = years.indexOf(currentYear.toString()),
-                        onItemSelected = { selectedYear = years[it].toInt() }
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Button(
-                    onClick = onDismiss,
-                    modifier = Modifier.weight(1f).height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F5F9)),
-                    shape = RoundedCornerShape(100.dp)
+                        .height(150.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text("Cancel", color = Color(0xFF475569), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .background(Color(0xFFF1F5F9).copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                    )
+
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        WheelPicker(
+                            modifier = Modifier.weight(1f),
+                            items = months,
+                            initialIndex = currentMonth,
+                            onItemSelected = { selectedMonth = it }
+                        )
+                        WheelPicker(
+                            modifier = Modifier.weight(1f),
+                            items = years,
+                            initialIndex = years.indexOf(currentYear.toString()),
+                            onItemSelected = { selectedYear = years[it].toInt() }
+                        )
+                    }
                 }
 
-                Button(
-                    onClick = { onConfirm(selectedMonth, selectedYear) },
-                    modifier = Modifier.weight(1f).height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF22C55E)),
-                    shape = RoundedCornerShape(100.dp)
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text("Confirm", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Button(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f).height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF1F5F9)),
+                        shape = RoundedCornerShape(100.dp)
+                    ) {
+                        Text("Cancel", color = Color(0xFF475569), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
+
+                    Button(
+                        onClick = { onConfirm(selectedMonth, selectedYear) },
+                        modifier = Modifier.weight(1f).height(50.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF22C55E)),
+                        shape = RoundedCornerShape(100.dp)
+                    ) {
+                        Text("OK", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    }
                 }
             }
         }
