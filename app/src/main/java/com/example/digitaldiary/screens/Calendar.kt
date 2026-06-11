@@ -115,21 +115,48 @@ fun CalendarScreen(
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                Row(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 62.dp, bottom = 6.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = onBack) {
-                        Icon(painter = painterResource(id = R.drawable.potted_plant), contentDescription = "Go Home", Modifier.size(32.dp), tint = textColor)
-                    }
-
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(start = 16.dp, top = 30.dp) // Manually sets its exact spot
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.potted_plant),
+                        contentDescription = "Navigate to Garden",
+                        modifier = Modifier.size(32.dp),
+                        tint = Color(0xFFFFFFFF)
+                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, top = 16.dp, end = 16.dp),
+                    horizontalAlignment = Alignment.Start
+                )
+                {
+                    Spacer(modifier = Modifier.height(66.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable { showDatePicker = true }
-                    ) {
-                        Text(text = currentMonthYear, color = textColor, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.width(1.dp))
-                        Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Change Month", tint = textColor)
+                        modifier = Modifier
+                            .clickable { showDatePicker = true }
+                            .padding(start = 128.dp, bottom = 8.dp) // Extra padding for perfect text alignment
+                    )
+                    {
+                        Text(
+                            text = currentMonthYear,
+                            color = Color(0xFFFFFFFF),
+                            fontSize = 26.sp, // Made larger and bolder as its own title block
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "",
+                            tint = Color(0xFFFFFFFF),
+                            modifier = Modifier.size(28.dp) // Scaled up arrow to match new text size
+                        )
                     }
-
-                    IconButton(onClick = { }) { Icon(Icons.Default.Share, contentDescription = "Share", tint = textColor) }
                 }
             },
 
@@ -141,12 +168,12 @@ fun CalendarScreen(
             Column(modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
                 Spacer(modifier = Modifier.height(24.dp))
 
-                val weekdays = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+                val weekdays = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
                 Row(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                    weekdays.forEach { day -> Text(text = day, color = mutedTextColor, modifier = Modifier.weight(1f), textAlign = TextAlign.Center, fontSize = 14.sp) }
+                    weekdays.forEach { day -> Text(text = day, color = CardWhite, modifier = Modifier.weight(4f), textAlign = TextAlign.Center, fontSize = 18.sp) }
                 }
 
-                LazyVerticalGrid(columns = GridCells.Fixed(7), modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp), contentPadding = PaddingValues(bottom = 16.dp)) {
+                LazyVerticalGrid(columns = GridCells.Fixed(7), modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(1.dp), contentPadding = PaddingValues(bottom = 16.dp)) {
                     items(firstDayOfWeek) { Box(modifier = Modifier.size(48.dp)) }
                     items(daysInMonth) { dayIndex ->
                         val dayNumber = dayIndex + 1
