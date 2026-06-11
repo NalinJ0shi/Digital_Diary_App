@@ -18,13 +18,15 @@ import com.example.digitaldiary.main.UniversalDesignCard
 
 @Composable
 fun ProfileScreen(
+    entriesCount: Int, // NEW: Parameter for active entry count size
+    plantsCount: Int,  // NEW: Parameter for dynamic unlocked plant collection size
     onBack: () -> Unit,
     onCalendarClick: () -> Unit,
     onChartClick: () -> Unit,
     onGameClick: () -> Unit,
     onProfileClick: () -> Unit,
     onAddEntry: () -> Unit,
-    onNavigateToPlantCollection: () -> Unit // new
+    onNavigateToPlantCollection: () -> Unit
 ) {
     UniversalBackgroundWrapper {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -99,7 +101,7 @@ fun ProfileScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Stat Card 1
+                    // Stat Card 1 - Entries
                     UniversalDesignCard(
                         modifier = Modifier
                             .weight(1f)
@@ -112,7 +114,8 @@ fun ProfileScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "14",
+                                // UPDATED: Displays your actual active Room database size string
+                                text = entriesCount.toString(),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 28.sp,
                                 color = AppDesignTokens.primaryText
@@ -131,7 +134,7 @@ fun ProfileScreen(
                         modifier = Modifier
                             .weight(1f)
                             .height(110.dp),
-                        onClick = onNavigateToPlantCollection // new
+                        onClick = onNavigateToPlantCollection
                     ) {
                         Column(
                             modifier = Modifier.fillMaxSize(),
@@ -139,14 +142,15 @@ fun ProfileScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "5",
+                                // UPDATED: Displays your actual dynamic plant library collection size string
+                                text = plantsCount.toString(),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 28.sp,
                                 color = AppDesignTokens.primaryText
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Plants", // new
+                                text = "Plants",
                                 color = Color.Gray,
                                 fontSize = 14.sp
                             )

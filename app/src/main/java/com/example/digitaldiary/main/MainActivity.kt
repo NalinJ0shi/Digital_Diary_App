@@ -70,8 +70,6 @@ fun DiaryAppNavigation() {
     val unlockedPlants by diaryViewModel.unlockedPlants.collectAsState(initial = emptyList())
 
     val streakCount = diaryViewModel.getStreak(entries)
-
-    // NEW: Replaced the hardcoded binary check with our dynamic evaluation tracker method
     val currentPlantTier = diaryViewModel.getCurrentPlantTier(unlockedPlants)
 
     NavHost(navController = navController,
@@ -89,7 +87,6 @@ fun DiaryAppNavigation() {
                 canAdd = true,
                 isDarkMode = isDarkMode,
                 currentPlantTier = currentPlantTier,
-                // NEW: Ensure we register the next milestone sequential week cleanly
                 onUnlockPlant = { tier -> diaryViewModel.unlockNewPlant(tier + 1) },
                 onToggleTheme = { isDarkMode = !isDarkMode },
                 onAddEntry = { navController.navigate("mood_screen") },
@@ -278,7 +275,11 @@ fun DiaryAppNavigation() {
         }
 
         composable("profile_screen") {
+            // UPDATED: Now passing the continuous reactive lists straight into your ProfileScreen composable
             ProfileScreen(
+                entriesCount = entries.size,
+                // Week 1 is available by default, so total plants = database entries + 1 baseline plant
+                plantsCount = unlockedPlants.size + 1,
                 onBack = {
                     navController.navigate("home") {
                         popUpTo("home") { inclusive = false }

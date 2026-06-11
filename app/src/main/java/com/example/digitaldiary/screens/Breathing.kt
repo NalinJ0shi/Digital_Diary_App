@@ -34,10 +34,11 @@ import com.example.digitaldiary.ui.theme.JosefinSans
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
-// Simple data class to hold our exercise info
+// Added animationRes parameter to map unique files to each exercise card
 data class BreathingExercise(
     val title: String,
-    val isAvailable: Boolean
+    val isAvailable: Boolean,
+    val animationRes: Int
 )
 
 @Composable
@@ -49,10 +50,8 @@ fun BreathingScreen(
     onProfileClick: () -> Unit,
     onAddEntry: () -> Unit
 ) {
-    // State to track if we are in the carousel view (null) or inside an exercise
     var selectedExercise by remember { mutableStateOf<BreathingExercise?>(null) }
 
-    // 1. Wrap the layout inside the DesignSystem Scenery wrapper
     UniversalBackgroundWrapper {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -68,18 +67,14 @@ fun BreathingScreen(
                 )
             }
         ) { innerPadding ->
-
             Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
                 if (selectedExercise == null) {
-                    // Show the Carousel if no exercise is selected
                     ExerciseCarouselView(
-                        onExerciseSelected = { exercise ->
-                            selectedExercise = exercise
-                        }
+                        onExerciseSelected = { exercise -> selectedExercise = exercise }
                     )
                 } else {
-                    // Show your Rive Animation if an exercise is selected
                     ActiveBreathingView(
+                        exercise = selectedExercise!!,
                         onClose = { selectedExercise = null }
                     )
                 }
@@ -88,26 +83,21 @@ fun BreathingScreen(
     }
 }
 
-// Updated data class: Description removed
-
 @Composable
 fun ExerciseCarouselView(onExerciseSelected: (BreathingExercise) -> Unit) {
-    // List of cards for the carousel (updated to match new data class)
+    // Linked 3 specific Rive raw assets down to your specific design cards
+    // PLACEHOLDER NOTE: Swap R.raw.breath1 out for your custom filename variants if named differently (e.g., breath2, breath3)
     val exercises = listOf(
-        BreathingExercise("Box Breathing", true),
-        BreathingExercise("4-7-8 Method", false),
-        BreathingExercise("Lion's Breath", false)
+        BreathingExercise("Box Breathing", true, R.raw.breath2),
+        BreathingExercise("4-7-8 Method", false, R.raw.breath4),
+        BreathingExercise("Lion's Breath", false, R.raw.breath5)
     )
 
-    // Sizing Calculations
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
 
-    // Width ~40% of screen & Reduced height
     val cardWidth = 230.dp
     val cardHeight = 340.dp
-
-    // Padding to ensure the first and last items can snap exactly to the center
     val horizontalPadding = (screenWidth - cardWidth) / 2
 
     val listState = rememberLazyListState()
@@ -123,24 +113,25 @@ fun ExerciseCarouselView(onExerciseSelected: (BreathingExercise) -> Unit) {
                 color = Color(0xFF1E293B),
                 fontFamily = JosefinSans
             ),
-            modifier = Modifier
-                .padding(start = 34.dp, bottom = 32.dp)
+            modifier = Modifier.padding(start = 34.dp, bottom = 24.dp)
         )
-        
+
         LazyRow(
             state = listState,
-            // Snapping behavior so it locks onto the center card
             flingBehavior = rememberSnapFlingBehavior(lazyListState = listState),
             contentPadding = PaddingValues(horizontal = horizontalPadding),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             itemsIndexed(exercises) { index, exercise ->
+                val isCardCentered = remember(listState.firstVisibleItemIndex) {
+                    listState.firstVisibleItemIndex == index
+                }
+
                 Card(
                     modifier = Modifier
                         .width(cardWidth)
                         .height(cardHeight)
-                        // Dynamic Scaling & Positioning based on scroll offset
                         .graphicsLayer {
                             val itemInfo = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == index }
                             if (itemInfo != null) {
@@ -149,46 +140,79 @@ fun ExerciseCarouselView(onExerciseSelected: (BreathingExercise) -> Unit) {
                                 val distance = abs(viewportCenter - itemCenter).toFloat()
                                 val maxDistance = listState.layoutInfo.viewportEndOffset.toFloat()
 
-                                // Scale down items as they move away from the center (Max shrink to 80%)
                                 val scale = 1f - (distance / maxDistance) * 0.4f
                                 val coercedScale = scale.coerceIn(0.80f, 1f)
                                 scaleX = coercedScale
                                 scaleY = coercedScale
 
-                                // Push side items down slightly to make the center item look "higher"
                                 translationY = distance * 0.1f
                             }
                         }
-                        // Applied custom colors here based on availability
                         .clickable(enabled = exercise.isAvailable) {
                             onExerciseSelected(exercise)
                         },
                     shape = RoundedCornerShape(22.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (exercise.isAvailable) Color(0xFFC0E6BA)
-                        else Color(0xFFEAF9E7)
+                        containerColor = if (exercise.isAvailable) Color(0xFFC0E6BA) else Color(0xFFEAF9E7)
                     ),
-                    elevation = CardDefaults.cardElevation(
-                        defaultElevation = 0.dp
-                    )
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
+                    // Changed to a Box container so you can freely overlay, float, and coordinate text positions
+                    Box(
+                        modifier = Modifier.fillMaxSize().padding(16.dp)
                     ) {
+
+                        // Animation Surface Container
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AndroidView(
+                                // =================================================================
+                                // COMMIT 1: POSITION & RESIZE THE CAROUSEL RIVE ANIMATION HERE
+                                // =================================================================
+                                modifier = Modifier
+                                    .size(160.dp)
+                                    .offset(x = 0.dp, y = -10.dp),
+                                // =================================================================
+                                factory = { context ->
+                                    RiveAnimationView(context).apply {
+                                        setRiveResource(
+                                            resId = exercise.animationRes, // Loads specific animation resource
+                                            stateMachineName = "State Machine 1",
+                                            autoplay = false
+                                        )
+                                    }
+                                },
+                                update = { view ->
+                                    // REMOVED '&& exercise.isAvailable' so animations preview even if the card is locked
+                                    if (isCardCentered) {
+                                        if (!view.isPlaying) view.play()
+                                    } else {
+                                        if (view.isPlaying) view.pause()
+                                    }
+                                }
+                            )
+                        }
+
+                        // =================================================================
+                        // COMMIT 2: MANUALLY CONTROL THE POSITION OF THE TEXT CARD HERE
+                        // Alter alignment rules, padding sizes, or add an individual .offset()
+                        // =================================================================
                         Text(
                             text = exercise.title,
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = JosefinSans
                             ),
-                            // I set the text color to a dark slate gray for great contrast against both green backgrounds
                             color = Color(0xFF1E293B),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter) // Control baseline attachment alignment point
+                                .padding(bottom = 12.dp)       // Manual bottom position spacing tuning
+                                .offset(x = 0.dp, y = 0.dp)    // Fine-grained pixel grid layout override values
                         )
+                        // =================================================================
                     }
                 }
             }
@@ -197,7 +221,7 @@ fun ExerciseCarouselView(onExerciseSelected: (BreathingExercise) -> Unit) {
 }
 
 @Composable
-fun ActiveBreathingView(onClose: () -> Unit) {
+fun ActiveBreathingView(exercise: BreathingExercise, onClose: () -> Unit) {
     var isPressed by remember { mutableStateOf(false) }
     val progress = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
@@ -207,11 +231,8 @@ fun ActiveBreathingView(onClose: () -> Unit) {
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Back Button to return to Carousel
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             horizontalArrangement = Arrangement.Start
         ) {
             IconButton(onClick = onClose) {
@@ -225,7 +246,6 @@ fun ActiveBreathingView(onClose: () -> Unit) {
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Interactive Tracking Stack (Your original code)
         Box(contentAlignment = Alignment.Center) {
             CircularProgressIndicator(
                 progress = { progress.value },
@@ -241,7 +261,7 @@ fun ActiveBreathingView(onClose: () -> Unit) {
                     factory = { context ->
                         RiveAnimationView(context).apply {
                             setRiveResource(
-                                resId = R.raw.breath,
+                                resId = exercise.animationRes, // Loads specific animation resource inside screen active loop
                                 stateMachineName = "State Machine 1"
                             )
                         }
@@ -250,12 +270,11 @@ fun ActiveBreathingView(onClose: () -> Unit) {
                         try {
                             view.setBooleanState("State Machine 1", "IsPressed", isPressed)
                         } catch (e: Exception) {
-                            println("RIVE ERROR: Could not find State Machine or Input name!")
+                            println("RIVE ERROR: Input parameters mapping failed!")
                         }
                     }
                 )
 
-                // Glass interaction shielding target layer overlay
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -288,7 +307,6 @@ fun ActiveBreathingView(onClose: () -> Unit) {
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        // Guided breathing label indicators
         if (progress.value > 0f || isPressed) {
             Text(
                 text = if (isPressed) "Breath in!" else "Breath out!",
