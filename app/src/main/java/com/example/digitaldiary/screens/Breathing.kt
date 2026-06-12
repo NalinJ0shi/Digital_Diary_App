@@ -105,30 +105,25 @@ fun ExerciseCarouselView(
     val horizontalPadding = (screenWidth - cardWidth) / 2
     val listState = rememberLazyListState()
 
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, top = 1.dp, end = 16.dp),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) { IconButton(onClick = onBackClick) {
+        // Using your leaf drawable or a placeholder resource id for your plant/leaf asset
+        Icon(
+            painter = painterResource(id = R.drawable.potted_plant),
+            contentDescription = "Navigate to Garden",
+            tint = Color(0xFFFFFFFF),
+            modifier = Modifier.size(32.dp)
+        )
+    }}
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Top // Changed to Top so top elements sit appropriately
     ) {
-
-        // --- ADDED: TOP ACTION BAR FOR THE POTTED PLANT BUTTON ---
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, top = 16.dp, end = 16.dp),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBackClick) {
-                // Using your leaf drawable or a placeholder resource id for your plant/leaf asset
-                Icon(
-                    painter = painterResource(id = R.drawable.potted_plant),
-                    contentDescription = "Navigate to Garden",
-                    tint = Color(0xFFFFFFFF),
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        }
-
         // Keeps your content beautifully separated
         Spacer(modifier = Modifier.weight(0.5f))
 

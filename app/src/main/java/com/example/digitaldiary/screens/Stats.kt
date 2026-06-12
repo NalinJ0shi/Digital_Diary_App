@@ -86,22 +86,26 @@ fun ChartScreen(
 
     // Swapped raw gradient box with your global single-source design framework component
     UniversalBackgroundWrapper {
+        IconButton(
+            onClick = onBack,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(start = 16.dp, top = 40.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.potted_plant),
+                contentDescription = "Navigate to Garden",
+                tint = Color(0xFFFFFFFF),
+                modifier = Modifier.size(32.dp)
+            )
+        }
         Scaffold(
             // Make the Scaffold transparent so the universal box background shows through
             containerColor = Color.Transparent,
             topBar = {
                 TopAppBar(
                     title = {},
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.potted_plant),
-                                contentDescription = "Go Home",
-                                modifier = Modifier.size(28.dp),
-                                tint = TextDark
-                            )
-                        }
-                    },
+                    navigationIcon = {},
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 )
             },

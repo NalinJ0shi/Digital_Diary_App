@@ -119,7 +119,7 @@ fun CalendarScreen(
                     onClick = onBack,
                     modifier = Modifier
                         .align(Alignment.TopStart)
-                        .padding(start = 16.dp, top = 30.dp) // Manually sets its exact spot
+                        .padding(start = 16.dp, top = 40.dp) // Manually sets its exact spot
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.potted_plant),
