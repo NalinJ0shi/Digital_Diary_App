@@ -40,7 +40,7 @@ fun MoodSliderScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "How are you feeling today?",
+            text = "What's Hanging?",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 16.dp)
         )
