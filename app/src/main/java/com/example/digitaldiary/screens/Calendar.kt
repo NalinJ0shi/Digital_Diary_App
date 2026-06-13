@@ -7,8 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -110,107 +108,177 @@ fun CalendarScreen(
         }
     }
 
-    // 1. ALL LOCAL CANVAS MATH DELETED. Wrapped entirely in UniversalBackgroundWrapper
     UniversalBackgroundWrapper {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(start = 16.dp, top = 40.dp) // Manually sets its exact spot
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.potted_plant),
-                        contentDescription = "Navigate to Garden",
-                        modifier = Modifier.size(32.dp),
-                        tint = Color(0xFFFFFFFF)
-                    )
-                }
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 8.dp, top = 16.dp, end = 16.dp),
-                    horizontalAlignment = Alignment.Start
-                )
-                {
-                    Spacer(modifier = Modifier.height(66.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    IconButton(
+                        onClick = onBack,
                         modifier = Modifier
-                            .clickable { showDatePicker = true }
-                            .padding(start = 128.dp, bottom = 8.dp) // Extra padding for perfect text alignment
-                    )
-                    {
-                        Text(
-                            text = currentMonthYear,
-                            color = Color(0xFFFFFFFF),
-                            fontSize = 26.sp, // Made larger and bolder as its own title block
-                            fontWeight = FontWeight.ExtraBold
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
+                            .align(Alignment.TopStart)
+                            .padding(start = 16.dp, top = 40.dp)
+                    ) {
                         Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = "",
-                            tint = Color(0xFFFFFFFF),
-                            modifier = Modifier.size(28.dp) // Scaled up arrow to match new text size
+                            painter = painterResource(id = R.drawable.potted_plant),
+                            contentDescription = "Navigate to Garden",
+                            modifier = Modifier.size(32.dp),
+                            tint = Color(0xFFFFFFFF)
                         )
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 8.dp, top = 16.dp, end = 16.dp),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        Spacer(modifier = Modifier.height(66.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .clickable { showDatePicker = true }
+                                .padding(start = 128.dp, bottom = 8.dp)
+                        ) {
+                            Text(
+                                text = currentMonthYear,
+                                color = Color(0xFFFFFFFF),
+                                fontSize = 26.sp,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "",
+                                tint = Color(0xFFFFFFFF),
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
                     }
                 }
             },
-
-
             bottomBar = {
                 CustomBottomNavBar(0, onCalendarClick, onChartClick, onGameClick, onProfileClick, onAddEntry)
             }
         ) { padding ->
-            Column(modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp)) {
-                Spacer(modifier = Modifier.height(24.dp))
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(bottom = 16.dp)
+            ) {
+                // --- ITEM 1: WEEKDAY HEADER ROW ---
+                item {
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                val weekdays = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
-                Row(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                    weekdays.forEach { day -> Text(text = day, color = CardWhite, modifier = Modifier.weight(4f), textAlign = TextAlign.Center, fontSize = 18.sp) }
-                }
-
-                LazyVerticalGrid(columns = GridCells.Fixed(7), modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(1.dp), contentPadding = PaddingValues(bottom = 16.dp)) {
-                    items(firstDayOfWeek) { Box(modifier = Modifier.size(48.dp)) }
-                    items(daysInMonth) { dayIndex ->
-                        val dayNumber = dayIndex + 1
-                        val entryForDay = entriesByDay[dayNumber]
-                        val hasMoodData = entryForDay != null
-                        val moodRating = entryForDay?.dayRating ?: 3
-                        val emotionDrawableId = when (moodRating) { 1 -> R.drawable.sad; 2 -> R.drawable.tire; 3 -> R.drawable.surprise; 4 -> R.drawable.happy; 5 -> R.drawable.exicted; else -> R.drawable.surprise }
-                        val isToday = calendar.get(Calendar.YEAR) == todayYear && calendar.get(Calendar.MONTH) == todayMonth && dayNumber == todayDayNumber
-
-                        val clickCal = Calendar.getInstance().apply {
-                            set(Calendar.YEAR, displayedYear)
-                            set(Calendar.MONTH, displayedMonth)
-                            set(Calendar.DAY_OF_MONTH, dayNumber)
-                        }
-                        val isSelected = clickCal.timeInMillis == selectedDateMillis
-
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable {
-                            val selectedTime = clickCal.timeInMillis
-                            if (selectedTime > todayMillis) Toast.makeText(context, "No writing in the future!", Toast.LENGTH_SHORT).show()
-                            else { selectedDateMillis = selectedTime; if (!hasMoodData) onDateSelected(selectedTime) }
-                        }) {
-                            Box(modifier = Modifier.size(45.dp), contentAlignment = Alignment.Center) {
-                                if (isToday) { Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.fillMaxSize(), tint = todayRingColor); Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.size(35.dp), tint = innerFillColor) }
-                                else { Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.fillMaxSize(), tint = emptyCircleColor) }
-                                if (hasMoodData) Icon(painter = painterResource(id = emotionDrawableId), contentDescription = null, modifier = Modifier.fillMaxSize(), tint = Color.Unspecified)
-                            }
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(text = dayNumber.toString(), color = if (isSelected) todayRingColor else Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    val weekdays = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        weekdays.forEach { day ->
+                            Text(
+                                text = day,
+                                color = Color.White,
+                                modifier = Modifier.weight(1f),
+                                textAlign = TextAlign.Center,
+                                fontSize = 18.sp
+                            )
                         }
                     }
                 }
 
-                Box(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
-                    if (selectedEntry != null) DiaryItem(selectedEntry, onEditEntry, { onDeleteEntry(it) })
-                    else Text(text = "No thoughts logged for this day yet.", color = mutedTextColor, fontSize = 16.sp, textAlign = TextAlign.Center)
+                // --- ITEM 2: MANUAL CALENDAR ROW MATRIX GRID ---
+                item {
+                    val totalSlots = firstDayOfWeek + daysInMonth
+                    val rowsCount = (totalSlots + 6) / 7
+
+                    Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                        for (rowIndex in 0 until rowsCount) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                for (columnIndex in 0 until 7) {
+                                    val slotIndex = rowIndex * 7 + columnIndex
+
+                                    Box(
+                                        modifier = Modifier.weight(1f),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (slotIndex >= firstDayOfWeek && slotIndex < totalSlots) {
+                                            val dayIndex = slotIndex - firstDayOfWeek
+                                            val dayNumber = dayIndex + 1
+                                            val entryForDay = entriesByDay[dayNumber]
+                                            val hasMoodData = entryForDay != null
+                                            val moodRating = entryForDay?.dayRating ?: 3
+                                            val emotionDrawableId = when (moodRating) {
+                                                1 -> R.drawable.sad
+                                                2 -> R.drawable.tire
+                                                3 -> R.drawable.surprise
+                                                4 -> R.drawable.happy
+                                                5 -> R.drawable.exicted
+                                                else -> R.drawable.surprise
+                                            }
+                                            val isToday = calendar.get(Calendar.YEAR) == todayYear && calendar.get(Calendar.MONTH) == todayMonth && dayNumber == todayDayNumber
+
+                                            val clickCal = Calendar.getInstance().apply {
+                                                set(Calendar.YEAR, displayedYear)
+                                                set(Calendar.MONTH, displayedMonth)
+                                                set(Calendar.DAY_OF_MONTH, dayNumber)
+                                            }
+                                            val isSelected = clickCal.timeInMillis == selectedDateMillis
+
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                modifier = Modifier.clickable {
+                                                    val selectedTime = clickCal.timeInMillis
+                                                    if (selectedTime > todayMillis) {
+                                                        Toast.makeText(context, "No writing in the future!", Toast.LENGTH_SHORT).show()
+                                                    } else {
+                                                        selectedDateMillis = selectedTime
+                                                        if (!hasMoodData) onDateSelected(selectedTime)
+                                                    }
+                                                }
+                                            ) {
+                                                Box(modifier = Modifier.size(45.dp), contentAlignment = Alignment.Center) {
+                                                    if (isToday) {
+                                                        Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.fillMaxSize(), tint = todayRingColor)
+                                                        Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.size(35.dp), tint = innerFillColor)
+                                                    } else {
+                                                        Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.fillMaxSize(), tint = emptyCircleColor)
+                                                    }
+                                                    if (hasMoodData) {
+                                                        Icon(painter = painterResource(id = emotionDrawableId), contentDescription = null, modifier = Modifier.fillMaxSize(), tint = Color.Unspecified)
+                                                    }
+                                                }
+                                                Spacer(modifier = Modifier.height(2.dp))
+                                                Text(text = dayNumber.toString(), color = if (isSelected) todayRingColor else Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                            }
+                                        } else {
+                                            Spacer(modifier = Modifier.size(45.dp))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-                Spacer(modifier = Modifier.height(80.dp))
+
+                // --- ITEM 3: SELECTED DIARY ENTRY CARD THOUGHTS LOG ---
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (selectedEntry != null) {
+                            DiaryItem(selectedEntry, onEditEntry, { onDeleteEntry(it) })
+                        } else {
+                            Text(text = "No thoughts logged for this day yet.", color = mutedTextColor, fontSize = 16.sp, textAlign = TextAlign.Center)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(80.dp))
+                }
             }
         }
 
