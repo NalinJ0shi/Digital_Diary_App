@@ -1,6 +1,8 @@
 package com.example.digitaldiary.screens
 
 import com.nalin.my_digitaldiary.R
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -10,11 +12,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import app.rive.runtime.kotlin.RiveAnimationView
 import com.example.digitaldiary.database.DiaryEntry
-import kotlin.math.roundToInt // NEW: Imported the rounding function
+import kotlin.math.floor
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,9 +36,39 @@ fun MoodSliderScreen(
     }
     var hasSlided by remember { mutableStateOf(existingEntry != null) }
 
+    // CONTROL PALETTE: Define your exact 5 colors here (one for each Rive state)
+    val colorStep1 = Color(0xFF6C6363) // State 1: Very Bad
+    val colorStep2 = Color(0xFFB09090) // State 2: Somewhat Bad
+    val colorStep3 = Color(0xFF747474) // State 3: Neutral
+    val colorStep4 = Color(0xFF8FB26F) // State 4: Somewhat Good
+    val colorStep5 = Color(0xFF9D61B8) // State 5: Very Good
+
+    // MATHEMATICAL BLENDING: Calculate the exact blended color based on moodLevel
+    val targetBackgroundColor = remember(moodLevel) {
+        val baseInteger = floor(moodLevel).toInt()
+        val fraction = moodLevel - baseInteger
+
+        when (baseInteger) {
+            1 -> lerp(colorStep1, colorStep2, fraction)
+            2 -> lerp(colorStep2, colorStep3, fraction)
+            3 -> lerp(colorStep3, colorStep4, fraction)
+            4 -> lerp(colorStep4, colorStep5, fraction)
+            5 -> colorStep5
+            else -> colorStep3
+        }
+    }
+
+    // Smooths out minor micro-stuttering while dragging
+    val animatedBackgroundColor by animateColorAsState(
+        targetValue = targetBackgroundColor,
+        animationSpec = tween(durationMillis = 100),
+        label = "BackgroundColorAnimation"
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(animatedBackgroundColor) // Apply the dynamic blended color here
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -50,13 +84,13 @@ fun MoodSliderScreen(
             factory = { context ->
                 RiveAnimationView(context).apply {
                     setRiveResource(
-                        resId = R.raw.ghost2,
+                        resId = R.raw.gp2,
                         stateMachineName = "State Machine 1"
                     )
                 }
             },
             update = { view ->
-                // HIDDEN MATH: Smoothly maps the 1-5 data scale to the 0-100 Rive timeline
+                // Smoothly maps the 1-5 data scale to the 0-100 Rive timeline
                 val mappedRiveValue = (moodLevel - 1f) * 25f
                 try {
                     view.setNumberState("State Machine 1", "NumberInput", mappedRiveValue)
@@ -75,12 +109,11 @@ fun MoodSliderScreen(
                 moodLevel = it
                 hasSlided = true
             },
-            valueRange = 1f..5f, // DATA: 5 hidden steps for the database
+            valueRange = 1f..5f, // DATA: 5 steps for Rive states and DB saving
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp),
             thumb = {
-                // The main draggable thumb dot
                 Box(
                     modifier = Modifier
                         .size(20.dp)
@@ -88,7 +121,7 @@ fun MoodSliderScreen(
                 )
             },
             track = {
-                // VISUALS: Your exact 3-dot track design
+                // VISUALS: Your 3-dot track design remains intact
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -103,7 +136,7 @@ fun MoodSliderScreen(
                             .background(Color.Black)
                     )
 
-                    // Fixed Left Dot
+                    // Fixed Left Dot (Maps to Step 1)
                     Box(
                         modifier = Modifier
                             .size(12.dp)
@@ -111,7 +144,7 @@ fun MoodSliderScreen(
                             .align(Alignment.CenterStart)
                     )
 
-                    // Fixed Center Dot
+                    // Fixed Center Dot (Maps to Step 3)
                     Box(
                         modifier = Modifier
                             .size(12.dp)
@@ -119,7 +152,7 @@ fun MoodSliderScreen(
                             .align(Alignment.Center)
                     )
 
-                    // Fixed Right Dot
+                    // Fixed Right Dot (Maps to Step 5)
                     Box(
                         modifier = Modifier
                             .size(12.dp)
@@ -130,7 +163,7 @@ fun MoodSliderScreen(
             }
         )
 
-        // VISUALS: Your exact 3 labels
+        // VISUALS: Your 3 labels
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -166,7 +199,6 @@ fun MoodSliderScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                // NEW: Uses roundToInt() to accurately convert the continuous float scale to your 1-5 database integers
                 onClick = { onSaveEntry(entryContent, moodLevel.roundToInt()) },
                 modifier = Modifier.size(width = 200.dp, height = 50.dp)
             ) {
