@@ -58,11 +58,17 @@ fun GardenScreen(
     }
 
     // NEW SHIFTER LOGIC: Dynamically rearranges the text labels based on when the streak began
-    val shiftedDays = remember(streakCount) {
+    val shiftedDays = remember(streakCount, entries) {
         val standardWeek = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
 
-        // Find today's real weekday index (Sun = 1, Mon = 2 ... Sat = 7)
-        val todayWeekdayIndex = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) - 1
+        // ✅ FIXED: Reference the last entry's weekday index instead of the current real-world day
+        val lastEntryCalendar = Calendar.getInstance().apply {
+            // If there are entries, set the clock to the exact time of the most recent entry
+            entries.firstOrNull()?.let { mostRecentEntry ->
+                timeInMillis = mostRecentEntry.timestamp
+            }
+        }
+        val todayWeekdayIndex = lastEntryCalendar.get(Calendar.DAY_OF_WEEK) - 1
 
         if (streakCount <= 1) {
             // If there's no streak or it's Day 1, today's weekday becomes Day 1 (the first column)

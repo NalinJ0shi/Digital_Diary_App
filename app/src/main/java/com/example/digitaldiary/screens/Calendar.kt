@@ -131,7 +131,7 @@ fun CalendarScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 16.dp, top = 16.dp, end = 16.dp),
+                        .padding(start = 8.dp, top = 16.dp, end = 16.dp),
                     horizontalAlignment = Alignment.Start
                 )
                 {
@@ -195,8 +195,8 @@ fun CalendarScreen(
                             if (selectedTime > todayMillis) Toast.makeText(context, "No writing in the future!", Toast.LENGTH_SHORT).show()
                             else { selectedDateMillis = selectedTime; if (!hasMoodData) onDateSelected(selectedTime) }
                         }) {
-                            Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) {
-                                if (isToday) { Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.fillMaxSize(), tint = todayRingColor); Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.size(38.dp), tint = innerFillColor) }
+                            Box(modifier = Modifier.size(45.dp), contentAlignment = Alignment.Center) {
+                                if (isToday) { Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.fillMaxSize(), tint = todayRingColor); Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.size(35.dp), tint = innerFillColor) }
                                 else { Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.fillMaxSize(), tint = emptyCircleColor) }
                                 if (hasMoodData) Icon(painter = painterResource(id = emotionDrawableId), contentDescription = null, modifier = Modifier.fillMaxSize(), tint = Color.Unspecified)
                             }

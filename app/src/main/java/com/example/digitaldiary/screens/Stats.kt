@@ -146,15 +146,6 @@ fun ChartScreen(
                 }
 
                 // 2. Date Selector
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 24.dp)) {
-                    Text(
-                        text = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(Date()),
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 22.sp,
-                        color = TextDark
-                    )
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = "Select Month", tint = TextDark)
-                }
 
                 // 3. Mood Flow Card (The Graph)
                 Card(
