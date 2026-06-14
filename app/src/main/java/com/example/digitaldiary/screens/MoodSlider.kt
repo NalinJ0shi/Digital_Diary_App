@@ -39,7 +39,7 @@ fun MoodSliderScreen(
     // CONTROL PALETTE: Define your exact 5 colors here (one for each Rive state)
     val colorStep1 = Color(0xFF6C6363) // State 1: Very Bad
     val colorStep2 = Color(0xFFB09090) // State 2: Somewhat Bad
-    val colorStep3 = Color(0xFF747474) // State 3: Neutral
+    val colorStep3 = Color(0xFF5B5454) // State 3: Neutral
     val colorStep4 = Color(0xFF8FB26F) // State 4: Somewhat Good
     val colorStep5 = Color(0xFF9D61B8) // State 5: Very Good
 
