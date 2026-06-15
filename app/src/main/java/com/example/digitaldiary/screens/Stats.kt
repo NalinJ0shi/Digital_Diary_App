@@ -250,7 +250,6 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
         val maxPoint = 5f
         val minPoint = 1f
 
-        // Leave room for dates at the bottom and dots on the left
         val textPaddingBottom = 60f
         val yAxisPadding = 40.dp.toPx()
 
@@ -306,11 +305,18 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
             )
         }
 
-        // LAYER 3: Draw Straight Connecting Lines between Data Points
+        // FIXED LAYER PIPELINE ORDER:
+        // LAYER 3: Draw the data point rings/anchors first
+        coordinates.forEach { offset ->
+            drawCircle(color = Color.White, radius = 7.dp.toPx(), center = offset)
+            drawCircle(color = PrimaryGreen, radius = 4.dp.toPx(), center = offset)
+        }
+
+        // LAYER 4: Draw the Line *ON TOP* so it cleanly enters and intersects the nodes
         if (coordinates.isNotEmpty()) {
             path.moveTo(coordinates.first().x, coordinates.first().y)
             for (i in 1 until coordinates.size) {
-                path.lineTo(coordinates[i].x, coordinates[i].y) // Sharp, straight lines
+                path.lineTo(coordinates[i].x, coordinates[i].y)
             }
 
             drawPath(
@@ -322,12 +328,6 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
                     join = StrokeJoin.Round
                 )
             )
-        }
-
-        // LAYER 4: Draw the Data Nodes over the connecting lines
-        coordinates.forEach { offset ->
-            drawCircle(color = Color.White, radius = 8.dp.toPx(), center = offset)
-            drawCircle(color = PrimaryGreen, radius = 4.dp.toPx(), center = offset)
         }
     }
 }

@@ -28,7 +28,7 @@ import com.example.digitaldiary.screens.ChartScreen
 import com.example.digitaldiary.screens.GardenScreen
 import com.example.digitaldiary.screens.MoodSliderScreen
 import com.example.digitaldiary.screens.ProfileScreen
-import com.example.digitaldiary.database.PlantCollectionScreen
+import com.example.digitaldiary.secondaryscreen.PlantCollectionScreen
 import com.example.digitaldiary.ui.theme.AppGlobalGradient
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition

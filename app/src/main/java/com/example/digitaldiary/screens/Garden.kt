@@ -27,7 +27,6 @@ import com.nalin.my_digitaldiary.R
 import kotlinx.coroutines.delay
 import java.util.Calendar
 
-//github.com/NalinJ0shi/Digital_Diary_App
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GardenScreen(
@@ -61,9 +60,7 @@ fun GardenScreen(
     val shiftedDays = remember(streakCount, entries) {
         val standardWeek = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
 
-        // ✅ FIXED: Reference the last entry's weekday index instead of the current real-world day
         val lastEntryCalendar = Calendar.getInstance().apply {
-            // If there are entries, set the clock to the exact time of the most recent entry
             entries.firstOrNull()?.let { mostRecentEntry ->
                 timeInMillis = mostRecentEntry.timestamp
             }
@@ -71,22 +68,15 @@ fun GardenScreen(
         val todayWeekdayIndex = lastEntryCalendar.get(Calendar.DAY_OF_WEEK) - 1
 
         if (streakCount <= 1) {
-            // If there's no streak or it's Day 1, today's weekday becomes Day 1 (the first column)
             val shiftOffset = todayWeekdayIndex
             standardWeek.drop(shiftOffset) + standardWeek.take(shiftOffset)
         } else {
-            // Find how many days back this current 7-day row page block started
             val daysBackToStart = (streakCount - 1) % 7
-
-            // Subtract that offset to calculate the weekday index when the streak segment began
             val startWeekdayIndex = (todayWeekdayIndex - daysBackToStart + 7) % 7
-
-            // Slice and rotate the list so the streak start day moves to the front index 0
             standardWeek.drop(startWeekdayIndex) + standardWeek.take(startWeekdayIndex)
         }
     }
 
-    // The active highlighted item index always moves sequentially from 0 to 6 in sync with progress
     val currentDayIndex = remember(streakCount) {
         if (streakCount == 0) -1
         else {
@@ -106,11 +96,19 @@ fun GardenScreen(
         }
     )
 
+    // FIXED: Delayed Tier State Logic
     LaunchedEffect(showLevelUpScreen) {
         if (showLevelUpScreen) {
-            delay(600)
-            onUnlockPlant(currentPlantTier)
+            // 1. Keep the overlay visible for 2 seconds while the completed plant sits behind it
             delay(2000)
+
+            // 2. Safely upgrade the plant tier in the database/state behind the opaque overlay
+            onUnlockPlant(currentPlantTier)
+
+            // 3. Give Compose a tiny moment to process the asset swap and reset the progress fraction
+            delay(100)
+
+            // 4. Fade out the overlay to reveal the brand-new baby plant tier starting at 0%
             showLevelUpScreen = false
         }
     }
@@ -145,7 +143,10 @@ fun GardenScreen(
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        val riveResource = when (currentPlantTier) {
+                        // FIXED: Ensure Rive stays locked onto the current tier until the level up sequence officially completes
+                        val activeTier = currentPlantTier
+
+                        val riveResource = when (activeTier) {
                             1 -> R.raw.treeyo
                             2 -> R.raw.treeyo2
                             3 -> R.raw.tree3
@@ -158,7 +159,7 @@ fun GardenScreen(
                         }
                         val stateMachine = "State Machine 1"
 
-                        key(currentPlantTier) {
+                        key(activeTier) {
                             AndroidView(
                                 modifier = Modifier.size(400.dp),
                                 factory = { context ->
@@ -171,7 +172,10 @@ fun GardenScreen(
                                 },
                                 update = { view ->
                                     try {
-                                        view.setNumberState(stateMachine, "Number 1", streakProgress * 100f)
+                                        // If the level up screen is currently covering everything,
+                                        // we visually drop the animation state down to 0% if the resource updates early
+                                        val appliedProgress = if (showLevelUpScreen && realProgressFraction == 1f) 100f else streakProgress * 100f
+                                        view.setNumberState(stateMachine, "Number 1", appliedProgress)
                                     } catch (e: Exception) {
                                         println("RIVE ERROR: Input parameters mapping failed!")
                                     }
@@ -207,7 +211,6 @@ fun GardenScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.Bottom
                             ) {
-                                // Updated to iterate over our new shiftedDays collection instead of hardcoded strings
                                 shiftedDays.forEachIndexed { index, day ->
                                     val isActive = index == currentDayIndex
 

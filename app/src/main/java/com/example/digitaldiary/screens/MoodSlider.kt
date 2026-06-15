@@ -69,13 +69,14 @@ fun MoodSliderScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(animatedBackgroundColor) // Apply the dynamic blended color here
-            .padding(16.dp),
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "What's Hanging?",
             style = MaterialTheme.typography.headlineMedium,
+            color = Color.White, // White text pops nicely against all the background steps
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
@@ -112,12 +113,16 @@ fun MoodSliderScreen(
             valueRange = 1f..5f, // DATA: 5 steps for Rive states and DB saving
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 32.dp),
+                .padding(horizontal = 24.dp),
+            colors = SliderDefaults.colors(
+                activeTrackColor = Color.Transparent,
+                inactiveTrackColor = Color.Transparent
+            ),
             thumb = {
                 Box(
                     modifier = Modifier
                         .size(20.dp)
-                        .background(color = Color.Black, shape = CircleShape)
+                        .background(color = Color.White, shape = CircleShape)
                 )
             },
             track = {
@@ -133,14 +138,14 @@ fun MoodSliderScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(2.dp)
-                            .background(Color.Black)
+                            .background(Color.White.copy(alpha = 0.6f))
                     )
 
                     // Fixed Left Dot (Maps to Step 1)
                     Box(
                         modifier = Modifier
                             .size(12.dp)
-                            .background(Color.Black, shape = CircleShape)
+                            .background(Color.White.copy(alpha = 0.8f), shape = CircleShape)
                             .align(Alignment.CenterStart)
                     )
 
@@ -148,7 +153,7 @@ fun MoodSliderScreen(
                     Box(
                         modifier = Modifier
                             .size(12.dp)
-                            .background(Color.Black, shape = CircleShape)
+                            .background(Color.White.copy(alpha = 0.8f), shape = CircleShape)
                             .align(Alignment.Center)
                     )
 
@@ -156,7 +161,7 @@ fun MoodSliderScreen(
                     Box(
                         modifier = Modifier
                             .size(12.dp)
-                            .background(Color.Black, shape = CircleShape)
+                            .background(Color.White.copy(alpha = 0.8f), shape = CircleShape)
                             .align(Alignment.CenterEnd)
                     )
                 }
@@ -167,28 +172,32 @@ fun MoodSliderScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 40.dp),
+                .padding(horizontal = 32.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = "Bad", style = MaterialTheme.typography.bodyMedium)
-            Text(text = "Neutral", style = MaterialTheme.typography.bodyMedium)
-            Text(text = "Good", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "Bad", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.8f))
+            Text(text = "Neutral", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.8f))
+            Text(text = "Good", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.8f))
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Smart Reveal Text Field
+        // Smart Reveal Text Field & Buttons
         if (hasSlided) {
             TextField(
                 value = entryContent,
                 onValueChange = { entryContent = it },
-                placeholder = { Text("...") },
+                placeholder = { Text("...", color = Color.White.copy(alpha = 0.5f)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 8.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.White.copy(alpha = 0.15f),
+                    unfocusedContainerColor = Color.White.copy(alpha = 0.1f),
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                     disabledIndicatorColor = Color.Transparent
@@ -198,11 +207,55 @@ fun MoodSliderScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
-                onClick = { onSaveEntry(entryContent, moodLevel.roundToInt()) },
-                modifier = Modifier.size(width = 200.dp, height = 50.dp)
+            // BUTTON ROW: Cancel and Save Actions side-by-side
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Save Entry")
+                OutlinedButton(
+                    onClick = onBack,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = Color.White
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
+                ) {
+                    Text("Cancel")
+                }
+
+                Button(
+                    onClick = { onSaveEntry(entryContent, moodLevel.roundToInt()) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Black
+                    )
+                ) {
+                    Text("Save Entry")
+                }
+            }
+        } else {
+            // Standalone Cancel button if they haven't interacted yet
+            OutlinedButton(
+                onClick = onBack,
+                modifier = Modifier
+                    .width(150.dp)
+                    .height(44.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = Color.White
+                ),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
+            ) {
+                Text("Cancel")
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.example.digitaldiary.database
+package com.example.digitaldiary.secondaryscreen
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import app.rive.runtime.kotlin.RiveAnimationView
+import com.example.digitaldiary.database.DiaryViewModel
 import com.example.digitaldiary.main.UniversalBackgroundWrapper
 import com.nalin.my_digitaldiary.R
 import java.text.SimpleDateFormat
