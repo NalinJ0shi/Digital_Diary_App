@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +21,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import app.rive.runtime.kotlin.RiveAnimationView
 import com.example.digitaldiary.main.CustomBottomNavBar
 import com.example.digitaldiary.main.UniversalBackgroundWrapper
 import com.example.digitaldiary.ui.theme.JosefinSans
@@ -41,7 +46,6 @@ fun BreathingScreen(
     var selectedExercise by remember { mutableStateOf<BreathingExercise?>(null) }
 
     if (selectedExercise == null) {
-        // Show the Carousel view with the Bottom Navigation Bar
         UniversalBackgroundWrapper {
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
@@ -68,7 +72,6 @@ fun BreathingScreen(
             }
         }
     } else {
-        // Navigate completely to your new screen file, hiding the bottom bar
         ActiveBreathingScreen(
             exerciseTitle = selectedExercise!!.title,
             onBackClick = { selectedExercise = null }
@@ -82,7 +85,7 @@ fun ExerciseCarouselView(
     onBackClick: () -> Unit
 ) {
     val exercises = listOf(
-        BreathingExercise("Box Breathing", true),
+        BreathingExercise("Box \n Breathing", true),
         BreathingExercise("4-7-8 Method", false),
         BreathingExercise("Lion's Breath", false)
     )
@@ -155,34 +158,100 @@ fun ExerciseCarouselView(
 
                                 translationY = distance * 0.1f
                             }
-                        }
-                        .clickable(enabled = exercise.isAvailable) {
-                            onExerciseSelected(exercise)
                         },
                     shape = RoundedCornerShape(22.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = if (exercise.isAvailable) Color(0xFFC0E6BA)
-                        else Color(0xFFEAF9E7)
+                        containerColor = Color(0xFFEAF9E7)
                     ),
                     elevation = CardDefaults.cardElevation(
                         defaultElevation = 0.dp
                     )
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = exercise.title,
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = JosefinSans
-                            ),
-                            color = Color(0xFF1E293B),
-                            textAlign = TextAlign.Center
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        val textFontSize = 28.sp
+                        val textXOffset = 10.dp
+                        val textYOffset = 74.dp
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .offset(x = textXOffset, y = textYOffset)
+                                .align(Alignment.TopCenter),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = exercise.title,
+                                    style = MaterialTheme.typography.titleLarge.copy(
+                                        fontSize = textFontSize,
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = JosefinSans
+                                    ),
+                                    color = Color(0xFF1E293B),
+                                    textAlign = TextAlign.Center
+                                )
+
+                                if (exercise.isAvailable) {
+                                    Spacer(modifier = Modifier.width(1.dp))
+
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                        contentDescription = null,
+                                        tint = Color(0xFF1E293B),
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                }
+                            }
+
+                            if (!exercise.isAvailable) {
+                                Spacer(modifier = Modifier.height(62.dp))
+                                Text(
+                                    text = "coming soon.",
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontSize = 26.sp,
+                                        fontWeight = FontWeight.Normal,
+                                        fontFamily = JosefinSans
+                                    ),
+                                    color = Color(0xFF64748B),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+
+                        if (exercise.isAvailable) {
+                            val riveWidth = 340.dp
+                            val riveHeight = 340.dp
+                            val riveXOffset = 5.dp
+                            val riveYOffset = 35.dp
+
+                            AndroidView(
+                                modifier = Modifier
+                                    .size(width = riveWidth, height = riveHeight)
+                                    .offset(x = riveXOffset, y = riveYOffset)
+                                    .align(Alignment.Center),
+                                factory = { context ->
+                                    RiveAnimationView(context).apply {
+                                        this.fit = app.rive.runtime.kotlin.core.Fit.FILL
+                                        this.alignment = app.rive.runtime.kotlin.core.Alignment.CENTER
+
+                                        setRiveResource(
+                                            resId = R.raw.card01,
+                                            stateMachineName = "State Machine 1"
+                                        )
+                                    }
+                                }
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clickable(enabled = exercise.isAvailable) {
+                                    onExerciseSelected(exercise)
+                                }
                         )
                     }
                 }
