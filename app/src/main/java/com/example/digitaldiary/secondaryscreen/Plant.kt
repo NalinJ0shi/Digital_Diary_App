@@ -155,15 +155,15 @@ fun PlantCardItem(tier: Int, label: String, subtitle: String, isUnlocked: Boolea
                 if (isUnlocked) {
                     val resId = remember(tier) {
                         when (tier) {
-                            1 -> R.raw.treeyo
-                            2 -> R.raw.treeyo2
-                            3 -> R.raw.tree3
-                            4 -> R.raw.tree4
-                            5 -> R.raw.tree5
-                            6 -> R.raw.tree6
-                            7 -> R.raw.tree7
-                            8 -> R.raw.tree8
-                            else -> R.raw.treeyo
+                            1 -> R.raw.delete01
+                            2 -> R.raw.delete02
+                            3 -> R.raw.tree03
+                            4 -> R.raw.tree04
+                            5 -> R.raw.tree05
+                            6 -> R.raw.tree06
+                            7 -> R.raw.tree02
+                            8 -> R.raw.tree01
+                            else -> R.raw.delete01
                         }
                     }
 

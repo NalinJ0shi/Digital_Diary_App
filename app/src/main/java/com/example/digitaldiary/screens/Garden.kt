@@ -147,15 +147,15 @@ fun GardenScreen(
                         val activeTier = currentPlantTier
 
                         val riveResource = when (activeTier) {
-                            1 -> R.raw.treeyo
-                            2 -> R.raw.treeyo2
-                            3 -> R.raw.tree3
-                            4 -> R.raw.tree4
-                            5 -> R.raw.tree5
-                            6 -> R.raw.tree6
-                            7 -> R.raw.tree7
-                            8 -> R.raw.tree8
-                            else -> R.raw.treeyo
+                            1 -> R.raw.tree01
+                            2 -> R.raw.tree02
+                            3 -> R.raw.tree03
+                            4 -> R.raw.tree04
+                            5 -> R.raw.tree05
+                            6 -> R.raw.tree06
+                            7 -> R.raw.delete02
+                            8 -> R.raw.delete01
+                            else -> R.raw.tree01
                         }
                         val stateMachine = "State Machine 1"
 
