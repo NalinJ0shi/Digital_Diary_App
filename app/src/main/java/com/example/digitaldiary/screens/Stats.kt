@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -64,21 +65,41 @@ fun ChartScreen(
     onProfileClick: () -> Unit,
     onAddEntry: () -> Unit
 ) {
+    var isWeekly by remember { mutableStateOf(true) }
     // Sorting chronologically before grouping so the timeline flows correctly
-    val dailyAverages = remember(entries) {
-        entries.sortedBy { it.timestamp } // Stops the time-travel bug!
-            .groupBy {
+    val dailyAverages = remember(entries, isWeekly) {
+        val sortedEntries = entries.sortedBy { it.timestamp } // [OLD] Rest of sorting stays same
+
+        if (isWeekly) {
+            // [OLD] Your existing weekly 7-day calculation logic goes here
+            sortedEntries.groupBy {
                 val calendar = Calendar.getInstance().apply { timeInMillis = it.timestamp }
                 SimpleDateFormat("d MMM", Locale.getDefault()).format(calendar.time)
             }.mapValues { entryMap ->
                 entryMap.value.map { it.dayRating.toDouble() }.average().toFloat()
             }.toList().takeLast(7)
+        } else {
+            // [NEW] Monthly calculation logic (e.g., grouping by 4 weeks instead of days)
+            sortedEntries.groupBy {
+                val calendar = Calendar.getInstance().apply { timeInMillis = it.timestamp }
+                "Week " + calendar.get(Calendar.WEEK_OF_MONTH)
+            }.mapValues { entryMap ->
+                entryMap.value.map { it.dayRating.toDouble() }.average().toFloat()
+            }.toList()
+        }
     }
 
     // Proportion Logic: Calculates % of each mood score (1-5)
-    val proportions = remember(entries) {
-        val total = entries.size.coerceAtLeast(1)
-        val counts = entries.groupingBy { it.dayRating }.eachCount()
+    val proportions = remember(entries, isWeekly) {
+        // [NEW] Filter entries first based on the active timeframe (7 days vs 30 days)
+        val filteredEntries = if (isWeekly) {
+            entries.takeLast(7) // Example fallback filter
+        } else {
+            entries.takeLast(30)
+        }
+
+        val total = filteredEntries.size.coerceAtLeast(1) // [OLD] Logic formula remains unchanged
+        val counts = filteredEntries.groupingBy { it.dayRating }.eachCount()
         (5 downTo 1).map { mood ->
             (counts[mood] ?: 0).toFloat() / total
         }
@@ -131,17 +152,21 @@ fun ChartScreen(
                 Row(modifier = Modifier.padding(bottom = 16.dp)) {
                     Text(
                         text = "Weekly",
-                        color = PrimaryGreen,
-                        fontWeight = FontWeight.Bold,
+                        color = if (isWeekly) PrimaryGreen else TextGray, // [NEW] Dynamic color
+                        fontWeight = if (isWeekly) FontWeight.Bold else FontWeight.Medium, // [NEW] Dynamic weight
                         fontSize = 18.sp,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .clickable { isWeekly = true }
                     )
                     Text(
                         text = "Monthly",
-                        color = TextGray,
-                        fontWeight = FontWeight.Medium,
+                        color = if (!isWeekly) PrimaryGreen else TextGray, // [NEW] Dynamic color
+                        fontWeight = if (!isWeekly) FontWeight.Bold else FontWeight.Medium, // [NEW] Dynamic weight
                         fontSize = 18.sp,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .clickable { isWeekly = false }
                     )
                 }
 
