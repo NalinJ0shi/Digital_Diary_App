@@ -8,7 +8,11 @@ plugins {
 android {
     namespace = "com.nalin.my_digitaldiary"
     compileSdk = 35
-
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
     defaultConfig {
         applicationId = "com.nalin.my_digitaldiary"
         minSdk = 24
