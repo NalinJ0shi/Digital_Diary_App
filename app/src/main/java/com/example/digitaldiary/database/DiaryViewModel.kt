@@ -28,56 +28,22 @@ class DiaryViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getEntryForDate(dateInMillis: Long, entries: List<DiaryEntry>): DiaryEntry? { return entries.find { isSameDay(it.timestamp, dateInMillis) } }
 
+    // Replace your old getStreak function with this Milestone calculator
     fun getStreak(entries: List<DiaryEntry>): Int {
         if (entries.isEmpty()) return 0
 
-        val calendar = Calendar.getInstance()
-        val todayStart = calendar.apply {
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
+        // Group all entries by their calendar date (stripping away hours/minutes/seconds)
+        // This gives us a permanent count of total unique days logged.
+        val uniqueDaysCount = entries.map { entry ->
+            val calendar = Calendar.getInstance().apply { timeInMillis = entry.timestamp }
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+            calendar.timeInMillis
+        }.distinct().size
 
-        val yesterdayStart = calendar.apply {
-            add(Calendar.DAY_OF_YEAR, -1)
-        }.timeInMillis
-
-        // Extract and normalize all unique entry dates down to midnight boundaries
-        val entryDates = entries.map {
-            val c = Calendar.getInstance().apply { timeInMillis = it.timestamp }
-            c.set(Calendar.HOUR_OF_DAY, 0)
-            c.set(Calendar.MINUTE, 0)
-            c.set(Calendar.SECOND, 0)
-            c.set(Calendar.MILLISECOND, 0)
-            c.timeInMillis
-        }.distinct()
-
-        // CRITICAL UPDATE: If there is no entry for today AND no entry for yesterday, the streak is broken
-        if (!entryDates.contains(todayStart) && !entryDates.contains(yesterdayStart)) {
-            return 0
-        }
-
-        // Reset tracking pointer back to today to begin counting backwards consecutive matches
-        var streak = 0
-        var checkDate = todayStart
-
-        // If today is empty but yesterday has an entry, start counting backwards from yesterday directly
-        if (!entryDates.contains(todayStart) && entryDates.contains(yesterdayStart)) {
-            checkDate = yesterdayStart
-        }
-
-        while (true) {
-            if (entryDates.contains(checkDate)) {
-                streak++
-                val c = Calendar.getInstance().apply { timeInMillis = checkDate }
-                c.add(Calendar.DAY_OF_YEAR, -1)
-                checkDate = c.timeInMillis
-            } else {
-                break
-            }
-        }
-        return streak
+        return uniqueDaysCount
     }
 
     private fun isSameDay(t1: Long, t2: Long): Boolean {

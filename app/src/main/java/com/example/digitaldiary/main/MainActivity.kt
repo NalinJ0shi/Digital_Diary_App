@@ -155,7 +155,9 @@ fun DiaryAppNavigation() {
                         dayRating = moodScore,
                         existingEntry = existingEntry
                     )
-                    navController.popBackStack()
+                    navController.navigate("home") {
+                        popUpTo(0) { inclusive = true }
+                    }
                 },
                 onBack = { navController.popBackStack() }
             )

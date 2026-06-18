@@ -3,6 +3,7 @@ package com.example.digitaldiary.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -31,7 +32,7 @@ import java.util.Calendar
 @Composable
 fun GardenScreen(
     entries: List<DiaryEntry>,
-    streakCount: Int,
+    streakCount: Int, // This now represents total unique days logged!
     canAdd: Boolean,
     isDarkMode: Boolean,
     currentPlantTier: Int,
@@ -46,9 +47,12 @@ fun GardenScreen(
     onNavigateToProfile: () -> Unit
 ) {
     var showLevelUpScreen by remember { mutableStateOf(false) }
+    var isLevelingUp by remember { mutableStateOf(false) }
 
-    // Calculate the 0.0f to 1.0f progress bar fill from the active streak count
-    val realProgressFraction = remember(streakCount) {
+    var visualProgressOverride by remember { mutableStateOf<Float?>(null) }
+
+    // 1. Progress math is now entirely based on increments of 7 unique days logged
+    val finalizedFraction = remember(streakCount) {
         if (streakCount == 0) 0f
         else {
             val remainder = streakCount % 7
@@ -56,61 +60,61 @@ fun GardenScreen(
         }
     }
 
-    // NEW SHIFTER LOGIC: Dynamically rearranges the text labels based on when the streak began
-    val shiftedDays = remember(streakCount, entries) {
-        val standardWeek = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
+    var targetProgress by remember { mutableStateOf(0f) }
 
-        val lastEntryCalendar = Calendar.getInstance().apply {
-            entries.firstOrNull()?.let { mostRecentEntry ->
-                timeInMillis = mostRecentEntry.timestamp
-            }
-        }
-        val todayWeekdayIndex = lastEntryCalendar.get(Calendar.DAY_OF_WEEK) - 1
-
-        if (streakCount <= 1) {
-            val shiftOffset = todayWeekdayIndex
-            standardWeek.drop(shiftOffset) + standardWeek.take(shiftOffset)
-        } else {
-            val daysBackToStart = (streakCount - 1) % 7
-            val startWeekdayIndex = (todayWeekdayIndex - daysBackToStart + 7) % 7
-            standardWeek.drop(startWeekdayIndex) + standardWeek.take(startWeekdayIndex)
-        }
-    }
-
-    val currentDayIndex = remember(streakCount) {
-        if (streakCount == 0) -1
-        else {
-            val position = (streakCount - 1) % 7
-            position.coerceIn(0, 6)
+    LaunchedEffect(streakCount, finalizedFraction) {
+        if (finalizedFraction > 0f && !isLevelingUp) {
+            targetProgress = (finalizedFraction - 1f / 7f).coerceAtLeast(0f)
+            delay(200)
+            targetProgress = finalizedFraction
+        } else if (!isLevelingUp) {
+            targetProgress = 0f
         }
     }
 
     val streakProgress by animateFloatAsState(
-        targetValue = realProgressFraction,
-        animationSpec = tween(durationMillis = 1500, easing = FastOutSlowInEasing),
-        label = "StreakFill",
-        finishedListener = { finalValue ->
-            if (finalValue >= 0.99f && currentPlantTier < 8) {
-                showLevelUpScreen = true
-            }
-        }
+        targetValue = visualProgressOverride ?: targetProgress,
+        animationSpec = if (visualProgressOverride != null) {
+            snap()
+        } else {
+            tween(durationMillis = 1500, easing = FastOutSlowInEasing)
+        },
+        label = "StreakFill"
     )
 
-    // FIXED: Delayed Tier State Logic
-    LaunchedEffect(showLevelUpScreen) {
-        if (showLevelUpScreen) {
-            // 1. Keep the overlay visible for 2 seconds while the completed plant sits behind it
+    // 2. LEVEL-UP SEQUENCER: Safely resets progress behind the white screen
+    LaunchedEffect(streakCount, finalizedFraction) {
+        if (finalizedFraction >= 0.99f && currentPlantTier < 8 && !isLevelingUp) {
+            isLevelingUp = true
+
+            delay(1700)
+            showLevelUpScreen = true
+
             delay(2000)
 
-            // 2. Safely upgrade the plant tier in the database/state behind the opaque overlay
-            onUnlockPlant(currentPlantTier)
+            visualProgressOverride = 0f
+            onUnlockPlant(currentPlantTier) // Level up the plant tier permanently
 
-            // 3. Give Compose a tiny moment to process the asset swap and reset the progress fraction
-            delay(100)
+            delay(200)
 
-            // 4. Fade out the overlay to reveal the brand-new baby plant tier starting at 0%
+            visualProgressOverride = null
             showLevelUpScreen = false
+            isLevelingUp = false
         }
+    }
+
+    // 3. MOOD HISTORY LOGIC: Grabs the last 5 logs to create a reflection strip
+    val recentMoods = remember(entries) {
+        entries.take(5).map { entry ->
+            // Convert numerical mood rating into a friendly text emoji representation
+            when (entry.dayRating) {
+                in 0..20 -> "😢"
+                in 21..40 -> "🙁"
+                in 41..60 -> "😐"
+                in 61..80 -> "🙂"
+                else -> "😄"
+            }
+        }.reversed() // Keeps them chronologically left-to-right
     }
 
     UniversalBackgroundWrapper {
@@ -136,14 +140,13 @@ fun GardenScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    // --- 3. THE RIVE PLANT ANIMATION ---
+                    // --- THE RIVE PLANT ANIMATION ---
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        // FIXED: Ensure Rive stays locked onto the current tier until the level up sequence officially completes
                         val activeTier = currentPlantTier
 
                         val riveResource = when (activeTier) {
@@ -172,9 +175,7 @@ fun GardenScreen(
                                 },
                                 update = { view ->
                                     try {
-                                        // If the level up screen is currently covering everything,
-                                        // we visually drop the animation state down to 0% if the resource updates early
-                                        val appliedProgress = if (showLevelUpScreen && realProgressFraction == 1f) 100f else streakProgress * 100f
+                                        val appliedProgress = if (showLevelUpScreen && visualProgressOverride == 0f) 0f else streakProgress * 100f
                                         view.setNumberState(stateMachine, "Number 1", appliedProgress)
                                     } catch (e: Exception) {
                                         println("RIVE ERROR: Input parameters mapping failed!")
@@ -184,7 +185,7 @@ fun GardenScreen(
                         }
                     }
 
-                    // --- 4. THE DUOLINGO STYLE STREAK CARD ---
+                    // --- THE NEW MILESTONE CARD WITH MOOD HISTORY STRIP ---
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(24.dp),
@@ -195,34 +196,42 @@ fun GardenScreen(
                             modifier = Modifier.padding(24.dp)
                         ) {
                             Text(
-                                text = "Week $currentPlantTier Growing (Streak: $streakCount Days)",
+                                text = "Plant Tier $currentPlantTier (Total Days Logged: $streakCount)",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = Color(0xFF6EBE80)
                             )
 
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
 
+                            // REPLACED ROW: Shows rolling emotional footprint instead of rigid calendar days
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 8.dp)
-                                    .padding(bottom = 8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.Bottom
+                                    .padding(bottom = 12.dp),
+                                horizontalArrangement = Arrangement.Start,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                shiftedDays.forEachIndexed { index, day ->
-                                    val isActive = index == currentDayIndex
+                                Text(
+                                    text = "Recent Moods: ",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFFA0A0A0)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
 
-                                    Text(
-                                        text = day,
-                                        fontSize = if (isActive) 22.sp else 15.sp,
-                                        fontWeight = if (isActive) FontWeight.ExtraBold else FontWeight.Bold,
-                                        color = if (isActive) Color(0xFF6EBE80) else Color(0xFFA0A0A0)
-                                    )
+                                if (recentMoods.isEmpty()) {
+                                    Text("No entries yet", fontSize = 14.sp, color = Color(0xFFA0A0A0))
+                                } else {
+                                    recentMoods.forEach { emoji ->
+                                        Text(text = emoji, fontSize = 22.sp)
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                    }
                                 }
                             }
 
+                            // PROGRESS BAR FILL SCREEN
                             Box(
                                 modifier = Modifier.fillMaxWidth(),
                                 contentAlignment = Alignment.Center
@@ -249,7 +258,7 @@ fun GardenScreen(
 
                                 Icon(
                                     painter = painterResource(id = R.drawable.leaf__1_),
-                                    contentDescription = "Streak Goal Leaf",
+                                    contentDescription = "Milestone Leaf",
                                     modifier = Modifier
                                         .size(38.dp)
                                         .align(Alignment.CenterEnd)
@@ -264,7 +273,7 @@ fun GardenScreen(
                 }
             }
 
-            // --- 5. VISUAL LEVEL UP OVERLAY REVEAL ---
+            // VISUAL LEVEL UP OVERLAY REVEAL
             AnimatedVisibility(
                 visible = showLevelUpScreen,
                 enter = fadeIn(animationSpec = tween(600)),
