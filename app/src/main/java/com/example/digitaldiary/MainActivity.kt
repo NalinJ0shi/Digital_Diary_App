@@ -1,4 +1,4 @@
-package com.example.digitaldiary.main
+package com.example.digitaldiary
 
 import android.app.Application
 import android.os.Bundle
@@ -25,7 +25,7 @@ import com.example.digitaldiary.database.DiaryViewModel
 import com.example.digitaldiary.screens.BreathingScreen
 import com.example.digitaldiary.screens.CalendarScreen
 import com.example.digitaldiary.screens.ChartScreen
-import com.example.digitaldiary.screens.GardenScreen
+import com.example.digitaldiary.secondaryscreen.GardenScreen
 import com.example.digitaldiary.screens.MoodSliderScreen
 import com.example.digitaldiary.screens.ProfileScreen
 import com.example.digitaldiary.secondaryscreen.PlantCollectionScreen

@@ -1,5 +1,5 @@
 // app/src/main/java/com/example/digitaldiary/CustomBottomNavBar.kt
-package com.example.digitaldiary.main
+package com.example.digitaldiary.miscellaneousBS
 
 import android.view.MotionEvent
 import kotlinx.coroutines.launch

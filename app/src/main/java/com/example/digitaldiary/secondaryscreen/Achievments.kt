@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import app.rive.runtime.kotlin.RiveAnimationView
 import com.example.digitaldiary.database.DiaryViewModel
-import com.example.digitaldiary.main.UniversalBackgroundWrapper
+import com.example.digitaldiary.miscellaneousBS.UniversalBackgroundWrapper
 import com.nalin.my_digitaldiary.R
 import java.text.SimpleDateFormat
 import java.util.Date

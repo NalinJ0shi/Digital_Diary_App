@@ -1,4 +1,4 @@
-package com.example.digitaldiary.main
+package com.example.digitaldiary.miscellaneousBS
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable

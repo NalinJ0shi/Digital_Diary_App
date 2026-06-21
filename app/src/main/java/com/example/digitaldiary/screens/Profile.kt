@@ -12,10 +12,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.digitaldiary.main.AppDesignTokens
-import com.example.digitaldiary.main.CustomBottomNavBar
-import com.example.digitaldiary.main.UniversalBackgroundWrapper
-import com.example.digitaldiary.main.UniversalDesignCard
+import com.example.digitaldiary.miscellaneousBS.AppDesignTokens
+import com.example.digitaldiary.miscellaneousBS.CustomBottomNavBar
+import com.example.digitaldiary.miscellaneousBS.UniversalBackgroundWrapper
+import com.example.digitaldiary.miscellaneousBS.UniversalDesignCard
 import com.nalin.my_digitaldiary.R
 
 @Composable
