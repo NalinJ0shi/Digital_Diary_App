@@ -84,9 +84,10 @@ fun ExerciseCarouselView(
     onExerciseSelected: (BreathingExercise) -> Unit,
     onBackClick: () -> Unit
 ) {
+    // 1. Updated the second card ("4-7-8 Method") to be available so its Rive view loads.
     val exercises = listOf(
         BreathingExercise("Box \n Breathing", true),
-        BreathingExercise("4-7-8 Method", false),
+        BreathingExercise("4-7-8 Method", true),
         BreathingExercise("Lion's Breath", false)
     )
 
@@ -96,6 +97,21 @@ fun ExerciseCarouselView(
     val cardHeight = 340.dp
     val horizontalPadding = (screenWidth - cardWidth) / 2
     val listState = rememberLazyListState()
+
+    // 2. State tracking to determine which item index is closest to the center of the viewport
+    val centeredItemIndex by remember {
+        derivedStateOf {
+            val layoutInfo = listState.layoutInfo
+            val visibleItems = layoutInfo.visibleItemsInfo
+            if (visibleItems.isEmpty()) 0 else {
+                val viewportCenter = layoutInfo.viewportEndOffset / 2
+                visibleItems.minByOrNull { itemInfo ->
+                    val itemCenter = itemInfo.offset + itemInfo.size / 2
+                    abs(viewportCenter - itemCenter)
+                }?.index ?: 0
+            }
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -139,6 +155,9 @@ fun ExerciseCarouselView(
             modifier = Modifier.fillMaxWidth()
         ) {
             itemsIndexed(exercises) { index, exercise ->
+                // Check if this specific card is the one in the middle
+                val isCentered = index == centeredItemIndex
+
                 Card(
                     modifier = Modifier
                         .width(cardWidth)
@@ -237,10 +256,21 @@ fun ExerciseCarouselView(
                                         this.fit = app.rive.runtime.kotlin.core.Fit.FILL
                                         this.alignment = app.rive.runtime.kotlin.core.Alignment.CENTER
 
+                                        // Dynamically select raw animation file based on card index
+                                        val resId = if (index == 0) R.raw.card01 else R.raw.card02
+
                                         setRiveResource(
-                                            resId = R.raw.card01,
+                                            resId = resId,
                                             stateMachineName = "State Machine 1"
                                         )
+                                    }
+                                },
+                                update = { view ->
+                                    // 3. Controls playback dynamically during scroll state updates
+                                    if (isCentered) {
+                                        view.play()
+                                    } else {
+                                        view.pause()
                                     }
                                 }
                             )
