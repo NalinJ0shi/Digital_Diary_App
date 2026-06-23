@@ -33,7 +33,6 @@ fun ProfileScreen(
     onNavigateToPlantCollection: () -> Unit
 ) {
     val primaryGreenColor = Color(0xFFFFFFFF)
-    // Create a scroll state for the content column
     val scrollState = rememberScrollState()
 
     UniversalBackgroundWrapper {
@@ -120,7 +119,7 @@ fun ProfileScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // --- 2. My Records Section (Now includes Theme) ---
+                    // --- 2. My Records Section ---
                     Text(
                         text = "My records",
                         fontSize = 23.sp,
@@ -138,7 +137,7 @@ fun ProfileScreen(
                         UniversalDesignCard(
                             modifier = Modifier
                                 .weight(1f)
-                                .height(119.dp),
+                                .height(110.dp),
                             onClick = { /* TODO: Action */ }
                         ) {
                             Column(
@@ -165,7 +164,7 @@ fun ProfileScreen(
                         UniversalDesignCard(
                             modifier = Modifier
                                 .weight(1f)
-                                .height(119.dp),
+                                .height(110.dp),
                             onClick = onNavigateToPlantCollection
                         ) {
                             Column(
@@ -191,6 +190,7 @@ fun ProfileScreen(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
+                    // Theme Card with Left Icon
                     UniversalDesignCard(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -231,7 +231,7 @@ fun ProfileScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // --- 3. Support Section (Renamed from More) ---
+                    // --- 3. Support Section ---
                     Text(
                         text = "Support",
                         fontSize = 26.sp,
@@ -241,7 +241,7 @@ fun ProfileScreen(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Write a review Card (Renamed with Left Icon)
+                    // Write a review Card
                     UniversalDesignCard(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -282,7 +282,7 @@ fun ProfileScreen(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Invite a Friend Card (New Card with Left Icon)
+                    // Invite a Friend Card
                     UniversalDesignCard(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -320,6 +320,44 @@ fun ProfileScreen(
                             )
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // --- CENTERED BOTTOM ICONS ---
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = { /* TODO: Icon 1 Action */ }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.potted_plant), // Replace with your 1st icon
+                                contentDescription = "Social 1",
+                                modifier = Modifier.size(28.dp),
+                                tint = Color.Gray
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        IconButton(onClick = { /* TODO: Icon 2 Action */ }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.potted_plant), // Replace with your 2nd icon
+                                contentDescription = "Social 2",
+                                modifier = Modifier.size(28.dp),
+                                tint = Color.Gray
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        IconButton(onClick = { /* TODO: Icon 3 Action */ }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.potted_plant), // Replace with your 3rd icon
+                                contentDescription = "Social 3",
+                                modifier = Modifier.size(28.dp),
+                                tint = Color.Gray
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
 
