@@ -1,6 +1,8 @@
 package com.example.digitaldiary.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
@@ -30,8 +32,9 @@ fun ProfileScreen(
     onAddEntry: () -> Unit,
     onNavigateToPlantCollection: () -> Unit
 ) {
-    // Defining your brand green locally for quick reference
     val primaryGreenColor = Color(0xFFFFFFFF)
+    // Create a scroll state for the content column
+    val scrollState = rememberScrollState()
 
     UniversalBackgroundWrapper {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -40,7 +43,6 @@ fun ProfileScreen(
                 horizontalAlignment = Alignment.Start
             ) {
                 // --- UNIFIED TOP NAVIGATION ACTION BAR ---
-                // Matches the exact padding, alignment, actionability, and size of Stats & Breathing screens
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -50,7 +52,7 @@ fun ProfileScreen(
                 ) {
                     IconButton(
                         onClick = onBack,
-                        modifier = Modifier.minimumInteractiveComponentSize() // Removes the forced 48.dp clipping box
+                        modifier = Modifier.minimumInteractiveComponentSize()
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.potted_plant),
@@ -61,12 +63,13 @@ fun ProfileScreen(
                     }
                 }
 
-                // Inner content column to safely hold profile cards with uniform scrolling/padding flow
+                // Inner content column with vertical scrolling enabled
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .verticalScroll(scrollState)
                         .padding(horizontal = 24.dp)
-                        .padding(top = 8.dp, bottom = 100.dp), // Adjusted top to blend naturally with the action bar
+                        .padding(top = 8.dp, bottom = 100.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
                     // --- 1. Account Section ---
@@ -117,7 +120,7 @@ fun ProfileScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // --- 2. My Records Section ---
+                    // --- 2. My Records Section (Now includes Theme) ---
                     Text(
                         text = "My records",
                         fontSize = 23.sp,
@@ -135,7 +138,7 @@ fun ProfileScreen(
                         UniversalDesignCard(
                             modifier = Modifier
                                 .weight(1f)
-                                .height(110.dp),
+                                .height(119.dp),
                             onClick = { /* TODO: Action */ }
                         ) {
                             Column(
@@ -162,7 +165,7 @@ fun ProfileScreen(
                         UniversalDesignCard(
                             modifier = Modifier
                                 .weight(1f)
-                                .height(110.dp),
+                                .height(119.dp),
                             onClick = onNavigateToPlantCollection
                         ) {
                             Column(
@@ -186,11 +189,51 @@ fun ProfileScreen(
                         }
                     }
 
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    UniversalDesignCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(70.dp),
+                        onClick = { /* TODO: Theme Action */ }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 20.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.potted_plant), // Replace with your theme icon filename
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                    tint = Color.Gray
+                                )
+                                Text(
+                                    text = "Theme",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.DarkGray,
+                                    fontSize = 18.sp
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowRight,
+                                contentDescription = "View Theme",
+                                tint = Color.Gray
+                            )
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // --- 3. About Section ---
+                    // --- 3. Support Section (Renamed from More) ---
                     Text(
-                        text = "More",
+                        text = "Support",
                         fontSize = 26.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Gray
@@ -198,11 +241,12 @@ fun ProfileScreen(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
+                    // Write a review Card (Renamed with Left Icon)
                     UniversalDesignCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(70.dp),
-                        onClick = { /* TODO: About Action */ }
+                        onClick = { /* TODO: Review Action */ }
                     ) {
                         Row(
                             modifier = Modifier
@@ -211,25 +255,39 @@ fun ProfileScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(
-                                text = "Theme",
-                                fontWeight = FontWeight.Bold,
-                                color = Color.DarkGray,
-                                fontSize = 18.sp
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.potted_plant), // Replace with your review icon filename
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                    tint = Color.Gray
+                                )
+                                Text(
+                                    text = "Write a review",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.DarkGray,
+                                    fontSize = 18.sp
+                                )
+                            }
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowRight,
-                                contentDescription = "View About",
+                                contentDescription = "Write a review",
                                 tint = Color.Gray
                             )
                         }
                     }
+
                     Spacer(modifier = Modifier.height(14.dp))
+
+                    // Invite a Friend Card (New Card with Left Icon)
                     UniversalDesignCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(70.dp),
-                        onClick = { /* TODO: About Action */ }
+                        onClick = { /* TODO: Invite Action */ }
                     ) {
                         Row(
                             modifier = Modifier
@@ -238,15 +296,26 @@ fun ProfileScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(
-                                text = "Notifications",
-                                fontWeight = FontWeight.Bold,
-                                color = Color.DarkGray,
-                                fontSize = 18.sp
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.potted_plant), // Replace with your invite icon filename
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                    tint = Color.Gray
+                                )
+                                Text(
+                                    text = "Invite a Friend",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.DarkGray,
+                                    fontSize = 18.sp
+                                )
+                            }
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowRight,
-                                contentDescription = "View About",
+                                contentDescription = "Invite a Friend",
                                 tint = Color.Gray
                             )
                         }
