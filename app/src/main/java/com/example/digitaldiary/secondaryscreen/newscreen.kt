@@ -15,6 +15,7 @@ import com.example.digitaldiary.ui.theme.JosefinSans
 @Composable
 fun YellowScreen() {
     UniversalBackgroundWrapper {
+
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center

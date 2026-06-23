@@ -175,7 +175,7 @@ fun DiaryAppNavigation() {
                 },
                 onCalendarClick = {  },
                 onBack = {
-                    navController.navigate("home") {
+                    navController.navigate("yellow_screen") {
                         popUpTo(0) { inclusive = true }
                         launchSingleTop = true
                     }
@@ -215,7 +215,7 @@ fun DiaryAppNavigation() {
             ChartScreen(
                 entries = entries,
                 onBack = {
-                    navController.navigate("home") {
+                    navController.navigate("yellow_screen") {
                         popUpTo("home") { inclusive = false }
                         launchSingleTop = true
                     }
@@ -249,7 +249,7 @@ fun DiaryAppNavigation() {
         composable("game_screen") {
             BreathingScreen(
                 onBack = {
-                    navController.navigate("home") {
+                    navController.navigate("yellow_screen") {
                         popUpTo("home") { inclusive = false }
                         launchSingleTop = true
                     }
@@ -287,7 +287,7 @@ fun DiaryAppNavigation() {
                 // Week 1 is available by default, so total plants = database entries + 1 baseline plant
                 plantsCount = unlockedPlants.size + 1,
                 onBack = {
-                    navController.navigate("home") {
+                    navController.navigate("yellow_screen") {
                         popUpTo("home") { inclusive = false }
                         launchSingleTop = true
                     }
