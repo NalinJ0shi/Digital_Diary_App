@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -71,13 +72,11 @@ fun BreathingScreen(
                 }
             }
         }
-        // Route specifically to the new 4-7-8 screen
         selectedExercise?.title == "4-7-8 Method" -> {
             FourSevenEightBreathingScreen(
                 onBackClick = { selectedExercise = null }
             )
         }
-        // Fallback for Box Breathing or other default exercises
         else -> {
             ActiveBreathingScreen(
                 exerciseTitle = selectedExercise!!.title,
@@ -92,7 +91,6 @@ fun ExerciseCarouselView(
     onExerciseSelected: (BreathingExercise) -> Unit,
     onBackClick: () -> Unit
 ) {
-    // 1. Updated the second card ("4-7-8 Method") to be available so its Rive view loads.
     val exercises = listOf(
         BreathingExercise("Box Breathing", true),
         BreathingExercise("4-7-8 Method", true),
@@ -103,20 +101,35 @@ fun ExerciseCarouselView(
     val screenWidth = configuration.screenWidthDp.dp
     val cardWidth = 230.dp
     val cardHeight = 340.dp
-    val horizontalPadding = (screenWidth - cardWidth) / 2
-    val listState = rememberLazyListState()
 
-    // 2. State tracking to determine which item index is closest to the center of the viewport
+    // Spacing configuration
+    val spaceBetweenItems = 16.dp
+    val horizontalPadding = (screenWidth - cardWidth) / 2
+
+    // Calculate structural pixel offset so index 1 lands exactly in the dead center
+    val density = LocalDensity.current
+    val initialOffsetPx = with(density) {
+        val itemSpacingPx = spaceBetweenItems.roundToPx()
+        // Pushes it backward into alignment by the structural padding space minus the item spacing gap
+        -itemSpacingPx
+    }
+
+    // Initialize state targeted directly at index 1 ("4-7-8 Method")
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = 1,
+        initialFirstVisibleItemScrollOffset = initialOffsetPx
+    )
+
     val centeredItemIndex by remember {
         derivedStateOf {
             val layoutInfo = listState.layoutInfo
             val visibleItems = layoutInfo.visibleItemsInfo
-            if (visibleItems.isEmpty()) 0 else {
+            if (visibleItems.isEmpty()) 1 else { // Fallback defaulting to target index
                 val viewportCenter = layoutInfo.viewportEndOffset / 2
                 visibleItems.minByOrNull { itemInfo ->
                     val itemCenter = itemInfo.offset + itemInfo.size / 2
                     abs(viewportCenter - itemCenter)
-                }?.index ?: 0
+                }?.index ?: 1
             }
         }
     }
@@ -148,22 +161,22 @@ fun ExerciseCarouselView(
             text = "Breathing Exercises",
             style = MaterialTheme.typography.headlineMedium.copy(
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1E293B),
+                fontSize = 40.sp,
+                color = Color(0xFF6C7430),
                 fontFamily = JosefinSans
             ),
             modifier = Modifier
-                .padding(start = 34.dp, bottom = 32.dp)
+                .padding(start = 20.dp, bottom = 32.dp)
         )
 
         LazyRow(
             state = listState,
             flingBehavior = rememberSnapFlingBehavior(lazyListState = listState),
             contentPadding = PaddingValues(horizontal = horizontalPadding),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(spaceBetweenItems),
             modifier = Modifier.fillMaxWidth()
         ) {
             itemsIndexed(exercises) { index, exercise ->
-                // Check if this specific card is the one in the middle
                 val isCentered = index == centeredItemIndex
 
                 Card(
@@ -265,7 +278,6 @@ fun ExerciseCarouselView(
                                     }
                                 },
                                 update = { view ->
-                                    // 3. Controls playback dynamically during scroll state updates
                                     if (isCentered) {
                                         view.play()
                                     } else {
