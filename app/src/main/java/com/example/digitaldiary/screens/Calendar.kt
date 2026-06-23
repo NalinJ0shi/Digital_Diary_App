@@ -164,8 +164,9 @@ fun CalendarScreen(
                     .fillMaxSize()
                     .padding(padding)
                     .padding(horizontal = 16.dp),
-                contentPadding = PaddingValues(bottom = 16.dp)
-            ) {
+                contentPadding = PaddingValues(bottom = 100.dp)
+            )
+            {
                 // --- ITEM 1: WEEKDAY HEADER ROW ---
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
@@ -186,7 +187,6 @@ fun CalendarScreen(
                         }
                     }
                 }
-
                 // --- ITEM 2: MANUAL CALENDAR ROW MATRIX GRID ---
                 item {
                     val totalSlots = firstDayOfWeek + daysInMonth
@@ -263,21 +263,19 @@ fun CalendarScreen(
                         }
                     }
                 }
-
                 // --- ITEM 3: SELECTED DIARY ENTRY CARD THOUGHTS LOG ---
                 item {
                     Box(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 25.dp),
                         contentAlignment = Alignment.Center
-                    ) {
-                        if (selectedEntry != null) {
-                            DiaryItem(selectedEntry, onEditEntry, { onDeleteEntry(it) })
-                        } else {
-                            Text(text = "No thoughts logged for this day yet.", color = mutedTextColor, fontSize = 16.sp, textAlign = TextAlign.Center)
-                        }
+                    )
+                    {
+                        if (selectedEntry != null) { DiaryItem(selectedEntry, onEditEntry, { onDeleteEntry(it) }) }
+                        else { Text(text = "No thoughts logged for this day yet.", color = mutedTextColor, fontSize = 20.sp, textAlign = TextAlign.Center) }
                     }
-                    Spacer(modifier = Modifier.height(80.dp))
                 }
+                //-----ITEM 4: THE SCROLL ---
+                item { Spacer(modifier = Modifier.height(200.dp)) }
             }
         }
 
