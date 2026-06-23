@@ -8,8 +8,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -96,7 +94,7 @@ fun ExerciseCarouselView(
 ) {
     // 1. Updated the second card ("4-7-8 Method") to be available so its Rive view loads.
     val exercises = listOf(
-        BreathingExercise("Box \n Breathing", true),
+        BreathingExercise("Box Breathing", true),
         BreathingExercise("4-7-8 Method", true),
         BreathingExercise("Lion's Breath", true)
     )
@@ -198,13 +196,12 @@ fun ExerciseCarouselView(
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         val textFontSize = 28.sp
-                        val textXOffset = 10.dp
                         val textYOffset = 74.dp
 
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .offset(x = textXOffset, y = textYOffset)
+                                .offset(y = textYOffset)
                                 .align(Alignment.TopCenter),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
@@ -222,17 +219,6 @@ fun ExerciseCarouselView(
                                     color = Color(0xFF1E293B),
                                     textAlign = TextAlign.Center
                                 )
-
-                                if (exercise.isAvailable) {
-                                    Spacer(modifier = Modifier.width(1.dp))
-
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                        contentDescription = null,
-                                        tint = Color(0xFF1E293B),
-                                        modifier = Modifier.size(28.dp)
-                                    )
-                                }
                             }
 
                             if (!exercise.isAvailable) {
@@ -286,6 +272,22 @@ fun ExerciseCarouselView(
                                         view.pause()
                                     }
                                 }
+                            )
+                        }
+
+                        if (exercise.isAvailable) {
+                            Text(
+                                text = "tap to open",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    fontFamily = JosefinSans
+                                ),
+                                color = Color(0xFF413B3B),
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = 32.dp),
+                                textAlign = TextAlign.Center
                             )
                         }
 
