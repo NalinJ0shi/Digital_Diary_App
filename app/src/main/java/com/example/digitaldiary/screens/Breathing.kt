@@ -45,37 +45,47 @@ fun BreathingScreen(
 ) {
     var selectedExercise by remember { mutableStateOf<BreathingExercise?>(null) }
 
-    if (selectedExercise == null) {
-        UniversalBackgroundWrapper {
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                containerColor = Color.Transparent,
-                bottomBar = {
-                    CustomBottomNavBar(
-                        selectedTab = 2,
-                        onCalendarClick = onCalendarClick,
-                        onChartClick = onChartClick,
-                        onGameClick = onGameClick,
-                        onProfileClick = onProfileClick,
-                        onAddEntry = onAddEntry
-                    )
-                }
-            ) { innerPadding ->
-                Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
-                    ExerciseCarouselView(
-                        onExerciseSelected = { exercise ->
-                            selectedExercise = exercise
-                        },
-                        onBackClick = onBack
-                    )
+    when {
+        selectedExercise == null -> {
+            UniversalBackgroundWrapper {
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    containerColor = Color.Transparent,
+                    bottomBar = {
+                        CustomBottomNavBar(
+                            selectedTab = 2,
+                            onCalendarClick = onCalendarClick,
+                            onChartClick = onChartClick,
+                            onGameClick = onGameClick,
+                            onProfileClick = onProfileClick,
+                            onAddEntry = onAddEntry
+                        )
+                    }
+                ) { innerPadding ->
+                    Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+                        ExerciseCarouselView(
+                            onExerciseSelected = { exercise ->
+                                selectedExercise = exercise
+                            },
+                            onBackClick = onBack
+                        )
+                    }
                 }
             }
         }
-    } else {
-        ActiveBreathingScreen(
-            exerciseTitle = selectedExercise!!.title,
-            onBackClick = { selectedExercise = null }
-        )
+        // Route specifically to the new 4-7-8 screen
+        selectedExercise?.title == "4-7-8 Method" -> {
+            FourSevenEightBreathingScreen(
+                onBackClick = { selectedExercise = null }
+            )
+        }
+        // Fallback for Box Breathing or other default exercises
+        else -> {
+            ActiveBreathingScreen(
+                exerciseTitle = selectedExercise!!.title,
+                onBackClick = { selectedExercise = null }
+            )
+        }
     }
 }
 
@@ -88,7 +98,7 @@ fun ExerciseCarouselView(
     val exercises = listOf(
         BreathingExercise("Box \n Breathing", true),
         BreathingExercise("4-7-8 Method", true),
-        BreathingExercise("Lion's Breath", false)
+        BreathingExercise("Lion's Breath", true)
     )
 
     val configuration = LocalConfiguration.current
@@ -256,8 +266,11 @@ fun ExerciseCarouselView(
                                         this.fit = app.rive.runtime.kotlin.core.Fit.FILL
                                         this.alignment = app.rive.runtime.kotlin.core.Alignment.CENTER
 
-                                        // Dynamically select raw animation file based on card index
-                                        val resId = if (index == 0) R.raw.card01 else R.raw.card02
+                                        val resId = when (index) {
+                                            0 -> R.raw.card04
+                                            1 -> R.raw.card02
+                                            else -> R.raw.card03
+                                        }
 
                                         setRiveResource(
                                             resId = resId,
