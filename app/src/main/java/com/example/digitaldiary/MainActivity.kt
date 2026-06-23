@@ -28,6 +28,7 @@ import com.example.digitaldiary.screens.ChartScreen
 import com.example.digitaldiary.secondaryscreen.GardenScreen
 import com.example.digitaldiary.screens.MoodSliderScreen
 import com.example.digitaldiary.screens.ProfileScreen
+import com.example.digitaldiary.screens.YellowScreen
 import com.example.digitaldiary.secondaryscreen.PlantCollectionScreen
 import com.example.digitaldiary.ui.theme.AppGlobalGradient
 import androidx.compose.animation.EnterTransition
@@ -79,6 +80,9 @@ fun DiaryAppNavigation() {
         popEnterTransition = { EnterTransition.None },
         popExitTransition = { ExitTransition.None })
     {
+        composable("yellow_screen") {
+            YellowScreen()
+        }
 
         composable("home") {
             GardenScreen(
