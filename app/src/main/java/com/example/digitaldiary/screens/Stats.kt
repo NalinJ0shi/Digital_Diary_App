@@ -25,10 +25,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.example.digitaldiary.miscellaneousBS.CustomBottomNavBar
 import com.example.digitaldiary.miscellaneousBS.UniversalBackgroundWrapper
 import com.example.digitaldiary.database.DiaryEntry
 import com.nalin.my_digitaldiary.R
+import app.rive.runtime.kotlin.RiveAnimationView
+import app.rive.runtime.kotlin.core.Alignment as RiveAlignment
+import app.rive.runtime.kotlin.core.Fit
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -66,10 +70,9 @@ fun ChartScreen(
     var isWeekly by remember { mutableStateOf(true) }
     // Sorting chronologically before grouping so the timeline flows correctly
     val dailyAverages = remember(entries, isWeekly) {
-        val sortedEntries = entries.sortedBy { it.timestamp } // [OLD] Rest of sorting stays same
+        val sortedEntries = entries.sortedBy { it.timestamp }
 
         if (isWeekly) {
-            // [OLD] Your existing weekly 7-day calculation logic goes here
             sortedEntries.groupBy {
                 val calendar = Calendar.getInstance().apply { timeInMillis = it.timestamp }
                 SimpleDateFormat("d MMM", Locale.getDefault()).format(calendar.time)
@@ -77,7 +80,6 @@ fun ChartScreen(
                 entryMap.value.map { it.dayRating.toDouble() }.average().toFloat()
             }.toList().takeLast(7)
         } else {
-            // [NEW] Monthly calculation logic (e.g., grouping by 4 weeks instead of days)
             sortedEntries.groupBy {
                 val calendar = Calendar.getInstance().apply { timeInMillis = it.timestamp }
                 "Week " + calendar.get(Calendar.WEEK_OF_MONTH)
@@ -89,21 +91,19 @@ fun ChartScreen(
 
     // Proportion Logic: Calculates % of each mood score (1-5)
     val proportions = remember(entries, isWeekly) {
-        // [NEW] Filter entries first based on the active timeframe (7 days vs 30 days)
         val filteredEntries = if (isWeekly) {
-            entries.takeLast(7) // Example fallback filter
+            entries.takeLast(7)
         } else {
             entries.takeLast(30)
         }
 
-        val total = filteredEntries.size.coerceAtLeast(1) // [OLD] Logic formula remains unchanged
+        val total = filteredEntries.size.coerceAtLeast(1)
         val counts = filteredEntries.groupingBy { it.dayRating }.eachCount()
         (5 downTo 1).map { mood ->
             (counts[mood] ?: 0).toFloat() / total
         }
     }
 
-    // Swapped raw gradient box with your global single-source design framework component
     UniversalBackgroundWrapper {
         IconButton(
             onClick = onBack,
@@ -119,7 +119,6 @@ fun ChartScreen(
             )
         }
         Scaffold(
-            // Make the Scaffold transparent so the universal box background shows through
             containerColor = Color.Transparent,
             topBar = {
                 TopAppBar(
@@ -146,12 +145,22 @@ fun ChartScreen(
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // 1. Weekly/Monthly Tabs
+
+                // 1. Rive Animation (Sits above the tabs, pushing them down)
+                RiveAnimationLayout(
+                    isWeekly = isWeekly,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp) // Adjusted height constraint for layout space
+                        .padding(bottom = 16.dp)
+                )
+
+                // 2. Weekly/Monthly Tabs
                 Row(modifier = Modifier.padding(bottom = 16.dp)) {
                     Text(
                         text = "Weekly",
-                        color = if (isWeekly) PrimaryGreen else TextGray, // [NEW] Dynamic color
-                        fontWeight = if (isWeekly) FontWeight.Bold else FontWeight.Medium, // [NEW] Dynamic weight
+                        color = if (isWeekly) PrimaryGreen else TextGray,
+                        fontWeight = if (isWeekly) FontWeight.Bold else FontWeight.Medium,
                         fontSize = 18.sp,
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
@@ -159,8 +168,8 @@ fun ChartScreen(
                     )
                     Text(
                         text = "Monthly",
-                        color = if (!isWeekly) PrimaryGreen else TextGray, // [NEW] Dynamic color
-                        fontWeight = if (!isWeekly) FontWeight.Bold else FontWeight.Medium, // [NEW] Dynamic weight
+                        color = if (!isWeekly) PrimaryGreen else TextGray,
+                        fontWeight = if (!isWeekly) FontWeight.Bold else FontWeight.Medium,
                         fontSize = 18.sp,
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
@@ -168,9 +177,9 @@ fun ChartScreen(
                     )
                 }
 
-                // 2. Date Selector
+                // 3. Date Selector (Placeholder/Space if needed)
 
-                // 3. Mood Flow Card (The Graph)
+                // 4. Mood Flow Card (The Graph)
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -195,7 +204,7 @@ fun ChartScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // 4. Mood Proportion Card (The Stats)
+                // 5. Mood Proportion Card (The Stats)
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -300,7 +309,7 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
             )
         }
 
-        // LAYER 2: Draw Y-Axis Mood Dots (The static scale on the left)
+        // LAYER 2: Draw Y-Axis Mood Dots
         for (i in 5 downTo 1) {
             val y = graphHeight - ((i - minPoint) * heightRatio)
             drawCircle(
@@ -310,7 +319,6 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
             )
         }
 
-        // Pre-calculate path nodes for data
         val path = Path()
         val coordinates = mutableListOf<Offset>()
 
@@ -319,7 +327,6 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
             val y = graphHeight - ((data.second - minPoint) * heightRatio)
             coordinates.add(Offset(x, y))
 
-            // Draw the exact date text centered under this data point
             drawContext.canvas.nativeCanvas.drawText(
                 data.first,
                 x,
@@ -328,14 +335,13 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
             )
         }
 
-        // FIXED LAYER PIPELINE ORDER:
         // LAYER 3: Draw the data point rings/anchors first
         coordinates.forEach { offset ->
             drawCircle(color = Color.White, radius = 7.dp.toPx(), center = offset)
             drawCircle(color = PrimaryGreen, radius = 4.dp.toPx(), center = offset)
         }
 
-        // LAYER 4: Draw the Line *ON TOP* so it cleanly enters and intersects the nodes
+        // LAYER 4: Draw the Line *ON TOP*
         if (coordinates.isNotEmpty()) {
             path.moveTo(coordinates.first().x, coordinates.first().y)
             for (i in 1 until coordinates.size) {
@@ -353,4 +359,28 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
             )
         }
     }
+}
+
+@Composable
+fun RiveAnimationLayout(
+    isWeekly: Boolean,
+    modifier: Modifier = Modifier
+) {
+    AndroidView(
+        modifier = modifier,
+        factory = { context ->
+            RiveAnimationView(context).apply {
+                setRiveResource(
+                    resId = R.raw.glow_tree, // Replace with your actual file name
+                    alignment = RiveAlignment.CENTER,
+                    fit = Fit.CONTAIN,
+                    autoplay = true
+                )
+            }
+        },
+        update = { view ->
+            // Optional: Handle runtime changes here
+            // view.setBooleanState("YourStateMachine", "isWeekly", isWeekly)
+        }
+    )
 }
