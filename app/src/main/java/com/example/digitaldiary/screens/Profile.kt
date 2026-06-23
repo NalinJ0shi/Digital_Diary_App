@@ -260,7 +260,7 @@ fun ProfileScreen(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 Icon(
-                                    painter = painterResource(id = R.drawable.potted_plant), // Replace with your review icon filename
+                                    painter = painterResource(id = R.drawable.thumbs_up), // Replace with your review icon filename
                                     contentDescription = null,
                                     modifier = Modifier.size(24.dp),
                                     tint = Color.Gray
@@ -301,7 +301,7 @@ fun ProfileScreen(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 Icon(
-                                    painter = painterResource(id = R.drawable.potted_plant), // Replace with your invite icon filename
+                                    painter = painterResource(id = R.drawable.users), // Replace with your invite icon filename
                                     contentDescription = null,
                                     modifier = Modifier.size(24.dp),
                                     tint = Color.Gray
@@ -331,7 +331,7 @@ fun ProfileScreen(
                     ) {
                         IconButton(onClick = { /* TODO: Icon 1 Action */ }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.potted_plant), // Replace with your 1st icon
+                                painter = painterResource(id = R.drawable.behance_logo),
                                 contentDescription = "Social 1",
                                 modifier = Modifier.size(28.dp),
                                 tint = Color.Gray
@@ -340,7 +340,7 @@ fun ProfileScreen(
                         Spacer(modifier = Modifier.width(16.dp))
                         IconButton(onClick = { /* TODO: Icon 2 Action */ }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.potted_plant), // Replace with your 2nd icon
+                                painter = painterResource(id = R.drawable.instagram_logo),
                                 contentDescription = "Social 2",
                                 modifier = Modifier.size(28.dp),
                                 tint = Color.Gray
@@ -349,7 +349,7 @@ fun ProfileScreen(
                         Spacer(modifier = Modifier.width(16.dp))
                         IconButton(onClick = { /* TODO: Icon 3 Action */ }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.potted_plant), // Replace with your 3rd icon
+                                painter = painterResource(id = R.drawable.linkedin_logo__1_),
                                 contentDescription = "Social 3",
                                 modifier = Modifier.size(28.dp),
                                 tint = Color.Gray

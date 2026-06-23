@@ -109,7 +109,7 @@ fun CustomBottomNavBar(
                     modifier = Modifier.offset(x = 25.dp, y = -15.dp)
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.graph__1_),
+                        painter = painterResource(id = R.drawable.graph),
                         contentDescription = "Chart",
                         modifier = Modifier.size(28.dp),
                         tint = if (selectedTab == 1) activeIconColor else inactiveIconColor
