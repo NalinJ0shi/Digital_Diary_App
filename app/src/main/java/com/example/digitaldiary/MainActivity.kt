@@ -181,6 +181,7 @@ fun DiaryAppNavigation() {
 
         composable("calendar_screen") {
             CalendarScreen(
+                themeProfile = currentThemeProfile,
                 riveResId = currentThemeProfile.navBarRiveResId,
                 entries = entries,
                 onDateSelected = { dateInMillis ->
@@ -226,6 +227,7 @@ fun DiaryAppNavigation() {
 
         composable("chart_screen") {
             ChartScreen(
+                themeProfile = currentThemeProfile,
                 riveResId = currentThemeProfile.navBarRiveResId,
                 entries = entries,
                 onBack = {
@@ -262,6 +264,7 @@ fun DiaryAppNavigation() {
 
         composable("game_screen") {
             BreathingScreen(
+                themeProfile = currentThemeProfile,
                 riveResId = currentThemeProfile.navBarRiveResId,
                 onBack = {
                     navController.navigate("yellow_screen") {
@@ -297,6 +300,7 @@ fun DiaryAppNavigation() {
 
         composable("profile_screen") {
             ProfileScreen(
+                themeProfile = currentThemeProfile,
                 riveResId = currentThemeProfile.navBarRiveResId,
                 entriesCount = entries.size,
                 plantsCount = unlockedPlants.size + 1,

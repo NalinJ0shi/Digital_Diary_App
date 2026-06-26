@@ -23,6 +23,7 @@ import com.nalin.my_digitaldiary.R
 @Composable
 fun ProfileScreen(
     riveResId: Int,
+    themeProfile: com.example.digitaldiary.miscellaneousBS.AppThemeProfile,
     entriesCount: Int,
     plantsCount: Int,
     onBack: () -> Unit,
@@ -36,7 +37,7 @@ fun ProfileScreen(
     val primaryGreenColor = Color(0xFFFFFFFF)
     val scrollState = rememberScrollState()
 
-    UniversalBackgroundWrapper {
+    UniversalBackgroundWrapper(themeProfile = themeProfile) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier.fillMaxSize(),

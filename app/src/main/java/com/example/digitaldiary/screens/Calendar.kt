@@ -39,6 +39,7 @@ fun CalendarScreen(
     entries: List<DiaryEntry>,
     onDateSelected: (Long) -> Unit,
     onBack: () -> Unit,
+    themeProfile: com.example.digitaldiary.miscellaneousBS.AppThemeProfile, // Corrected parameter type declaration
     onCalendarClick: () -> Unit,
     onChartClick: () -> Unit,
     onGameClick: () -> Unit,
@@ -46,7 +47,8 @@ fun CalendarScreen(
     onAddEntry: () -> Unit,
     onEditEntry: (DiaryEntry) -> Unit,
     onDeleteEntry: (DiaryEntry) -> Unit
-) {
+)
+{
     val context = LocalContext.current
     val todayMillis = System.currentTimeMillis()
     var selectedDateMillis by remember { mutableLongStateOf(todayMillis) }
@@ -108,7 +110,7 @@ fun CalendarScreen(
         }
     }
 
-    UniversalBackgroundWrapper {
+    UniversalBackgroundWrapper(themeProfile = themeProfile) {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {

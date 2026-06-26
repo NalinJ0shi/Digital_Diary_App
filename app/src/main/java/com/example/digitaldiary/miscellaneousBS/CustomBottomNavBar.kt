@@ -159,7 +159,7 @@ fun CustomBottomNavBar(
                 factory = { context ->
                     RiveAnimationView(context).apply {
                         setRiveResource(
-                            resId = R.raw.smiley,
+                            resId = riveResId,
                             stateMachineName = "State Machine 1",
                             autoplay = true // Run State Machine layers immediately
                         )

@@ -36,6 +36,7 @@ data class BreathingExercise(
 @Composable
 fun BreathingScreen(
     riveResId: Int,
+    themeProfile: com.example.digitaldiary.miscellaneousBS.AppThemeProfile,
     onBack: () -> Unit,
     onCalendarClick: () -> Unit,
     onChartClick: () -> Unit,
@@ -47,14 +48,14 @@ fun BreathingScreen(
 
     when {
         selectedExercise == null -> {
-            UniversalBackgroundWrapper {
+            UniversalBackgroundWrapper(themeProfile = themeProfile) {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     containerColor = Color.Transparent,
                     bottomBar = {
                         CustomBottomNavBar(
-                            riveResId = riveResId,
                             selectedTab = 2,
+                            riveResId = riveResId,
                             onCalendarClick = onCalendarClick,
                             onChartClick = onChartClick,
                             onGameClick = onGameClick,

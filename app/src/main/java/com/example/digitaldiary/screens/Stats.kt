@@ -60,6 +60,7 @@ val MoodColors = listOf(
 @Composable
 fun ChartScreen(
     riveResId: Int,
+    themeProfile: com.example.digitaldiary.miscellaneousBS.AppThemeProfile,
     entries: List<DiaryEntry>,
     onBack: () -> Unit,
     onCalendarClick: () -> Unit,
@@ -105,7 +106,7 @@ fun ChartScreen(
         }
     }
 
-    UniversalBackgroundWrapper {
+    UniversalBackgroundWrapper(themeProfile = themeProfile){
         IconButton(
             onClick = onBack,
             modifier = Modifier

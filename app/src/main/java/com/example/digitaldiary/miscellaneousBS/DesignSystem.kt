@@ -17,31 +17,35 @@ import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-// 1. THE DESIGN TOKENS
+// 1. THE DESIGN TOKENS & PROFILE MODELS
 data class AppThemeProfile(
     val backgroundBrush: Brush,
     val backHillColor: Color,
     val frontHillColor: Color,
     val navBarRiveResId: Int
 )
+
 object AppDesignTokens {
     val backgroundColor = Color(0xFFF5F6F8)
     val surfaceColor = Color(0xFFFFFFFF)
     val primaryText = Color(0xFF2C2C2C)
     val secondaryText = Color(0xFFA0A0A0)
     val accentColor = Color(0xFF6EBE80)
+
+    // Baseline Default Theme Profile Configuration
     val ForestTheme = AppThemeProfile(
         backgroundBrush = Brush.verticalGradient(listOf(Color(0xFFAEBE93), Color(0xFFD4DAE1))),
         backHillColor = Color(0xFFC6D7AC),
         frontHillColor = Color(0xFFDAEBC0),
-        navBarRiveResId = com.nalin.my_digitaldiary.R.raw.smiley // Default
+        navBarRiveResId = com.nalin.my_digitaldiary.R.raw.smiley
     )
 
+    // Secondary Theme Profile Configuration
     val OceanTheme = AppThemeProfile(
         backgroundBrush = Brush.verticalGradient(listOf(Color(0xFF7DD3FC), Color(0xFFE0F2FE))),
         backHillColor = Color(0xFF38BDF8),
         frontHillColor = Color(0xFF7DD3FC),
-        navBarRiveResId = com.nalin.my_digitaldiary.R.raw.smiley2 // Replace with your second Rive file
+        navBarRiveResId = com.nalin.my_digitaldiary.R.raw.smiley2
     )
 
     // Baseline fallback background colors & gradient
@@ -51,13 +55,15 @@ object AppDesignTokens {
         colors = listOf(UniversalTopBgColor, UniversalBottomBgColor)
     )
 }
-// 2. UNIVERSAL BACKGROUND WRAPPER (FIGMA HILLS)
+
+// 2. UNIVERSAL BACKGROUND WRAPPER (DYNAMIC FIGMA HILLS ENGINE)
 @Composable
 fun UniversalBackgroundWrapper(
     modifier: Modifier = Modifier,
-    themeProfile: AppThemeProfile = AppDesignTokens.ForestTheme, // Use the profile here
+    themeProfile: AppThemeProfile = AppDesignTokens.ForestTheme,
     content: @Composable BoxScope.() -> Unit
 ) {
+    // Exact hill vector geometry values extracted directly from your layout assets
     val hillPathString = "M285 17.4657C203.574 -21.8322 183.5 17.4659 114.5 17.4658L-3 17.4657V203.801H402V27.8015C402 27.8015 352 49.8013 285 17.4657Z"
     val hillPath = remember { PathParser().parsePathString(hillPathString).toPath() }
 
@@ -66,13 +72,19 @@ fun UniversalBackgroundWrapper(
 
     Box(modifier = modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Apply dynamic background
+
+            // Draw the underlying decoupled window canvas background field
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawRect(brush = themeProfile.backgroundBrush)
             }
 
-            // Apply dynamic back hill
-            Canvas(modifier = Modifier.fillMaxWidth().aspectRatio(402f / 264f).align(Alignment.BottomCenter)) {
+            // Draw Layered Back Hill - Reactive to theme profiles
+            Canvas(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(402f / 264f)
+                    .align(Alignment.BottomCenter)
+            ) {
                 val scaleX = size.width / 402f
                 val scaleY = size.height / 264f
                 withTransform({ scale(scaleX, scaleY, Offset.Zero) }) {
@@ -80,8 +92,13 @@ fun UniversalBackgroundWrapper(
                 }
             }
 
-            // Apply dynamic front hill
-            Canvas(modifier = Modifier.fillMaxWidth().aspectRatio(402f / 204f).align(Alignment.BottomCenter)) {
+            // Draw Layered Front Hill - Reactive to theme profiles
+            Canvas(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(402f / 204f)
+                    .align(Alignment.BottomCenter)
+            ) {
                 val scaleX = size.width / 402f
                 val scaleY = size.height / 204f
                 withTransform({ scale(scaleX, scaleY, Offset.Zero) }) {
@@ -89,10 +106,11 @@ fun UniversalBackgroundWrapper(
                 }
             }
         }
+
+        // 2. Front Screen Slot Container (Injects live screen features safely)
         content()
     }
 }
-
 
 // 3. THE MASTER CARD SHELL COMPONENT
 @Composable
