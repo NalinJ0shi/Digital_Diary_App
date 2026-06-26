@@ -68,8 +68,27 @@ fun DiaryAppNavigation() {
     val context = LocalContext.current
     val diaryViewModel: DiaryViewModel = viewModel(factory = ViewModelProvider.AndroidViewModelFactory.getInstance(context.applicationContext as Application))
 
-    // Manage theme profiling through single point-of-truth state
-    var currentThemeProfile by remember { mutableStateOf<com.example.digitaldiary.miscellaneousBS.AppThemeProfile>(AppDesignTokens.ForestTheme) }
+    // 1. PERSISTENCE PERSIST: Initialize SharedPreferences disk storage access context
+    val sharedPreferences = remember {
+        context.getSharedPreferences("user_settings", android.content.Context.MODE_PRIVATE)
+    }
+
+    // 2. LOAD ON BOOT: Fetch last saved theme string key marker. Defaults safely to "forest"
+    val savedThemeKey = remember {
+        sharedPreferences.getString("selected_theme", "forest") ?: "forest"
+    }
+
+    // 3. SCALE-SAFE ENGINES: Map initial state seamlessly via when-branch initialization
+    var currentThemeProfile by remember {
+        mutableStateOf(
+            when (savedThemeKey) {
+                "ocean" -> AppDesignTokens.OceanTheme
+                "forest" -> AppDesignTokens.ForestTheme
+                // "sunset" -> AppDesignTokens.SunsetTheme  <-- Add new profile mappings here later!
+                else -> AppDesignTokens.ForestTheme
+            }
+        )
+    }
 
     val entries by diaryViewModel.allEntries.collectAsState(initial = emptyList())
     val unlockedPlants by diaryViewModel.unlockedPlants.collectAsState(initial = emptyList())
@@ -89,7 +108,6 @@ fun DiaryAppNavigation() {
         }
 
         composable("home") {
-            // Apply background scenery engine directly to your garden landscape view
             UniversalBackgroundWrapper(themeProfile = currentThemeProfile) {
                 GardenScreen(
                     entries = entries,
@@ -98,12 +116,11 @@ fun DiaryAppNavigation() {
                     isDarkMode = currentThemeProfile == AppDesignTokens.OceanTheme,
                     currentPlantTier = currentPlantTier,
                     onUnlockPlant = { tier -> diaryViewModel.unlockNewPlant(tier + 1) },
+                    // Handles the blind toggle layout click on the Garden dashboard view
                     onToggleTheme = {
-                        currentThemeProfile = if (currentThemeProfile == AppDesignTokens.ForestTheme) {
-                            AppDesignTokens.OceanTheme
-                        } else {
-                            AppDesignTokens.ForestTheme
-                        }
+                        val targetKey = if (currentThemeProfile == AppDesignTokens.ForestTheme) "ocean" else "forest"
+                        currentThemeProfile = if (targetKey == "ocean") AppDesignTokens.OceanTheme else AppDesignTokens.ForestTheme
+                        sharedPreferences.edit().putString("selected_theme", targetKey).apply()
                     },
                     onAddEntry = { navController.navigate("mood_screen") },
                     onOpenCalendar = {
@@ -155,7 +172,8 @@ fun DiaryAppNavigation() {
                 type = NavType.LongType
                 defaultValue = -1L
             } )
-        ) { backStackEntry ->
+        )
+        { backStackEntry ->
             val timestamp = backStackEntry.arguments?.getLong("timestamp") ?: -1L
 
             val existingEntry = if (timestamp != -1L) {
@@ -172,7 +190,6 @@ fun DiaryAppNavigation() {
                         dayRating = moodScore,
                         existingEntry = existingEntry
                     )
-                    // Custom non-garden pop-back configuration to protect screen navigation rules
                     navController.popBackStack()
                 },
                 onBack = { navController.popBackStack() }
@@ -304,12 +321,15 @@ fun DiaryAppNavigation() {
                 riveResId = currentThemeProfile.navBarRiveResId,
                 entriesCount = entries.size,
                 plantsCount = unlockedPlants.size + 1,
-                onToggleTheme = { // <-- ADD THIS LAMBDA BLOCK
-                    currentThemeProfile = if (currentThemeProfile == AppDesignTokens.ForestTheme) {
-                        AppDesignTokens.OceanTheme
-                    } else {
-                        AppDesignTokens.ForestTheme
+                // FIXED & FUTURE-PROOF LAMBDA: Safely maps incoming explicit card string requests
+                onToggleTheme = { themeKey ->
+                    currentThemeProfile = when (themeKey) {
+                        "ocean" -> AppDesignTokens.OceanTheme
+                        "forest" -> AppDesignTokens.ForestTheme
+                        // "sunset" -> AppDesignTokens.SunsetTheme <-- Drop additions here cleanly!
+                        else -> AppDesignTokens.ForestTheme
                     }
+                    sharedPreferences.edit().putString("selected_theme", themeKey).apply()
                 },
                 onBack = {
                     navController.navigate("yellow_screen") {

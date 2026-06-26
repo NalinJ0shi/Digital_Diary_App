@@ -31,7 +31,7 @@ fun ProfileScreen(
     themeProfile: com.example.digitaldiary.miscellaneousBS.AppThemeProfile,
     entriesCount: Int,
     plantsCount: Int,
-    onToggleTheme: () -> Unit, // <-- Dynamic theme modifier hooked to single state source
+    onToggleTheme: (String) -> Unit, // <-- Dynamic theme modifier hooked to single state source
     onBack: () -> Unit,
     onCalendarClick: () -> Unit,
     onChartClick: () -> Unit,
@@ -405,7 +405,7 @@ fun ProfileScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(160.dp),
-                            onClick = { if (!isForestActive) onToggleTheme() }
+                            onClick = { if (!isForestActive) onToggleTheme("forest") }
                         ) {
                             Box(modifier = Modifier.fillMaxSize()) {
                                 Column(
@@ -450,7 +450,7 @@ fun ProfileScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(160.dp),
-                            onClick = { if (!isOceanActive) onToggleTheme() }
+                            onClick = { if (!isOceanActive) onToggleTheme("ocean") }
                         ) {
                             Box(modifier = Modifier.fillMaxSize()) {
                                 Column(
