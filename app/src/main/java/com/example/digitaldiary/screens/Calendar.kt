@@ -46,7 +46,7 @@ fun CalendarScreen(
     onProfileClick: () -> Unit,
     onAddEntry: () -> Unit,
     onEditEntry: (DiaryEntry) -> Unit,
-    onDeleteEntry: (DiaryEntry) -> Unit
+    onDeleteEntry: (DiaryEntry) -> Unit,
 )
 {
     val context = LocalContext.current
@@ -245,7 +245,7 @@ fun CalendarScreen(
                                             ) {
                                                 Box(modifier = Modifier.size(45.dp), contentAlignment = Alignment.Center) {
                                                     if (isToday) {
-                                                        Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.fillMaxSize(), tint = todayRingColor)
+                                                        Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.fillMaxSize(), tint = themeProfile.calendarTodayRingColor)
                                                         Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.size(35.dp), tint = innerFillColor)
                                                     } else {
                                                         Icon(painter = painterResource(id = R.drawable.calender_face), contentDescription = null, modifier = Modifier.fillMaxSize(), tint = emptyCircleColor)

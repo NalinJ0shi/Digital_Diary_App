@@ -200,7 +200,7 @@ fun ChartScreen(
                             if (dailyAverages.isEmpty()) {
                                 Text("Not enough data.", Modifier.align(Alignment.Center), color = TextGray)
                             } else {
-                                StraightLineBarGraph(dataPoints = dailyAverages)
+                                StraightLineBarGraph(dataPoints = dailyAverages, themeProfile = themeProfile)
                             }
                         }
                     }
@@ -281,7 +281,9 @@ fun ChartScreen(
 }
 
 @Composable
-fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
+fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>,
+                         themeProfile: com.example.digitaldiary.miscellaneousBS.AppThemeProfile)
+{
     Canvas(modifier = Modifier.fillMaxSize()) {
         val maxPoint = 5f
         val minPoint = 1f
@@ -342,7 +344,7 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
         // LAYER 3: Draw the data point rings/anchors first
         coordinates.forEach { offset ->
             drawCircle(color = Color.White, radius = 7.dp.toPx(), center = offset)
-            drawCircle(color = PrimaryGreen, radius = 4.dp.toPx(), center = offset)
+            drawCircle(color = themeProfile.graphLineColor, radius = 4.dp.toPx(), center = offset)
         }
 
         // LAYER 4: Draw the Line *ON TOP*
@@ -354,7 +356,7 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>) {
 
             drawPath(
                 path = path,
-                color = PrimaryGreen,
+                color = themeProfile.graphLineColor,
                 style = Stroke(
                     width = 3.dp.toPx(),
                     cap = StrokeCap.Round,

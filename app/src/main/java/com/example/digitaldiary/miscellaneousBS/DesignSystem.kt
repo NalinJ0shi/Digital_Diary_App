@@ -23,7 +23,9 @@ data class AppThemeProfile(
     val backHillColor: Color,
     val frontHillColor: Color,
     val navBarRiveResId: Int,
-    val activeIconColor: Color
+    val activeIconColor: Color,
+    val graphLineColor: Color,
+    val calendarTodayRingColor: Color
 )
 
 object AppDesignTokens {
@@ -39,7 +41,9 @@ object AppDesignTokens {
         backHillColor = Color(0xFFC6D7AC),
         frontHillColor = Color(0xFFDAEBC0),
         navBarRiveResId = com.nalin.my_digitaldiary.R.raw.smiley,
-        activeIconColor = Color(0xFF4CA18A)
+        activeIconColor = Color(0xFF4CA18A),
+        graphLineColor = Color(0xFF4CA18A),
+        calendarTodayRingColor = Color(0xFF4CA18A)
     )
 
     // Secondary Theme Profile Configuration
@@ -48,7 +52,9 @@ object AppDesignTokens {
         backHillColor = Color(0xFF38BDF8),
         frontHillColor = Color(0xFF85C9EA),
         navBarRiveResId = com.nalin.my_digitaldiary.R.raw.smiley2,
-        activeIconColor = Color(0xFF38BDF8)
+        activeIconColor = Color(0xFF38BDF8),
+        graphLineColor = Color(0xFF38BDF8),
+        calendarTodayRingColor = Color(0xFF0EA5E9)
     )
 
     // Baseline fallback background colors & gradient
