@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import java.text.SimpleDateFormat
 import java.util.*
@@ -46,51 +45,58 @@ fun DiaryItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(110.dp)
-            .padding(bottom = 4.dp, start = 8.dp, end = 8.dp)
+            .wrapContentHeight()
+            .padding(bottom = 12.dp, start = 8.dp, end = 8.dp)
             .combinedClickable(
                 onClick = { if (showDeleteIcon) showDeleteIcon = false else onEdit(entry) },
                 onLongClick = { showDeleteIcon = true }
             ),
         colors = CardDefaults.cardColors(
-            // Glassmorphism effect
-            containerColor = Color.White.copy(alpha = 0.12f)
+            containerColor = Color.White
+        ),
+        // Change defaultElevation to 0.dp to completely remove the box shadow
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 0.dp
         ),
         shape = RoundedCornerShape(24.dp)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
             Column(
-                modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp, vertical = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(horizontal = 20.dp, vertical = 20.dp),
                 horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Top
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.DateRange,
                         contentDescription = null,
-                        tint = Color(0xFF94A3B8),
+                        tint = Color(0xFF64748B), // Darker gray for clear slate contrast
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = dateStr,
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                        color = Color(0xFFF1F5F9) // Light text
+                        color = Color(0xFF1E293B) // Dark slate primary font
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = entry.content,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFFCBD5E1), // Softer light text
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    color = Color(0xFF475569) // Darker readable body gray text
+                    // 3. Max lines and text truncation modifiers completely removed to enable natural layout wrapping
                 )
             }
             if (showDeleteIcon) {
                 IconButton(
                     onClick = { onDeleteRequest(entry) },
-                    modifier = Modifier.align(Alignment.CenterEnd).padding(end = 12.dp)
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 12.dp)
                 ) {
                     Icon(Icons.Default.Delete, "Delete", tint = Color(0xFFF87171))
                 }
