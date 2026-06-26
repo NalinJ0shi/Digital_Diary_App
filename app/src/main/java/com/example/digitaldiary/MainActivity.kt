@@ -12,6 +12,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.example.digitaldiary.miscellaneousBS.AppDesignTokens
+import com.example.digitaldiary.miscellaneousBS.UniversalBackgroundWrapper
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -66,7 +68,9 @@ fun DiaryAppNavigation() {
     val context = LocalContext.current
     val diaryViewModel: DiaryViewModel = viewModel(factory = ViewModelProvider.AndroidViewModelFactory.getInstance(context.applicationContext as Application))
 
-    var isDarkMode by remember { mutableStateOf(false) }
+    // Manage theme profiling through single point-of-truth state
+    var currentThemeProfile by remember { mutableStateOf<com.example.digitaldiary.miscellaneousBS.AppThemeProfile>(AppDesignTokens.OceanTheme) }
+
     val entries by diaryViewModel.allEntries.collectAsState(initial = emptyList())
     val unlockedPlants by diaryViewModel.unlockedPlants.collectAsState(initial = emptyList())
 
@@ -85,48 +89,57 @@ fun DiaryAppNavigation() {
         }
 
         composable("home") {
-            GardenScreen(
-                entries = entries,
-                streakCount = streakCount,
-                canAdd = true,
-                isDarkMode = isDarkMode,
-                currentPlantTier = currentPlantTier,
-                onUnlockPlant = { tier -> diaryViewModel.unlockNewPlant(tier + 1) },
-                onToggleTheme = { isDarkMode = !isDarkMode },
-                onAddEntry = { navController.navigate("mood_screen") },
-                onOpenCalendar = {
-                    navController.navigate("calendar_screen") {
-                        popUpTo("home") { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                onNavigateToChart = {
-                    navController.navigate("chart_screen") {
-                        popUpTo("home") { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                onNavigateToGame = {
-                    navController.navigate("game_screen") {
-                        popUpTo("home") { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                onNavigateToProfile = {
-                    navController.navigate("profile_screen") {
-                        popUpTo("home") { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                onEditEntry = { entry ->
-                    navController.navigate("mood_screen?timestamp=${entry.timestamp}")
-                },
-                onDeleteEntry = { entry -> diaryViewModel.delete(entry) }
-            )
+            // Apply background scenery engine directly to your garden landscape view
+            UniversalBackgroundWrapper(themeProfile = currentThemeProfile) {
+                GardenScreen(
+                    entries = entries,
+                    streakCount = streakCount,
+                    canAdd = true,
+                    isDarkMode = currentThemeProfile == AppDesignTokens.OceanTheme,
+                    currentPlantTier = currentPlantTier,
+                    onUnlockPlant = { tier -> diaryViewModel.unlockNewPlant(tier + 1) },
+                    onToggleTheme = {
+                        currentThemeProfile = if (currentThemeProfile == AppDesignTokens.ForestTheme) {
+                            AppDesignTokens.OceanTheme
+                        } else {
+                            AppDesignTokens.ForestTheme
+                        }
+                    },
+                    onAddEntry = { navController.navigate("mood_screen") },
+                    onOpenCalendar = {
+                        navController.navigate("calendar_screen") {
+                            popUpTo("home") { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onNavigateToChart = {
+                        navController.navigate("chart_screen") {
+                            popUpTo("home") { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onNavigateToGame = {
+                        navController.navigate("game_screen") {
+                            popUpTo("home") { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onNavigateToProfile = {
+                        navController.navigate("profile_screen") {
+                            popUpTo("home") { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onEditEntry = { entry ->
+                        navController.navigate("mood_screen?timestamp=${entry.timestamp}")
+                    },
+                    onDeleteEntry = { entry -> diaryViewModel.delete(entry) }
+                )
+            }
         }
 
         composable("plant_collection") {
@@ -159,7 +172,7 @@ fun DiaryAppNavigation() {
                         dayRating = moodScore,
                         existingEntry = existingEntry
                     )
-                    // Change: Instead of navigating to "home", go back to the previous screen
+                    // Custom non-garden pop-back configuration to protect screen navigation rules
                     navController.popBackStack()
                 },
                 onBack = { navController.popBackStack() }
@@ -168,6 +181,7 @@ fun DiaryAppNavigation() {
 
         composable("calendar_screen") {
             CalendarScreen(
+                riveResId = currentThemeProfile.navBarRiveResId,
                 entries = entries,
                 onDateSelected = { dateInMillis ->
                     navController.navigate("mood_screen?timestamp=$dateInMillis")
@@ -212,6 +226,7 @@ fun DiaryAppNavigation() {
 
         composable("chart_screen") {
             ChartScreen(
+                riveResId = currentThemeProfile.navBarRiveResId,
                 entries = entries,
                 onBack = {
                     navController.navigate("yellow_screen") {
@@ -247,6 +262,7 @@ fun DiaryAppNavigation() {
 
         composable("game_screen") {
             BreathingScreen(
+                riveResId = currentThemeProfile.navBarRiveResId,
                 onBack = {
                     navController.navigate("yellow_screen") {
                         popUpTo("home") { inclusive = false }
@@ -280,10 +296,9 @@ fun DiaryAppNavigation() {
         }
 
         composable("profile_screen") {
-            // UPDATED: Now passing the continuous reactive lists straight into your ProfileScreen composable
             ProfileScreen(
+                riveResId = currentThemeProfile.navBarRiveResId,
                 entriesCount = entries.size,
-                // Week 1 is available by default, so total plants = database entries + 1 baseline plant
                 plantsCount = unlockedPlants.size + 1,
                 onBack = {
                     navController.navigate("yellow_screen") {

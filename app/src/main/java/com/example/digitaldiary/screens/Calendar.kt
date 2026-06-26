@@ -35,6 +35,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(
+    riveResId: Int,
     entries: List<DiaryEntry>,
     onDateSelected: (Long) -> Unit,
     onBack: () -> Unit,
@@ -156,7 +157,7 @@ fun CalendarScreen(
                 }
             },
             bottomBar = {
-                CustomBottomNavBar(0, onCalendarClick, onChartClick, onGameClick, onProfileClick, onAddEntry)
+                CustomBottomNavBar(0, riveResId = riveResId,onCalendarClick, onChartClick, onGameClick, onProfileClick, onAddEntry)
             }
         ) { padding ->
             LazyColumn(

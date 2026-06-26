@@ -120,16 +120,17 @@ fun GardenScreen(
         Box(modifier = Modifier.fillMaxSize()) {
             Scaffold(
                 containerColor = Color.Transparent,
-                bottomBar = {
-                    CustomBottomNavBar(
-                        selectedTab = 0,
-                        onCalendarClick = onOpenCalendar,
-                        onChartClick = onNavigateToChart,
-                        onGameClick = onNavigateToGame,
-                        onProfileClick = onNavigateToProfile,
-                        onAddEntry = onAddEntry
-                    )
-                }
+//                bottomBar = {
+//                    CustomBottomNavBar(
+//
+//                        selectedTab = 0,
+//                        onCalendarClick = onOpenCalendar,
+//                        onChartClick = onNavigateToChart,
+//                        onGameClick = onNavigateToGame,
+//                        onProfileClick = onNavigateToProfile,
+//                        onAddEntry = onAddEntry
+//                    )
+//                }
             ) { paddingValues ->
                 Column(
                     modifier = Modifier

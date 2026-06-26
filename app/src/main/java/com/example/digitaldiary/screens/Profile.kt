@@ -22,6 +22,7 @@ import com.nalin.my_digitaldiary.R
 
 @Composable
 fun ProfileScreen(
+    riveResId: Int,
     entriesCount: Int,
     plantsCount: Int,
     onBack: () -> Unit,
@@ -363,6 +364,7 @@ fun ProfileScreen(
 
             Box(modifier = Modifier.align(Alignment.BottomCenter)) {
                 CustomBottomNavBar(
+                    riveResId = riveResId,
                     selectedTab = 3,
                     onCalendarClick = onCalendarClick,
                     onChartClick = onChartClick,

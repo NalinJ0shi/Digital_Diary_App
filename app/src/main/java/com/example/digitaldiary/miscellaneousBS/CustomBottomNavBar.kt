@@ -27,6 +27,7 @@ import com.nalin.my_digitaldiary.R
 @Composable
 fun CustomBottomNavBar(
     selectedTab: Int, // Tells the navbar which icon should be green
+    riveResId: Int,
     onCalendarClick: () -> Unit,
     onChartClick: () -> Unit,
     onGameClick: () -> Unit,
@@ -149,45 +150,47 @@ fun CustomBottomNavBar(
             }
         }
 
-        AndroidView(
-            modifier = Modifier
-                .size(100.dp)
-                .align(Alignment.BottomCenter)
-                .offset(x = 0.dp, y = (-40).dp),
-            factory = { context ->
-                RiveAnimationView(context).apply {
-                    setRiveResource(
-                        resId = R.raw.smiley,
-                        stateMachineName = "State Machine 1",
-                        autoplay = true // Run State Machine layers immediately
-                    )
-                }.also {
-                    riveView = it
-                }
-            },
-            update = { view ->
-                riveView = view
+        key(riveResId){
+            AndroidView(
+                modifier = Modifier
+                    .size(100.dp)
+                    .align(Alignment.BottomCenter)
+                    .offset(x = 0.dp, y = (-40).dp),
+                factory = { context ->
+                    RiveAnimationView(context).apply {
+                        setRiveResource(
+                            resId = R.raw.smiley,
+                            stateMachineName = "State Machine 1",
+                            autoplay = true // Run State Machine layers immediately
+                        )
+                    }.also {
+                        riveView = it
+                    }
+                },
+                update = { view ->
+                    riveView = view
 
-                view.setOnTouchListener { v, event ->
-                    v.onTouchEvent(event)
-                    when (event.action) {
-                        MotionEvent.ACTION_DOWN -> {
-                            // Change your primary pointer interaction state
-                            view.setBooleanState("State Machine 1", "active", true)
-                        }
-                        MotionEvent.ACTION_UP -> {
-                            v.performClick()
-                            view.setBooleanState("State Machine 1", "active", false)
-                            coroutineScope.launch {
-                                delay(300)
-                                onAddEntry()
+                    view.setOnTouchListener { v, event ->
+                        v.onTouchEvent(event)
+                        when (event.action) {
+                            MotionEvent.ACTION_DOWN -> {
+                                // Change your primary pointer interaction state
+                                view.setBooleanState("State Machine 1", "active", true)
+                            }
+                            MotionEvent.ACTION_UP -> {
+                                v.performClick()
+                                view.setBooleanState("State Machine 1", "active", false)
+                                coroutineScope.launch {
+                                    delay(300)
+                                    onAddEntry()
+                                }
                             }
                         }
+                        true
                     }
-                    true
                 }
-            }
-        )
+            )
+        }
     }
 }
 

@@ -59,6 +59,7 @@ val MoodColors = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChartScreen(
+    riveResId: Int,
     entries: List<DiaryEntry>,
     onBack: () -> Unit,
     onCalendarClick: () -> Unit,
@@ -129,6 +130,7 @@ fun ChartScreen(
             },
             bottomBar = {
                 CustomBottomNavBar(
+                    riveResId = riveResId,
                     selectedTab = 1,
                     onCalendarClick = onCalendarClick,
                     onChartClick = onChartClick,

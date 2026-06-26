@@ -35,6 +35,7 @@ data class BreathingExercise(
 
 @Composable
 fun BreathingScreen(
+    riveResId: Int,
     onBack: () -> Unit,
     onCalendarClick: () -> Unit,
     onChartClick: () -> Unit,
@@ -52,6 +53,7 @@ fun BreathingScreen(
                     containerColor = Color.Transparent,
                     bottomBar = {
                         CustomBottomNavBar(
+                            riveResId = riveResId,
                             selectedTab = 2,
                             onCalendarClick = onCalendarClick,
                             onChartClick = onChartClick,
