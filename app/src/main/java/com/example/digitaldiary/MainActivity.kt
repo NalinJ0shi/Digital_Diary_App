@@ -69,7 +69,7 @@ fun DiaryAppNavigation() {
     val diaryViewModel: DiaryViewModel = viewModel(factory = ViewModelProvider.AndroidViewModelFactory.getInstance(context.applicationContext as Application))
 
     // Manage theme profiling through single point-of-truth state
-    var currentThemeProfile by remember { mutableStateOf<com.example.digitaldiary.miscellaneousBS.AppThemeProfile>(AppDesignTokens.OceanTheme) }
+    var currentThemeProfile by remember { mutableStateOf<com.example.digitaldiary.miscellaneousBS.AppThemeProfile>(AppDesignTokens.ForestTheme) }
 
     val entries by diaryViewModel.allEntries.collectAsState(initial = emptyList())
     val unlockedPlants by diaryViewModel.unlockedPlants.collectAsState(initial = emptyList())
