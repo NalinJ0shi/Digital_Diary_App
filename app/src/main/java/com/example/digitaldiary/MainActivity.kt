@@ -304,6 +304,13 @@ fun DiaryAppNavigation() {
                 riveResId = currentThemeProfile.navBarRiveResId,
                 entriesCount = entries.size,
                 plantsCount = unlockedPlants.size + 1,
+                onToggleTheme = { // <-- ADD THIS LAMBDA BLOCK
+                    currentThemeProfile = if (currentThemeProfile == AppDesignTokens.ForestTheme) {
+                        AppDesignTokens.OceanTheme
+                    } else {
+                        AppDesignTokens.ForestTheme
+                    }
+                },
                 onBack = {
                     navController.navigate("yellow_screen") {
                         popUpTo("home") { inclusive = false }
