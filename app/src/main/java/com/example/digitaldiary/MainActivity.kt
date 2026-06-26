@@ -159,9 +159,8 @@ fun DiaryAppNavigation() {
                         dayRating = moodScore,
                         existingEntry = existingEntry
                     )
-                    navController.navigate("home") {
-                        popUpTo(0) { inclusive = true }
-                    }
+                    // Change: Instead of navigating to "home", go back to the previous screen
+                    navController.popBackStack()
                 },
                 onBack = { navController.popBackStack() }
             )
