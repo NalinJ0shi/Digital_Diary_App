@@ -29,6 +29,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.example.digitaldiary.miscellaneousBS.CustomBottomNavBar
 import com.example.digitaldiary.miscellaneousBS.UniversalBackgroundWrapper
 import com.example.digitaldiary.database.DiaryEntry
+import androidx.compose.ui.graphics.drawscope.withTransform
 import com.nalin.my_digitaldiary.R
 import app.rive.runtime.kotlin.RiveAnimationView
 import app.rive.runtime.kotlin.core.Alignment as RiveAlignment
@@ -281,9 +282,28 @@ fun ChartScreen(
 }
 
 @Composable
-fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>,
-                         themeProfile: com.example.digitaldiary.miscellaneousBS.AppThemeProfile)
-{
+fun StraightLineBarGraph(
+    dataPoints: List<Pair<String, Float>>,
+    themeProfile: com.example.digitaldiary.miscellaneousBS.AppThemeProfile
+) {
+    // 1. LOAD COMPOSABLE ASSETS OUTSIDE THE CANVAS ENGINE
+    val moodDrawables = listOf(
+        painterResource(id = R.drawable.exicted),  // Mood 5 (Top)
+        painterResource(id = R.drawable.happy),    // Mood 4
+        painterResource(id = R.drawable.surprise), // Mood 3
+        painterResource(id = R.drawable.tire),     // For Mood 2
+        painterResource(id = R.drawable.sad)       // Mood 1 (Bottom)
+    )
+
+    // Convert Dp measurements to Px while still inside the Composable scope
+    val emojiSizePx = with(androidx.compose.ui.platform.LocalDensity.current) { 22.dp.toPx() }
+    val yAxisLabelOffsetPx = with(androidx.compose.ui.platform.LocalDensity.current) { 10.dp.toPx() }
+    val gridStrokePx = with(androidx.compose.ui.platform.LocalDensity.current) { 2.dp.toPx() }
+    val yAxisDotRadiusPx = with(androidx.compose.ui.platform.LocalDensity.current) { 6.dp.toPx() }
+    val anchorRadiusOuterPx = with(androidx.compose.ui.platform.LocalDensity.current) { 7.dp.toPx() }
+    val anchorRadiusInnerPx = with(androidx.compose.ui.platform.LocalDensity.current) { 4.dp.toPx() }
+    val lineStrokeWidthPx = with(androidx.compose.ui.platform.LocalDensity.current) { 3.dp.toPx() }
+
     Canvas(modifier = Modifier.fillMaxSize()) {
         val maxPoint = 5f
         val minPoint = 1f
@@ -311,18 +331,25 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>,
                 color = GridLineColor,
                 start = Offset(gridX, 0f),
                 end = Offset(gridX, graphHeight),
-                strokeWidth = 2.dp.toPx()
+                strokeWidth = gridStrokePx
             )
         }
 
-        // LAYER 2: Draw Y-Axis Mood Dots
+        // LAYER 2: Draw Y-Axis Mood Emojis (Safely rendering pre-loaded painters)
         for (i in 5 downTo 1) {
             val y = graphHeight - ((i - minPoint) * heightRatio)
-            drawCircle(
-                color = MoodColors[5 - i],
-                radius = 6.dp.toPx(),
-                center = Offset(10.dp.toPx(), y)
-            )
+            val painter = moodDrawables[5 - i]
+
+            withTransform({
+                translate(
+                    left = yAxisLabelOffsetPx - (emojiSizePx / 2f),
+                    top = y - (emojiSizePx / 2f)
+                )
+            }) {
+                with(painter) {
+                    draw(size = androidx.compose.ui.geometry.Size(emojiSizePx, emojiSizePx))
+                }
+            }
         }
 
         val path = Path()
@@ -343,8 +370,8 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>,
 
         // LAYER 3: Draw the data point rings/anchors first
         coordinates.forEach { offset ->
-            drawCircle(color = Color.White, radius = 7.dp.toPx(), center = offset)
-            drawCircle(color = themeProfile.graphLineColor, radius = 4.dp.toPx(), center = offset)
+            drawCircle(color = Color.White, radius = anchorRadiusOuterPx, center = offset)
+            drawCircle(color = themeProfile.graphLineColor, radius = anchorRadiusInnerPx, center = offset)
         }
 
         // LAYER 4: Draw the Line *ON TOP*
@@ -358,7 +385,7 @@ fun StraightLineBarGraph(dataPoints: List<Pair<String, Float>>,
                 path = path,
                 color = themeProfile.graphLineColor,
                 style = Stroke(
-                    width = 3.dp.toPx(),
+                    width = lineStrokeWidthPx,
                     cap = StrokeCap.Round,
                     join = StrokeJoin.Round
                 )
