@@ -159,7 +159,7 @@ fun CalendarScreen(
                 }
             },
             bottomBar = {
-                CustomBottomNavBar(0, riveResId = riveResId,onCalendarClick, onChartClick, onGameClick, onProfileClick, onAddEntry)
+                CustomBottomNavBar(0, riveResId = riveResId,themeProfile = themeProfile,onCalendarClick, onChartClick, onGameClick, onProfileClick, onAddEntry)
             }
         ) { padding ->
             LazyColumn(

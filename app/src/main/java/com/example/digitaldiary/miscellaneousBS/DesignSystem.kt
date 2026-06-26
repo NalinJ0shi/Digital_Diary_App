@@ -22,7 +22,8 @@ data class AppThemeProfile(
     val backgroundBrush: Brush,
     val backHillColor: Color,
     val frontHillColor: Color,
-    val navBarRiveResId: Int
+    val navBarRiveResId: Int,
+    val activeIconColor: Color
 )
 
 object AppDesignTokens {
@@ -37,15 +38,17 @@ object AppDesignTokens {
         backgroundBrush = Brush.verticalGradient(listOf(Color(0xFFAEBE93), Color(0xFFD4DAE1))),
         backHillColor = Color(0xFFC6D7AC),
         frontHillColor = Color(0xFFDAEBC0),
-        navBarRiveResId = com.nalin.my_digitaldiary.R.raw.smiley
+        navBarRiveResId = com.nalin.my_digitaldiary.R.raw.smiley,
+        activeIconColor = Color(0xFF4CA18A)
     )
 
     // Secondary Theme Profile Configuration
     val OceanTheme = AppThemeProfile(
         backgroundBrush = Brush.verticalGradient(listOf(Color(0xFF7DD3FC), Color(0xFFE0F2FE))),
         backHillColor = Color(0xFF38BDF8),
-        frontHillColor = Color(0xFF7DD3FC),
-        navBarRiveResId = com.nalin.my_digitaldiary.R.raw.smiley2
+        frontHillColor = Color(0xFF85C9EA),
+        navBarRiveResId = com.nalin.my_digitaldiary.R.raw.smiley2,
+        activeIconColor = Color(0xFF38BDF8)
     )
 
     // Baseline fallback background colors & gradient

@@ -367,6 +367,7 @@ fun ProfileScreen(
                 CustomBottomNavBar(
                     riveResId = riveResId,
                     selectedTab = 3,
+                    themeProfile = themeProfile,
                     onCalendarClick = onCalendarClick,
                     onChartClick = onChartClick,
                     onGameClick = onGameClick,

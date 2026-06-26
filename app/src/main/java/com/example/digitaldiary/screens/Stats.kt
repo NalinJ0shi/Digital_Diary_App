@@ -133,6 +133,7 @@ fun ChartScreen(
                 CustomBottomNavBar(
                     riveResId = riveResId,
                     selectedTab = 1,
+                    themeProfile = themeProfile,
                     onCalendarClick = onCalendarClick,
                     onChartClick = onChartClick,
                     onGameClick = onGameClick,

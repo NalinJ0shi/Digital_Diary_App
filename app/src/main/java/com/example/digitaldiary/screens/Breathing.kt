@@ -56,6 +56,7 @@ fun BreathingScreen(
                         CustomBottomNavBar(
                             selectedTab = 2,
                             riveResId = riveResId,
+                            themeProfile = themeProfile,
                             onCalendarClick = onCalendarClick,
                             onChartClick = onChartClick,
                             onGameClick = onGameClick,

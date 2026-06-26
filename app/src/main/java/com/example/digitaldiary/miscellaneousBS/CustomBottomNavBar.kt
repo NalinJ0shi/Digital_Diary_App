@@ -28,6 +28,7 @@ import com.nalin.my_digitaldiary.R
 fun CustomBottomNavBar(
     selectedTab: Int, // Tells the navbar which icon should be green
     riveResId: Int,
+    themeProfile: com.example.digitaldiary.miscellaneousBS.AppThemeProfile,
     onCalendarClick: () -> Unit,
     onChartClick: () -> Unit,
     onGameClick: () -> Unit,
@@ -52,7 +53,7 @@ fun CustomBottomNavBar(
 
     val groundColor = Color(0xFF042F2E)
     val navBarColor = Color(0xFFF8FAFC)
-    val activeIconColor = Color(0xFF4CA18A)
+    val activeIconColor = themeProfile.activeIconColor
     val inactiveIconColor = Color(0xFF94A3B8)
 
     val totalClickableHeight = 120.dp
