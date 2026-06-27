@@ -31,7 +31,7 @@ fun ProfileScreen(
     themeProfile: com.example.digitaldiary.miscellaneousBS.AppThemeProfile,
     entriesCount: Int,
     plantsCount: Int,
-    onToggleTheme: (String) -> Unit, // <-- Dynamic theme modifier hooked to single state source
+    onToggleTheme: (String) -> Unit,
     onBack: () -> Unit,
     onCalendarClick: () -> Unit,
     onChartClick: () -> Unit,
@@ -43,13 +43,12 @@ fun ProfileScreen(
     val primaryGreenColor = Color(0xFFFFFFFF)
     val scrollState = rememberScrollState()
 
-    // Toggle state to shift between settings view and theme gallery grid layout
     var showThemeSelection by remember { mutableStateOf(false) }
 
     UniversalBackgroundWrapper(themeProfile = themeProfile) {
         Box(modifier = Modifier.fillMaxSize()) {
             if (!showThemeSelection) {
-                // --- DEFAULT MAIN PROFILE VIEW ---
+                // --- 1. DEFAULT MAIN PROFILE VIEW (RESTORED!) ---
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.Start
@@ -196,12 +195,11 @@ fun ProfileScreen(
 
                         Spacer(modifier = Modifier.height(14.dp))
 
-                        // Theme selection activation trigger shell
                         UniversalDesignCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(70.dp),
-                            onClick = { showThemeSelection = true } // <-- OPENS GRID GALLERY VIEW
+                            onClick = { showThemeSelection = true } // <-- OPENS THE GALLERY
                         ) {
                             Row(
                                 modifier = Modifier
@@ -362,14 +360,13 @@ fun ProfileScreen(
                     }
                 }
             } else {
-                // --- 2. THEME SELECTION DISPLAY LAYER (PLANT CARD GRID STYLE) ---
+                // --- 2. THEME SELECTION DISPLAY LAYER (REPOSITIONED & PRESERVED 2x2!) ---
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 24.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    // Back arrow navigation wrapper to close overlay menu
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -393,10 +390,9 @@ fun ProfileScreen(
                         )
                     }
 
+                    // GRID ROW 1: Forest and Ocean side-by-side
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         // --- FOREST THEME CARD SELECTION ---
@@ -415,7 +411,6 @@ fun ProfileScreen(
                                     verticalArrangement = Arrangement.SpaceBetween,
                                     horizontalAlignment = Alignment.Start
                                 ) {
-                                    // Mini Theme Preview Circle Gradient Background Layout
                                     Box(
                                         modifier = Modifier
                                             .size(45.dp)
@@ -488,10 +483,105 @@ fun ProfileScreen(
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // GRID ROW 2: Cozy Sunset and Nordic Frost side-by-side
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        // --- SUNSET THEME CARD SELECTION ---
+                        val isSunsetActive = themeProfile == AppDesignTokens.SunsetTheme
+                        UniversalDesignCard(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(160.dp),
+                            onClick = { if (!isSunsetActive) onToggleTheme("sunset") }
+                        ) {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(16.dp),
+                                    verticalArrangement = Arrangement.SpaceBetween,
+                                    horizontalAlignment = Alignment.Start
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(45.dp)
+                                            .background(
+                                                AppDesignTokens.SunsetTheme.backgroundBrush,
+                                                RoundedCornerShape(12.dp)
+                                            )
+                                    )
+                                    Text(
+                                        text = "Cozy\nSunset",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 18.sp,
+                                        color = AppDesignTokens.primaryText
+                                    )
+                                }
+                                if (isSunsetActive) {
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = "Selected Theme Indicator",
+                                        tint = themeProfile.activeIconColor,
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .padding(12.dp)
+                                    )
+                                }
+                            }
+                        }
+
+                        // --- NORDIC FROST THEME CARD SELECTION ---
+                        val isNordicActive = themeProfile == AppDesignTokens.NordicTheme
+                        UniversalDesignCard(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(160.dp),
+                            onClick = { if (!isNordicActive) onToggleTheme("nordic") }
+                        ) {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(16.dp),
+                                    verticalArrangement = Arrangement.SpaceBetween,
+                                    horizontalAlignment = Alignment.Start
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(45.dp)
+                                            .background(
+                                                AppDesignTokens.NordicTheme.backgroundBrush,
+                                                RoundedCornerShape(12.dp)
+                                            )
+                                    )
+                                    Text(
+                                        text = "Nordic\nFrost",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 18.sp,
+                                        color = AppDesignTokens.primaryText
+                                    )
+                                }
+                                if (isNordicActive) {
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = "Selected Theme Indicator",
+                                        tint = themeProfile.activeIconColor,
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .padding(12.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
-            // Persistence of the customized Bottom Navbar container inside screen scaffold
             Box(modifier = Modifier.align(Alignment.BottomCenter)) {
                 CustomBottomNavBar(
                     selectedTab = 3,

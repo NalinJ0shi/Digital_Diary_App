@@ -35,7 +35,6 @@ object AppDesignTokens {
     val secondaryText = Color(0xFFA0A0A0)
     val accentColor = Color(0xFF6EBE80)
 
-    // Baseline Default Theme Profile Configuration
     val ForestTheme = AppThemeProfile(
         backgroundBrush = Brush.verticalGradient(listOf(Color(0xFFAEBE93), Color(0xFFD4DAE1))),
         backHillColor = Color(0xFFC6D7AC),
@@ -45,8 +44,6 @@ object AppDesignTokens {
         graphLineColor = Color(0xFF4CA18A),
         calendarTodayRingColor = Color(0xFF4CA18A)
     )
-
-    // Secondary Theme Profile Configuration
     val OceanTheme = AppThemeProfile(
         backgroundBrush = Brush.verticalGradient(listOf(Color(0xFF7DD3FC), Color(0xFFE0F2FE))),
         backHillColor = Color(0xFF38BDF8),
@@ -56,8 +53,31 @@ object AppDesignTokens {
         graphLineColor = Color(0xFF38BDF8),
         calendarTodayRingColor = Color(0xFF0EA5E9)
     )
+    val SunsetTheme = AppThemeProfile(
+        // A beautiful golden-hour gradient for the sky background
+        backgroundBrush = Brush.verticalGradient(
+            listOf(Color(0xFFFED7AA), Color(0xFFFEE2E2)) // Soft Peach to Warm Mallow Pink
+        ),
+        backHillColor = Color(0xFFFCA5A5),          // Warm Coral Pink back hills
+        frontHillColor = Color(0xFFFFEDD5),         // Light Sunset Cream front hills
+        navBarRiveResId = com.nalin.my_digitaldiary.R.raw.smiley3, // Your new peach Rive file!
+        activeIconColor = Color(0xFFFB923C),        // Your chosen Peach accent color
+        graphLineColor = Color(0xFFFB923C),         // Peach stats graph line & dots
+        calendarTodayRingColor = Color(0xFFFB923C)  // Peach calendar today circle indicator
+    )
+    val NordicTheme = AppThemeProfile(
+        // A crisp, clean winter slate-blue to ice gradient
+        backgroundBrush = Brush.verticalGradient(
+            listOf(Color(0xFFCBD5E1), Color(0xFFE0F2FE))
+        ),
+        backHillColor = Color(0xFF94A3B8),          // Slate gray-blue back hills
+        frontHillColor = Color(0xFFE2E8F0),         // Soft frosted ice front hills
+        navBarRiveResId = com.nalin.my_digitaldiary.R.raw.smiley4, // Your new Nordic Rive file!
+        activeIconColor = Color(0xFF06B6D4),        // Crisp Teal/Cyan accent color
+        graphLineColor = Color(0xFF06B6D4),         // Teal graph lines & dots
+        calendarTodayRingColor = Color(0xFF06B6D4)  // Teal calendar today circle indicator
+    )
 
-    // Baseline fallback background colors & gradient
     val UniversalTopBgColor = Color(0xFFAEBE93)
     val UniversalBottomBgColor = Color(0xFFD4DAE1)
     val UniversalBrush = Brush.verticalGradient(
@@ -72,7 +92,7 @@ fun UniversalBackgroundWrapper(
     themeProfile: AppThemeProfile = AppDesignTokens.ForestTheme,
     content: @Composable BoxScope.() -> Unit
 ) {
-    // Exact hill vector geometry values extracted directly from your layout assets
+
     val hillPathString = "M285 17.4657C203.574 -21.8322 183.5 17.4659 114.5 17.4658L-3 17.4657V203.801H402V27.8015C402 27.8015 352 49.8013 285 17.4657Z"
     val hillPath = remember { PathParser().parsePathString(hillPathString).toPath() }
 
@@ -82,12 +102,11 @@ fun UniversalBackgroundWrapper(
     Box(modifier = modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxSize()) {
 
-            // Draw the underlying decoupled window canvas background field
+
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawRect(brush = themeProfile.backgroundBrush)
             }
 
-            // Draw Layered Back Hill - Reactive to theme profiles
             Canvas(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -101,7 +120,6 @@ fun UniversalBackgroundWrapper(
                 }
             }
 
-            // Draw Layered Front Hill - Reactive to theme profiles
             Canvas(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -116,7 +134,6 @@ fun UniversalBackgroundWrapper(
             }
         }
 
-        // 2. Front Screen Slot Container (Injects live screen features safely)
         content()
     }
 }

@@ -84,7 +84,8 @@ fun DiaryAppNavigation() {
             when (savedThemeKey) {
                 "ocean" -> AppDesignTokens.OceanTheme
                 "forest" -> AppDesignTokens.ForestTheme
-                // "sunset" -> AppDesignTokens.SunsetTheme  <-- Add new profile mappings here later!
+                "sunset" -> AppDesignTokens.SunsetTheme
+                "nordic" -> AppDesignTokens.NordicTheme
                 else -> AppDesignTokens.ForestTheme
             }
         )
@@ -326,7 +327,8 @@ fun DiaryAppNavigation() {
                     currentThemeProfile = when (themeKey) {
                         "ocean" -> AppDesignTokens.OceanTheme
                         "forest" -> AppDesignTokens.ForestTheme
-                        // "sunset" -> AppDesignTokens.SunsetTheme <-- Drop additions here cleanly!
+                        "sunset" -> AppDesignTokens.SunsetTheme
+                        "nordic" -> AppDesignTokens.NordicTheme
                         else -> AppDesignTokens.ForestTheme
                     }
                     sharedPreferences.edit().putString("selected_theme", themeKey).apply()
