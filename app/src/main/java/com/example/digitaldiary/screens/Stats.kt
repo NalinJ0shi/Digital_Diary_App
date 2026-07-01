@@ -44,8 +44,6 @@ val TextDark = Color(0xFF2C2C2C)
 val TextGray = Color(0xFFA0A0A0)
 val GridBarColor = Color(0xFFF4F5F7)
 val GridLineColor = Color(0xFFE2E8F0)
-
-// Safely keeping this as a fallback color for the 0% proportion empty states
 val EmptyBgColorFallback = Color(0xFF0F172A)
 
 // Mood Colors (Best to Worst)
@@ -71,7 +69,6 @@ fun ChartScreen(
     onAddEntry: () -> Unit
 ) {
     var isWeekly by remember { mutableStateOf(true) }
-    // Sorting chronologically before grouping so the timeline flows correctly
     val dailyAverages = remember(entries, isWeekly) {
         val sortedEntries = entries.sortedBy { it.timestamp }
 
@@ -91,8 +88,6 @@ fun ChartScreen(
             }.toList()
         }
     }
-
-    // Proportion Logic: Calculates % of each mood score (1-5)
     val proportions = remember(entries, isWeekly) {
         val filteredEntries = if (isWeekly) {
             entries.takeLast(7)
@@ -113,14 +108,12 @@ fun ChartScreen(
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(start = 16.dp, top = 40.dp)
-        ) {
-            Icon(
+        ) {Icon(
                 painter = painterResource(id = R.drawable.potted_plant),
                 contentDescription = "Navigate to Garden",
                 tint = Color(0xFFFFFFFF),
                 modifier = Modifier.size(32.dp)
-            )
-        }
+            )}
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
@@ -142,7 +135,8 @@ fun ChartScreen(
                     onAddEntry = onAddEntry
                 )
             }
-        ) { paddingValues ->
+        )
+        { paddingValues ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -393,7 +387,6 @@ fun StraightLineBarGraph(
         }
     }
 }
-
 @Composable
 fun RiveAnimationLayout(
     isWeekly: Boolean,
