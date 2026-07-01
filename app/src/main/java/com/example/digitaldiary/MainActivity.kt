@@ -173,8 +173,7 @@ fun DiaryAppNavigation() {
                 type = NavType.LongType
                 defaultValue = -1L
             } )
-        )
-        { backStackEntry ->
+        ) { backStackEntry ->
             val timestamp = backStackEntry.arguments?.getLong("timestamp") ?: -1L
 
             val existingEntry = if (timestamp != -1L) {
@@ -362,7 +361,8 @@ fun DiaryAppNavigation() {
                 },
                 onProfileClick = {  },
                 onAddEntry = { navController.navigate("mood_screen") },
-                onNavigateToPlantCollection = { navController.navigate("plant_collection") }
+                onNavigateToPlantCollection = { navController.navigate("plant_collection") },
+                onNavigateToInvite = { navController.navigate("yellow_screen") }
             )
         }
     }

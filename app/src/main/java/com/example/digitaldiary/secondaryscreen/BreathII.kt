@@ -2,7 +2,10 @@ package com.example.digitaldiary.screens
 
 import com.nalin.my_digitaldiary.R
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -24,6 +27,9 @@ import app.rive.runtime.kotlin.RiveAnimationView
 import com.example.digitaldiary.miscellaneousBS.UniversalBackgroundWrapper
 import com.example.digitaldiary.ui.theme.JosefinSans
 import kotlinx.coroutines.delay
+import kotlin.compareTo
+import kotlin.rem
+import kotlin.text.toInt
 
 enum class BreathingPhase {
     BREATH_OUT, // Phase 1: 50% Green replaces Gray
@@ -80,52 +86,30 @@ fun ActiveBreathingScreen(
     val baseGrayColor = Color(0xFFE2E8F0).copy(alpha = 0.5f)
     val activeGreen50Opacity = Color(0xFF9EF163).copy(alpha = 0.5f)
 
-    UniversalBackgroundWrapper {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFEAF9E7))
+    ) {
         Scaffold(
-            modifier = Modifier.fillMaxSize(),
             containerColor = Color.Transparent
-        ) { innerPadding ->
+        )
+        { innerPadding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Top Navigation Bar
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back to exercises",
-                            tint = Color(0xFF475569)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Text(
-                        text = exerciseTitle,
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = JosefinSans,
-                            color = Color(0xFF1E293B)
-                        )
-                    )
-                }
-
+            )
+            {
                 Spacer(modifier = Modifier.weight(1f))
 
                 // The Centered Interaction Zone
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.size(280.dp)
-                ) {
+                )
+                {
                     Canvas(modifier = Modifier.fillMaxSize()) {
                         val strokeWidthPx = 20.dp.toPx()
                         val cornerRadiusPx = 48.dp.toPx()
@@ -216,7 +200,6 @@ fun ActiveBreathingScreen(
                 }
 
                 Spacer(modifier = Modifier.height(40.dp))
-
                 // Dynamic UI guidance text
                 Text(
                     text = when (currentPhase) {
@@ -232,7 +215,20 @@ fun ActiveBreathingScreen(
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .padding(bottom = 32.dp)
+                        .size(60.dp)
+                        .background(Color(0xFF475569), shape = CircleShape) // Change hex color here for full background control!
+                        .clickable { onBackClick() }
+                ) { Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.White // Change icon arrow color here!
+                    ) }
             }
+
         }
     }
 }

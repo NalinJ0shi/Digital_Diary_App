@@ -22,8 +22,10 @@ import com.example.digitaldiary.miscellaneousBS.AppDesignTokens
 import com.example.digitaldiary.miscellaneousBS.CustomBottomNavBar
 import com.example.digitaldiary.miscellaneousBS.UniversalBackgroundWrapper
 import com.example.digitaldiary.miscellaneousBS.UniversalDesignCard
+import androidx.compose.ui.platform.LocalContext
 import com.nalin.my_digitaldiary.R
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.example.digitaldiary.openPlayStoreForReview
 
 @Composable
 fun ProfileScreen(
@@ -38,11 +40,12 @@ fun ProfileScreen(
     onGameClick: () -> Unit,
     onProfileClick: () -> Unit,
     onAddEntry: () -> Unit,
-    onNavigateToPlantCollection: () -> Unit
+    onNavigateToPlantCollection: () -> Unit,
+    onNavigateToInvite: () -> Unit,
 ) {
     val primaryGreenColor = Color(0xFFFFFFFF)
     val scrollState = rememberScrollState()
-
+    val context = LocalContext.current
     var showThemeSelection by remember { mutableStateOf(false) }
 
     UniversalBackgroundWrapper(themeProfile = themeProfile) {
@@ -248,7 +251,7 @@ fun ProfileScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(70.dp),
-                            onClick = { /* Review Action */ }
+                            onClick = { openPlayStoreForReview(context) }
                         ) {
                             Row(
                                 modifier = Modifier
@@ -288,7 +291,7 @@ fun ProfileScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(70.dp),
-                            onClick = { /* Invite Action */ }
+                            onClick = { onNavigateToInvite()}
                         ) {
                             Row(
                                 modifier = Modifier
