@@ -404,7 +404,7 @@ fun RiveAnimationLayout(
         factory = { context ->
             RiveAnimationView(context).apply {
                 setRiveResource(
-                    resId = R.raw.glow_tree, // Replace with your actual file name
+                    resId = R.raw.gl0wtree02, // Replace with your actual file name
                     alignment = RiveAlignment.CENTER,
                     fit = Fit.CONTAIN,
                     autoplay = true
