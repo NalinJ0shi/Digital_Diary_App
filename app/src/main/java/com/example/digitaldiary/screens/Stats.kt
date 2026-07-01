@@ -48,11 +48,11 @@ val EmptyBgColorFallback = Color(0xFF0F172A)
 
 // Mood Colors (Best to Worst)
 val MoodColors = listOf(
-    Color(0xFF6EBE80), // 5: Best
-    Color(0xFF8FCE9D), // 4: Good
+    Color(0xFFB392BF), // 5: Best
+    Color(0xFF8FB26F), // 4: Good
     Color(0xFFBBE5C5), // 3: Okay
-    Color(0xFFE2E8E4), // 2: Bad
-    Color(0xFFC7CDCE)  // 1: Terrible
+    Color(0xFFA19595), // 2: Bad
+    Color(0xFFF1E7B0)  // 1: Terrible
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
