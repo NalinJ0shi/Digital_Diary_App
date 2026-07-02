@@ -26,14 +26,11 @@ fun MoodSliderScreen(
     existingEntry: DiaryEntry? = null,
     onSaveEntry: (String, Int) -> Unit,
     onBack: () -> Unit
-) {
+)
+{
     // Start at 3f (The physical Center Dot)
-    var moodLevel by remember {
-        mutableFloatStateOf(existingEntry?.dayRating?.toFloat() ?: 3f)
-    }
-    var entryContent by remember {
-        mutableStateOf(existingEntry?.content ?: "")
-    }
+    var moodLevel by remember { mutableFloatStateOf(existingEntry?.dayRating?.toFloat() ?: 3f) }
+    var entryContent by remember { mutableStateOf(existingEntry?.content ?: "") }
     var hasSlided by remember { mutableStateOf(existingEntry != null) }
 
     // CONTROL PALETTE: Define your exact 5 colors here (one for each Rive state)
@@ -43,7 +40,7 @@ fun MoodSliderScreen(
     val colorStep4 = Color(0xFF8FB26F) // State 4: Somewhat Good
     val colorStep5 = Color(0xFF9D61B8) // State 5: Very Good
 
-    // MATHEMATICAL BLENDING: Calculate the exact blended color based on moodLevel
+    // MATHEMATICAL BLENDING
     val targetBackgroundColor = remember(moodLevel) {
         val baseInteger = floor(moodLevel).toInt()
         val fraction = moodLevel - baseInteger
@@ -57,8 +54,6 @@ fun MoodSliderScreen(
             else -> colorStep3
         }
     }
-
-    // Smooths out minor micro-stuttering while dragging
     val animatedBackgroundColor by animateColorAsState(
         targetValue = targetBackgroundColor,
         animationSpec = tween(durationMillis = 100),
@@ -76,7 +71,7 @@ fun MoodSliderScreen(
         Text(
             text = "What's Hanging?",
             style = MaterialTheme.typography.headlineMedium,
-            color = Color.White, // White text pops nicely against all the background steps
+            color = Color.White,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 

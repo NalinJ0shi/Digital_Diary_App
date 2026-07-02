@@ -304,7 +304,7 @@ fun ProfileScreen(
                             Spacer(modifier = Modifier.width(16.dp))
                             IconButton(onClick = { /* Social 3 */ }) {
                                 Icon(
-                                    painter = painterResource(id = R.drawable.linkedin_logo__1_),
+                                    painter = painterResource(id = R.drawable.linkedin_logo),
                                     contentDescription = "Social 3",
                                     modifier = Modifier.size(28.dp),
                                     tint = Color.Gray
