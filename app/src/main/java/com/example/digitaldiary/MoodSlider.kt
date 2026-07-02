@@ -28,12 +28,11 @@ fun MoodSliderScreen(
     onBack: () -> Unit
 )
 {
-    // Start at 3f (The physical Center Dot)
     var moodLevel by remember { mutableFloatStateOf(existingEntry?.dayRating?.toFloat() ?: 3f) }
     var entryContent by remember { mutableStateOf(existingEntry?.content ?: "") }
     var hasSlided by remember { mutableStateOf(existingEntry != null) }
 
-    // CONTROL PALETTE: Define your exact 5 colors here (one for each Rive state)
+    // CONTROL PALETTE
     val colorStep1 = Color(0xFF6C6363) // State 1: Very Bad
     val colorStep2 = Color(0xFFB09090) // State 2: Somewhat Bad
     val colorStep3 = Color(0xFF5B5454) // State 3: Neutral
@@ -67,7 +66,8 @@ fun MoodSliderScreen(
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
-    ) {
+    )
+    {
         Text(
             text = "What's Hanging?",
             style = MaterialTheme.typography.headlineMedium,
