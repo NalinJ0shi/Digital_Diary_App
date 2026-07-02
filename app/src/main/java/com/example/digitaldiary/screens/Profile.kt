@@ -52,11 +52,12 @@ fun ProfileScreen(
     UniversalBackgroundWrapper(themeProfile = themeProfile) {
         Box(modifier = Modifier.fillMaxSize()) {
             if (!showThemeSelection) {
-                // --- 1. DEFAULT MAIN PROFILE VIEW (RESTORED!) ---
+                // ---Main column---
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.Start
-                ) {
+                )
+                {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -84,62 +85,18 @@ fun ProfileScreen(
                             .padding(horizontal = 24.dp)
                             .padding(top = 8.dp, bottom = 100.dp),
                         horizontalAlignment = Alignment.Start
-                    ) {
-                        Text(
-                            text = "Account",
-                            fontSize = 23.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Gray
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        UniversalDesignCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(100.dp),
-                            onClick = { /* Account Action */ }
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 20.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column(verticalArrangement = Arrangement.Center) {
-                                    Text(
-                                        text = "Username",
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.DarkGray,
-                                        fontSize = 20.sp
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = "ID: 987654321",
-                                        color = Color.LightGray,
-                                        fontSize = 14.sp
-                                    )
-                                }
-                                Icon(
-                                    imageVector = Icons.Default.KeyboardArrowRight,
-                                    contentDescription = "Go to Account",
-                                    tint = Color.Gray
-                                )
-                            }
-                        }
-
+                    )
+                    //Main thing
+                    {
                         Spacer(modifier = Modifier.height(20.dp))
-
+                        //My Records
                         Text(
                             text = "My records",
                             fontSize = 23.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Gray
                         )
-
                         Spacer(modifier = Modifier.height(12.dp))
-
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -169,7 +126,6 @@ fun ProfileScreen(
                                     )
                                 }
                             }
-
                             UniversalDesignCard(
                                 modifier = Modifier
                                     .weight(1f)
@@ -196,9 +152,7 @@ fun ProfileScreen(
                                 }
                             }
                         }
-
                         Spacer(modifier = Modifier.height(14.dp))
-
                         UniversalDesignCard(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -236,18 +190,15 @@ fun ProfileScreen(
                                 )
                             }
                         }
-
                         Spacer(modifier = Modifier.height(20.dp))
-
+                        //Support
                         Text(
                             text = "Support",
                             fontSize = 26.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Gray
                         )
-
                         Spacer(modifier = Modifier.height(14.dp))
-
                         UniversalDesignCard(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -285,9 +236,55 @@ fun ProfileScreen(
                                 )
                             }
                         }
-
+                        Spacer(modifier = Modifier.height(20.dp))
+                        //Legal
+                        Text(
+                            text = "Legal",
+                            fontSize = 26.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.height(14.dp))
+                        UniversalDesignCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(70.dp),
+                            onClick = { openPlayStoreForReview(context) }
+                        )
+                        {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 20.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.thumbs_up),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(24.dp),
+                                        tint = Color.Gray
+                                    )
+                                    Text(
+                                        text = "Write a review",
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.DarkGray,
+                                        fontSize = 18.sp
+                                    )
+                                }
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowRight,
+                                    contentDescription = "Write a review",
+                                    tint = Color.Gray
+                                )
+                            }
+                        }
                         Spacer(modifier = Modifier.height(24.dp))
-
+                        //icons
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.Center,
@@ -323,14 +320,17 @@ fun ProfileScreen(
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                 }
-            } else {
-                // --- 2. THEME SELECTION DISPLAY LAYER (REPOSITIONED & PRESERVED 2x2!) ---
+            }
+            //theme
+            else {
+                // --- 2. THEME SELECTION ---
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 24.dp),
                     horizontalAlignment = Alignment.Start
-                ) {
+                )
+                {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -545,7 +545,7 @@ fun ProfileScreen(
                     }
                 }
             }
-
+            //don't know what this is
             Box(modifier = Modifier.align(Alignment.BottomCenter)) {
                 CustomBottomNavBar(
                     selectedTab = 3,
