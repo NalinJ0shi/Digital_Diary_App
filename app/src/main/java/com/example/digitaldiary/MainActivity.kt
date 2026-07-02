@@ -237,14 +237,13 @@ fun DiaryAppNavigation() {
         composable("chart_screen") {
             ChartScreen(
                 themeProfile = currentThemeProfile,
-                riveResId = currentThemeProfile.navBarRiveResId,
+                navBarRiveResId = currentThemeProfile.navBarRiveResId,
+                statsRiveResId = currentThemeProfile.statsRiveResId,
                 entries = entries,
-                onBack = {
-                    navController.navigate("yellow_screen") {
+                onBack = { navController.navigate("yellow_screen") {
                         popUpTo("home") { inclusive = false }
                         launchSingleTop = true
-                    }
-                },
+                    } },
                 onCalendarClick = {
                     navController.navigate("calendar_screen") {
                         popUpTo("home") { saveState = true }

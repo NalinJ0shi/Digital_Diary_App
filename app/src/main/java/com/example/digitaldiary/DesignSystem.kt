@@ -24,6 +24,7 @@ data class AppThemeProfile(
     val backHillColor: Color,
     val frontHillColor: Color,
     val navBarRiveResId: Int,
+    val statsRiveResId: Int,
     val activeIconColor: Color,
     val graphLineColor: Color,
     val calendarTodayRingColor: Color
@@ -42,6 +43,7 @@ object AppDesignTokens {
         frontHillColor = Color(0xFFDAEBC0),
         navBarRiveResId = R.raw.smiley,
         activeIconColor = Color(0xFF4CA18A),
+        statsRiveResId = R.raw.gl0wtree01,
         graphLineColor = Color(0xFF4CA18A),
         calendarTodayRingColor = Color(0xFF4CA18A)
     )
@@ -51,6 +53,7 @@ object AppDesignTokens {
         frontHillColor = Color(0xFF85C9EA),
         navBarRiveResId = R.raw.smiley2,
         activeIconColor = Color(0xFF38BDF8),
+        statsRiveResId = R.raw.gl0wtree03,
         graphLineColor = Color(0xFF38BDF8),
         calendarTodayRingColor = Color(0xFF0EA5E9)
     )
@@ -62,7 +65,8 @@ object AppDesignTokens {
         backHillColor = Color(0xFFFCA5A5),          // Warm Coral Pink back hills
         frontHillColor = Color(0xFFFFEDD5),         // Light Sunset Cream front hills
         navBarRiveResId = R.raw.smiley3, // Your new peach Rive file!
-        activeIconColor = Color(0xFFFB923C),        // Your chosen Peach accent color
+        activeIconColor = Color(0xFFFB923C),
+        statsRiveResId = R.raw.gl0wtree02,// Your chosen Peach accent color
         graphLineColor = Color(0xFFFB923C),         // Peach stats graph line & dots
         calendarTodayRingColor = Color(0xFFFB923C)  // Peach calendar today circle indicator
     )
@@ -74,7 +78,8 @@ object AppDesignTokens {
         backHillColor = Color(0xFF94A3B8),          // Slate gray-blue back hills
         frontHillColor = Color(0xFFE2E8F0),         // Soft frosted ice front hills
         navBarRiveResId = R.raw.smiley4, // Your new Nordic Rive file!
-        activeIconColor = Color(0xFF06B6D4),        // Crisp Teal/Cyan accent color
+        activeIconColor = Color(0xFF06B6D4),
+        statsRiveResId = R.raw.gl0wtree03,// Crisp Teal/Cyan accent color
         graphLineColor = Color(0xFF06B6D4),         // Teal graph lines & dots
         calendarTodayRingColor = Color(0xFF06B6D4)  // Teal calendar today circle indicator
     )

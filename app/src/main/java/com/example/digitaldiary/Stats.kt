@@ -56,7 +56,8 @@ val MoodColors = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChartScreen(
-    riveResId: Int,
+    navBarRiveResId: Int,
+    statsRiveResId: Int,
     themeProfile: AppThemeProfile,
     entries: List<DiaryEntry>,
     onBack: () -> Unit,
@@ -123,7 +124,7 @@ fun ChartScreen(
             },
             bottomBar = {
                 CustomBottomNavBar(
-                    riveResId = riveResId,
+                    riveResId = navBarRiveResId,
                     selectedTab = 1,
                     themeProfile = themeProfile,
                     onCalendarClick = onCalendarClick,
@@ -145,6 +146,7 @@ fun ChartScreen(
 
                 // 1. Rive Animation (Sits above the tabs, pushing them down)
                 RiveAnimationLayout(
+                    riveResId = statsRiveResId,
                     isWeekly = isWeekly,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -387,6 +389,7 @@ fun StraightLineBarGraph(
 }
 @Composable
 fun RiveAnimationLayout(
+    riveResId: Int,
     isWeekly: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -395,7 +398,7 @@ fun RiveAnimationLayout(
         factory = { context ->
             RiveAnimationView(context).apply {
                 setRiveResource(
-                    resId = R.raw.gl0wtree02, // Replace with your actual file name
+                    resId = riveResId, // Replace with your actual file name
                     alignment = RiveAlignment.CENTER,
                     fit = Fit.CONTAIN,
                     autoplay = true
