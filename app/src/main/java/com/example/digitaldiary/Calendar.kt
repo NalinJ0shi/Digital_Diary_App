@@ -35,7 +35,7 @@ fun CalendarScreen(
     entries: List<DiaryEntry>,
     onDateSelected: (Long) -> Unit,
     onBack: () -> Unit,
-    themeProfile: AppThemeProfile, // Corrected parameter type declaration
+    themeProfile: AppThemeProfile,
     onCalendarClick: () -> Unit,
     onChartClick: () -> Unit,
     onGameClick: () -> Unit,
@@ -43,8 +43,7 @@ fun CalendarScreen(
     onAddEntry: () -> Unit,
     onEditEntry: (DiaryEntry) -> Unit,
     onDeleteEntry: (DiaryEntry) -> Unit,
-)
-{
+) {
     val context = LocalContext.current
     val todayMillis = System.currentTimeMillis()
     var selectedDateMillis by remember { mutableLongStateOf(todayMillis) }
@@ -155,7 +154,7 @@ fun CalendarScreen(
                 }
             },
             bottomBar = {
-                CustomBottomNavBar(0, riveResId = riveResId,themeProfile = themeProfile,onCalendarClick, onChartClick, onGameClick, onProfileClick, onAddEntry)
+                CustomBottomNavBar(0, riveResId = riveResId, themeProfile = themeProfile, onCalendarClick, onChartClick, onGameClick, onProfileClick, onAddEntry)
             }
         ) { padding ->
             LazyColumn(
@@ -164,12 +163,10 @@ fun CalendarScreen(
                     .padding(padding)
                     .padding(horizontal = 16.dp),
                 contentPadding = PaddingValues(bottom = 100.dp)
-            )
-            {
+            ) {
                 // --- ITEM 1: WEEKDAY HEADER ROW ---
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
-
                     val weekdays = listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa")
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
@@ -267,13 +264,11 @@ fun CalendarScreen(
                     Box(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 25.dp),
                         contentAlignment = Alignment.Center
-                    )
-                    {
+                    ) {
                         if (selectedEntry != null) { DiaryItem(selectedEntry, onEditEntry, { onDeleteEntry(it) }) }
                         else { Text(text = "No thoughts logged for this day yet.", color = mutedTextColor, fontSize = 20.sp, textAlign = TextAlign.Center) }
                     }
                 }
-                //-----ITEM 4: THE SCROLL ---
                 item { Spacer(modifier = Modifier.height(200.dp)) }
             }
         }
@@ -304,7 +299,7 @@ fun MonthYearPickerModal(
     onConfirm: (month: Int, year: Int) -> Unit
 ) {
     val months = listOf("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
-    val years = (currentYear - 5..currentYear + 5).map { it.toString() }
+    val years = (currentYear - 10..currentYear).map { it.toString() }
 
     var selectedMonth by remember { mutableIntStateOf(currentMonth) }
     var selectedYear by remember { mutableIntStateOf(currentYear) }
@@ -313,17 +308,18 @@ fun MonthYearPickerModal(
         onDismissRequest = onDismiss,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp)
+            .padding(horizontal = 12.dp) // FIXED: Widened the dialog frame boundary
     ) {
         Card(
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFE7EAE1)),
             shape = RoundedCornerShape(24.dp),
             modifier = Modifier.fillMaxWidth()
-        ) {
+        )
+        {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp),
+                    .padding(vertical = 24.dp, horizontal = 12.dp), // FIXED: Reduced horizontal constraints
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -341,23 +337,28 @@ fun MonthYearPickerModal(
                 ) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .width(300.dp) // FIXED: Match layout size perfectly
                             .height(48.dp)
-                            .background(Color(0xFFF1F5F9).copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                            .background(Color(0xFFB9B5B5).copy(alpha = 0.5f), RoundedCornerShape(8.dp))
                     )
 
-                    Row(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.wrapContentWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         WheelPicker(
-                            modifier = Modifier.weight(1f),
                             items = months,
                             initialIndex = currentMonth,
-                            onItemSelected = { selectedMonth = it }
+                            onItemSelected = { selectedMonth = it },
+                            widthModifier = Modifier.width(110.dp)
                         )
+                        Spacer(modifier = Modifier.width(12.dp))
                         WheelPicker(
-                            modifier = Modifier.weight(1f),
                             items = years,
                             initialIndex = years.indexOf(currentYear.toString()),
-                            onItemSelected = { selectedYear = years[it].toInt() }
+                            onItemSelected = { selectedYear = years[it].toInt() },
+                            widthModifier = Modifier.width(100.dp)
                         )
                     }
                 }
@@ -365,7 +366,7 @@ fun MonthYearPickerModal(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Button(
@@ -397,31 +398,40 @@ fun WheelPicker(
     modifier: Modifier = Modifier,
     items: List<String>,
     initialIndex: Int,
-    onItemSelected: (Int) -> Unit
+    onItemSelected: (Int) -> Unit,
+    widthModifier: Modifier = Modifier.fillMaxWidth()
 ) {
-    val listState = rememberLazyListState(initialFirstVisibleItemIndex = initialIndex)
-    val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
     val itemHeight = 48.dp
 
-    val paddedItems = remember(items) { listOf("", "") + items + listOf("", "") }
+    // FIXED: Key structure resets list state position correctly every time the popup initializes
+    val listState = key(initialIndex) {
+        rememberLazyListState(initialFirstVisibleItemIndex = initialIndex)
+    }
+    val flingBehavior = rememberSnapFlingBehavior(lazyListState = listState)
 
-    LaunchedEffect(listState) {
-        snapshotFlow { listState.firstVisibleItemIndex }
-            .collect { index ->
-                if (index in items.indices) {
-                    onItemSelected(index)
-                }
+    var isInitialized by remember { mutableStateOf(false) }
+
+    LaunchedEffect(listState.firstVisibleItemIndex) {
+        if (!isInitialized) {
+            isInitialized = true
+        } else {
+            if (listState.firstVisibleItemIndex in items.indices) {
+                onItemSelected(listState.firstVisibleItemIndex)
             }
+        }
     }
 
     LazyColumn(
         state = listState,
         flingBehavior = flingBehavior,
-        modifier = modifier.height(itemHeight * 5),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier
+            .height(itemHeight * 3)
+            .then(widthModifier),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        contentPadding = PaddingValues(vertical = itemHeight)
     ) {
-        itemsIndexed(paddedItems) { index, item ->
-            val isCenter = listState.firstVisibleItemIndex == index - 2
+        itemsIndexed(items) { index, item ->
+            val isCenter = listState.firstVisibleItemIndex == index
 
             Box(
                 modifier = Modifier
@@ -433,9 +443,9 @@ fun WheelPicker(
                     text = item,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = if (isCenter) FontWeight.ExtraBold else FontWeight.Medium,
-                        fontSize = if (isCenter) 20.sp else 16.sp
+                        fontSize = if (isCenter) 22.sp else 16.sp
                     ),
-                    color = if (isCenter) Color(0xFF0F172A) else Color(0xFF94A3B8)
+                    color = if (isCenter) Color(0xFF191E1C) else Color(0xFF94A3B8)
                 )
             }
         }
