@@ -278,7 +278,7 @@ fun ProfileScreen(
                                 }
                                 Icon(
                                     imageVector = Icons.Default.KeyboardArrowRight,
-                                    contentDescription = "Write a review",
+                                    contentDescription = "Privacy Policy",
                                     tint = Color.Gray
                                 )
                             }
