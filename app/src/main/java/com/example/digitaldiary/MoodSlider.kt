@@ -31,6 +31,7 @@ fun MoodSliderScreen(
     var moodLevel by remember { mutableFloatStateOf(existingEntry?.dayRating?.toFloat() ?: 3f) }
     var entryContent by remember { mutableStateOf(existingEntry?.content ?: "") }
     var hasSlided by remember { mutableStateOf(existingEntry != null) }
+    var showNoteField by remember { mutableStateOf(existingEntry != null) }
 
     // CONTROL PALETTE
     val colorStep1 = Color(0xFF6C6363) // State 1: Very Bad
@@ -179,40 +180,13 @@ fun MoodSliderScreen(
 
         // Smart Reveal Text Field & Buttons
         if (hasSlided) {
-            TextField(
-                value = entryContent,
-                onValueChange = { entryContent = it },
-                placeholder = { Text("...", color = Color.White.copy(alpha = 0.5f)) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .padding(horizontal = 8.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.White.copy(alpha = 0.15f),
-                    unfocusedContainerColor = Color.White.copy(alpha = 0.1f),
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
-                ),
-                maxLines = 5
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // BUTTON ROW: Cancel and Save Actions side-by-side
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+            if (!showNoteField) {
+                // Option 1: Optional "Add Note" sits on top
                 OutlinedButton(
-                    onClick = onBack,
+                    onClick = { showNoteField = true },
                     modifier = Modifier
-                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp)
                         .height(50.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
@@ -220,25 +194,107 @@ fun MoodSliderScreen(
                     ),
                     border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
                 ) {
-                    Text("Cancel")
+                    Text("Add Note")
                 }
 
-                Button(
-                    onClick = { onSaveEntry(entryContent, moodLevel.roundToInt()) },
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Cancel and Save actions are immediately available side-by-side
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .height(50.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black
-                    )
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text("Save Entry")
+                    OutlinedButton(
+                        onClick = onBack,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(50.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = Color.White
+                        ),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
+                    ) {
+                        Text("Cancel")
+                    }
+
+                    Button(
+                        onClick = { onSaveEntry(entryContent, moodLevel.roundToInt()) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(50.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black
+                        )
+                    ) {
+                        Text("Save Entry")
+                    }
+                }
+            } else {
+                // Once clicked, the text field is revealed with the standard Cancel/Save row underneath
+                TextField(
+                    value = entryContent,
+                    onValueChange = { entryContent = it },
+                    placeholder = { Text("...", color = Color.White.copy(alpha = 0.5f)) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .padding(horizontal = 8.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.White.copy(alpha = 0.15f),
+                        unfocusedContainerColor = Color.White.copy(alpha = 0.1f),
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent
+                    ),
+                    maxLines = 5
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = onBack,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(50.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = Color.White
+                        ),
+                        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
+                    ) {
+                        Text("Cancel")
+                    }
+
+                    Button(
+                        onClick = { onSaveEntry(entryContent, moodLevel.roundToInt()) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(50.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black
+                        )
+                    ) {
+                        Text("Save Entry")
+                    }
                 }
             }
         } else {
-            // Standalone Cancel button if they haven't interacted yet
             OutlinedButton(
                 onClick = onBack,
                 modifier = Modifier
