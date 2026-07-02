@@ -42,7 +42,8 @@ fun ProfileScreen(
     onAddEntry: () -> Unit,
     onNavigateToPlantCollection: () -> Unit,
     onNavigateToInvite: () -> Unit,
-) {
+)
+{
     val primaryGreenColor = Color(0xFFFFFFFF)
     val scrollState = rememberScrollState()
     val context = LocalContext.current
@@ -280,46 +281,6 @@ fun ProfileScreen(
                                 Icon(
                                     imageVector = Icons.Default.KeyboardArrowRight,
                                     contentDescription = "Write a review",
-                                    tint = Color.Gray
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        UniversalDesignCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(70.dp),
-                            onClick = { onNavigateToInvite()}
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 20.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.users),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(24.dp),
-                                        tint = Color.Gray
-                                    )
-                                    Text(
-                                        text = "Invite a Friend",
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.DarkGray,
-                                        fontSize = 18.sp
-                                    )
-                                }
-                                Icon(
-                                    imageVector = Icons.Default.KeyboardArrowRight,
-                                    contentDescription = "Invite a Friend",
                                     tint = Color.Gray
                                 )
                             }
