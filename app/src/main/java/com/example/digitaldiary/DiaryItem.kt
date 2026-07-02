@@ -1,5 +1,5 @@
 // app/src/main/java/com/example/digitaldiary/DiaryItem.kt
-package com.example.digitaldiary.database
+package com.example.digitaldiary
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable

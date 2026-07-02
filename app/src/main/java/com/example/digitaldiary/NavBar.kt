@@ -1,5 +1,5 @@
-// app/src/main/java/com/example/digitaldiary/CustomBottomNavBar.kt
-package com.example.digitaldiary.miscellaneousBS
+// app/src/main/java/com/example/digitaldiary/NavBar.kt
+package com.example.digitaldiary
 
 import android.view.MotionEvent
 import kotlinx.coroutines.launch
@@ -28,7 +28,7 @@ import com.nalin.my_digitaldiary.R
 fun CustomBottomNavBar(
     selectedTab: Int, // Tells the navbar which icon should be green
     riveResId: Int,
-    themeProfile: com.example.digitaldiary.miscellaneousBS.AppThemeProfile,
+    themeProfile: AppThemeProfile,
     onCalendarClick: () -> Unit,
     onChartClick: () -> Unit,
     onGameClick: () -> Unit,

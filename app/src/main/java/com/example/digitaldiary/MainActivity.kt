@@ -12,8 +12,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import com.example.digitaldiary.miscellaneousBS.AppDesignTokens
-import com.example.digitaldiary.miscellaneousBS.UniversalBackgroundWrapper
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -23,15 +21,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import app.rive.runtime.kotlin.core.Rive
-import com.example.digitaldiary.database.DiaryViewModel
-import com.example.digitaldiary.screens.BreathingScreen
-import com.example.digitaldiary.screens.CalendarScreen
-import com.example.digitaldiary.screens.ChartScreen
-import com.example.digitaldiary.secondaryscreen.GardenScreen
-import com.example.digitaldiary.screens.MoodSliderScreen
-import com.example.digitaldiary.screens.ProfileScreen
+import com.example.digitaldiary.trash.GardenScreen
 import com.example.digitaldiary.screens.YellowScreen
-import com.example.digitaldiary.secondaryscreen.PlantCollectionScreen
+import com.example.digitaldiary.trash.PlantCollectionScreen
 import com.example.digitaldiary.ui.theme.AppGlobalGradient
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition

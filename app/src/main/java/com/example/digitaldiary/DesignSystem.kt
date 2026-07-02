@@ -1,4 +1,4 @@
-package com.example.digitaldiary.miscellaneousBS
+package com.example.digitaldiary
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.nalin.my_digitaldiary.R
 
 // 1. THE DESIGN TOKENS & PROFILE MODELS
 data class AppThemeProfile(
@@ -39,7 +40,7 @@ object AppDesignTokens {
         backgroundBrush = Brush.verticalGradient(listOf(Color(0xFFAEBE93), Color(0xFFD4DAE1))),
         backHillColor = Color(0xFFC6D7AC),
         frontHillColor = Color(0xFFDAEBC0),
-        navBarRiveResId = com.nalin.my_digitaldiary.R.raw.smiley,
+        navBarRiveResId = R.raw.smiley,
         activeIconColor = Color(0xFF4CA18A),
         graphLineColor = Color(0xFF4CA18A),
         calendarTodayRingColor = Color(0xFF4CA18A)
@@ -48,7 +49,7 @@ object AppDesignTokens {
         backgroundBrush = Brush.verticalGradient(listOf(Color(0xFF7DD3FC), Color(0xFFE0F2FE))),
         backHillColor = Color(0xFF38BDF8),
         frontHillColor = Color(0xFF85C9EA),
-        navBarRiveResId = com.nalin.my_digitaldiary.R.raw.smiley2,
+        navBarRiveResId = R.raw.smiley2,
         activeIconColor = Color(0xFF38BDF8),
         graphLineColor = Color(0xFF38BDF8),
         calendarTodayRingColor = Color(0xFF0EA5E9)
@@ -60,7 +61,7 @@ object AppDesignTokens {
         ),
         backHillColor = Color(0xFFFCA5A5),          // Warm Coral Pink back hills
         frontHillColor = Color(0xFFFFEDD5),         // Light Sunset Cream front hills
-        navBarRiveResId = com.nalin.my_digitaldiary.R.raw.smiley3, // Your new peach Rive file!
+        navBarRiveResId = R.raw.smiley3, // Your new peach Rive file!
         activeIconColor = Color(0xFFFB923C),        // Your chosen Peach accent color
         graphLineColor = Color(0xFFFB923C),         // Peach stats graph line & dots
         calendarTodayRingColor = Color(0xFFFB923C)  // Peach calendar today circle indicator
@@ -72,7 +73,7 @@ object AppDesignTokens {
         ),
         backHillColor = Color(0xFF94A3B8),          // Slate gray-blue back hills
         frontHillColor = Color(0xFFE2E8F0),         // Soft frosted ice front hills
-        navBarRiveResId = com.nalin.my_digitaldiary.R.raw.smiley4, // Your new Nordic Rive file!
+        navBarRiveResId = R.raw.smiley4, // Your new Nordic Rive file!
         activeIconColor = Color(0xFF06B6D4),        // Crisp Teal/Cyan accent color
         graphLineColor = Color(0xFF06B6D4),         // Teal graph lines & dots
         calendarTodayRingColor = Color(0xFF06B6D4)  // Teal calendar today circle indicator

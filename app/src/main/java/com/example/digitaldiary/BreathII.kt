@@ -24,69 +24,63 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import app.rive.runtime.kotlin.RiveAnimationView
-import com.example.digitaldiary.miscellaneousBS.UniversalBackgroundWrapper
 import com.example.digitaldiary.ui.theme.JosefinSans
 import kotlinx.coroutines.delay
-import kotlin.compareTo
 
-enum class FourSevenEightPhase(val durationMs: Long, val text: String) {
-    IN(4000L, "Breathe In... (4s)"),
-    HOLD(7000L, "Hold... (7s)"),
-    OUT(8000L, "Breathe Out... (8s)")
+enum class BreathingPhase {
+    BREATH_OUT, // Phase 1: 50% Green replaces Gray
+    BREATH_IN   // Phase 2: Gray replaces 50% Green
 }
 
 @Composable
-fun FourSevenEightBreathingScreen(
+fun ActiveBreathingScreen(
+    exerciseTitle: String,
     onBackClick: () -> Unit
 ) {
-    var currentPhase by remember { mutableStateOf(FourSevenEightPhase.IN) }
+    var currentPhase by remember { mutableStateOf(BreathingPhase.BREATH_OUT) }
     var riveView by remember { mutableStateOf<RiveAnimationView?>(null) }
 
-    // Normalized progress tracking (0.0f to 1.0f) for the current phase
-    var phaseProgress by remember { mutableStateOf(0f) }
+    // Absolute Manual Control Ticker Loop that counts upward infinitely
+    var manualProgress by remember { mutableStateOf(0f) }
 
     LaunchedEffect(Unit) {
         delay(1000L)
+
         while (true) {
-            // --- PHASE 1: IN (4 Seconds) ---
-            currentPhase = FourSevenEightPhase.IN
-            riveView?.fireState("State Machine 1", "next_phase") // Update Rive if needed
+            // Determine Phase based on whether the floor of manualProgress is Even or Odd
+            val currentStep = manualProgress.toInt()
 
-            val inDuration = FourSevenEightPhase.IN.durationMs
-            val stepsIn = (inDuration / 16L).toInt()
-            for (i in 0..stepsIn) {
-                phaseProgress = i.toFloat() / stepsIn
-                delay(16L)
-            }
+            if (currentStep % 2 == 0) {
+                currentPhase = BreathingPhase.BREATH_OUT
 
-            // --- PHASE 2: HOLD (7 Seconds) ---
-            currentPhase = FourSevenEightPhase.HOLD
-            riveView?.fireState("State Machine 1", "next_phase")
+                riveView?.fireState("State Machine 1", "next_phase")
 
-            val holdDuration = FourSevenEightPhase.HOLD.durationMs
-            val stepsHold = (holdDuration / 16L).toInt()
-            for (i in 0..stepsHold) {
-                phaseProgress = i.toFloat() / stepsHold
-                delay(16L)
-            }
+                val target = currentStep + 1f
+                while (manualProgress < target) {
+                    manualProgress += 0.005f
+                    delay(15L)
+                }
+                manualProgress = target // Lock precisely at the whole number
+            } else {
+                // ODD steps (1f->2f, 3f->4f, etc.) = Breath In (Gray fills 50% Green)
+                currentPhase = BreathingPhase.BREATH_IN
 
-            // --- PHASE 3: OUT (8 Seconds) ---
-            currentPhase = FourSevenEightPhase.OUT
-            riveView?.fireState("State Machine 1", "next_phase")
+                // Trigger Rive to advance to the Breath In animation state
+                riveView?.fireState("State Machine 1", "next_phase")
 
-            val outDuration = FourSevenEightPhase.OUT.durationMs
-            val stepsOut = (outDuration / 16L).toInt()
-            for (i in 0..stepsOut) {
-                phaseProgress = i.toFloat() / stepsOut
-                delay(16L)
+                val target = currentStep + 1f
+                while (manualProgress < target) {
+                    manualProgress += 0.005f
+                    delay(15L)
+                }
+                manualProgress = target // Lock precisely at the whole number
             }
         }
     }
 
-    // Color Theme Customization
+    // Color Swatches
     val baseGrayColor = Color(0xFFE2E8F0).copy(alpha = 0.5f)
-    val activeBlueColor = Color(0xFF38BDF8).copy(alpha = 0.6f) // Swapped to Blue to contrast Box Breathing
-    val activeOrangeColor = Color(0xFFFB923C).copy(alpha = 0.6f)
+    val activeGreen50Opacity = Color(0xFF9EF163).copy(alpha = 0.5f)
 
     Box(
         modifier = Modifier
@@ -102,17 +96,20 @@ fun FourSevenEightBreathingScreen(
                     .fillMaxSize()
                     .padding(innerPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            )
+            {
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Interactive Progress Track
+                // The Centered Interaction Zone
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.size(280.dp)
-                ) {
+                )
+                {
                     Canvas(modifier = Modifier.fillMaxSize()) {
                         val strokeWidthPx = 20.dp.toPx()
                         val cornerRadiusPx = 48.dp.toPx()
+
                         val padding = strokeWidthPx / 2
                         val squareSize = Size(size.width - (padding * 2), size.height - (padding * 2))
 
@@ -128,47 +125,67 @@ fun FourSevenEightBreathingScreen(
 
                         val pathMeasure = PathMeasure()
                         pathMeasure.setPath(fullPath, false)
-                        val totalLength = pathMeasure.length
-                        val currentDistance = totalLength * phaseProgress
 
-                        // Choose colors based on active pacing states
-                        val (fillColor, remColor) = when (currentPhase) {
-                            FourSevenEightPhase.IN -> Pair(activeBlueColor, baseGrayColor)
-                            FourSevenEightPhase.HOLD -> Pair(activeOrangeColor, activeBlueColor)
-                            FourSevenEightPhase.OUT -> Pair(baseGrayColor, activeOrangeColor)
+                        // 1. Map progress perfectly into a clockwise 0.0 -> 1.0 fraction
+                        val segmentProgress = manualProgress % 1f
+
+                        val splitDistance = if (segmentProgress == 0f && manualProgress > 0f) {
+                            pathMeasure.length
+                        } else {
+                            pathMeasure.length * segmentProgress
                         }
 
-                        // Segment A: Drawing active progress
-                        if (currentDistance > 0f) {
+                        // 2. Even/Odd Step Logic for Color Swapping
+                        val currentStep = manualProgress.toInt()
+                        val (activeFillColor, emptyFillColor) = if (currentStep % 2 == 0) {
+                            // Even Step: 50% Green fills up, displacing Gray
+                            Pair(activeGreen50Opacity, baseGrayColor)
+                        } else {
+                            // Odd Step: Gray fills up (erases), displacing 50% Green
+                            Pair(baseGrayColor, activeGreen50Opacity)
+                        }
+
+                        // 3. Draw Segment A (Active Fill running forward clockwise)
+                        if (splitDistance > 0f) {
                             val activePath = Path()
-                            pathMeasure.getSegment(0f, currentDistance, activePath, true)
+                            pathMeasure.getSegment(
+                                startDistance = 0f,
+                                stopDistance = splitDistance,
+                                destination = activePath,
+                                startWithMoveTo = true
+                            )
                             drawPath(
                                 path = activePath,
-                                color = fillColor,
+                                color = activeFillColor,
                                 style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
                             )
                         }
 
-                        // Segment B: Drawing remaining background track
-                        if (currentDistance < totalLength) {
-                            val remainingPath = Path()
-                            pathMeasure.getSegment(currentDistance, totalLength, remainingPath, true)
+                        // 4. Draw Segment B (Empty Fill ahead clearing out of the way)
+                        if (splitDistance < pathMeasure.length) {
+                            val emptyRemainingPath = Path()
+                            pathMeasure.getSegment(
+                                startDistance = splitDistance,
+                                stopDistance = pathMeasure.length,
+                                destination = emptyRemainingPath,
+                                startWithMoveTo = true
+                            )
                             drawPath(
-                                path = remainingPath,
-                                color = remColor,
+                                path = emptyRemainingPath,
+                                color = emptyFillColor,
                                 style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
                             )
                         }
                     }
 
-                    // Animation Engine Box
+                    // The Clean Rive Core View
                     Box(modifier = Modifier.size(300.dp)) {
                         AndroidView(
                             modifier = Modifier.fillMaxSize(),
                             factory = { context ->
                                 RiveAnimationView(context).apply {
                                     setRiveResource(
-                                        resId = R.raw.breatho1, // Uses same layout rig asset
+                                        resId = R.raw.breatho1,
                                         stateMachineName = "State Machine 1"
                                     )
                                     riveView = this
@@ -179,10 +196,12 @@ fun FourSevenEightBreathingScreen(
                 }
 
                 Spacer(modifier = Modifier.height(40.dp))
-
-                // Dynamic UI prompt text
+                // Dynamic UI guidance text
                 Text(
-                    text = currentPhase.text,
+                    text = when (currentPhase) {
+                        BreathingPhase.BREATH_OUT -> "Breathe In..."
+                        BreathingPhase.BREATH_IN -> "Breathe Out..."
+                    },
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontSize = 26.sp,
                         fontWeight = FontWeight.Medium,
@@ -200,11 +219,12 @@ fun FourSevenEightBreathingScreen(
                         .background(Color(0xFF475569), shape = CircleShape) // Change hex color here for full background control!
                         .clickable { onBackClick() }
                 ) { Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White // Change icon arrow color here!
-                ) }
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.White // Change icon arrow color here!
+                    ) }
             }
+
         }
     }
 }

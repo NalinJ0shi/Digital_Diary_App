@@ -1,4 +1,4 @@
-package com.example.digitaldiary.screens
+package com.example.digitaldiary
 
 import android.graphics.Paint
 import androidx.compose.foundation.Canvas
@@ -26,10 +26,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.example.digitaldiary.miscellaneousBS.CustomBottomNavBar
-import com.example.digitaldiary.miscellaneousBS.UniversalBackgroundWrapper
-import com.example.digitaldiary.database.DiaryEntry
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.platform.LocalDensity
 import com.nalin.my_digitaldiary.R
 import app.rive.runtime.kotlin.RiveAnimationView
 import app.rive.runtime.kotlin.core.Alignment as RiveAlignment
@@ -59,7 +57,7 @@ val MoodColors = listOf(
 @Composable
 fun ChartScreen(
     riveResId: Int,
-    themeProfile: com.example.digitaldiary.miscellaneousBS.AppThemeProfile,
+    themeProfile: AppThemeProfile,
     entries: List<DiaryEntry>,
     onBack: () -> Unit,
     onCalendarClick: () -> Unit,
@@ -278,7 +276,7 @@ fun ChartScreen(
 @Composable
 fun StraightLineBarGraph(
     dataPoints: List<Pair<String, Float>>,
-    themeProfile: com.example.digitaldiary.miscellaneousBS.AppThemeProfile
+    themeProfile: AppThemeProfile
 ) {
     // 1. LOAD COMPOSABLE ASSETS OUTSIDE THE CANVAS ENGINE
     val moodDrawables = listOf(
@@ -290,12 +288,12 @@ fun StraightLineBarGraph(
     )
 
     // Convert Dp measurements to Px while still inside the Composable scope
-    val emojiSizePx = with(androidx.compose.ui.platform.LocalDensity.current) { 22.dp.toPx() }
-    val yAxisLabelOffsetPx = with(androidx.compose.ui.platform.LocalDensity.current) { 10.dp.toPx() }
-    val gridStrokePx = with(androidx.compose.ui.platform.LocalDensity.current) { 2.dp.toPx() }
-    val yAxisDotRadiusPx = with(androidx.compose.ui.platform.LocalDensity.current) { 6.dp.toPx() }
-    val anchorRadiusOuterPx = with(androidx.compose.ui.platform.LocalDensity.current) { 7.dp.toPx() }
-    val anchorRadiusInnerPx = with(androidx.compose.ui.platform.LocalDensity.current) { 4.dp.toPx() }
+    val emojiSizePx = with(LocalDensity.current) { 22.dp.toPx() }
+    val yAxisLabelOffsetPx = with(LocalDensity.current) { 10.dp.toPx() }
+    val gridStrokePx = with(LocalDensity.current) { 2.dp.toPx() }
+    val yAxisDotRadiusPx = with(LocalDensity.current) { 6.dp.toPx() }
+    val anchorRadiusOuterPx = with(LocalDensity.current) { 7.dp.toPx() }
+    val anchorRadiusInnerPx = with(LocalDensity.current) { 4.dp.toPx() }
     val lineStrokeWidthPx = with(androidx.compose.ui.platform.LocalDensity.current) { 3.dp.toPx() }
 
     Canvas(modifier = Modifier.fillMaxSize()) {

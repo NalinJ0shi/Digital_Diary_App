@@ -1,4 +1,4 @@
-package com.example.digitaldiary.screens
+package com.example.digitaldiary
 
 import com.nalin.my_digitaldiary.R
 import androidx.compose.foundation.clickable
@@ -23,8 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import app.rive.runtime.kotlin.RiveAnimationView
-import com.example.digitaldiary.miscellaneousBS.CustomBottomNavBar
-import com.example.digitaldiary.miscellaneousBS.UniversalBackgroundWrapper
+import app.rive.runtime.kotlin.core.Fit
+import com.example.digitaldiary.screens.ActiveBreathingScreen
+import com.example.digitaldiary.screens.FourSevenEightBreathingScreen
 import com.example.digitaldiary.ui.theme.JosefinSans
 import kotlin.math.abs
 
@@ -36,7 +37,7 @@ data class BreathingExercise(
 @Composable
 fun BreathingScreen(
     riveResId: Int,
-    themeProfile: com.example.digitaldiary.miscellaneousBS.AppThemeProfile,
+    themeProfile: AppThemeProfile,
     onBack: () -> Unit,
     onCalendarClick: () -> Unit,
     onChartClick: () -> Unit,
@@ -266,7 +267,7 @@ fun ExerciseCarouselView(
                                     .align(Alignment.Center),
                                 factory = { context ->
                                     RiveAnimationView(context).apply {
-                                        this.fit = app.rive.runtime.kotlin.core.Fit.FILL
+                                        this.fit = Fit.FILL
                                         this.alignment = app.rive.runtime.kotlin.core.Alignment.CENTER
 
                                         val resId = when (index) {

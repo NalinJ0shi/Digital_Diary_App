@@ -1,4 +1,4 @@
-package com.example.digitaldiary.screens
+package com.example.digitaldiary
 
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -23,10 +23,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.digitaldiary.miscellaneousBS.CustomBottomNavBar
-import com.example.digitaldiary.miscellaneousBS.UniversalBackgroundWrapper
-import com.example.digitaldiary.database.DiaryEntry
-import com.example.digitaldiary.database.DiaryItem
 import com.nalin.my_digitaldiary.R
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -39,7 +35,7 @@ fun CalendarScreen(
     entries: List<DiaryEntry>,
     onDateSelected: (Long) -> Unit,
     onBack: () -> Unit,
-    themeProfile: com.example.digitaldiary.miscellaneousBS.AppThemeProfile, // Corrected parameter type declaration
+    themeProfile: AppThemeProfile, // Corrected parameter type declaration
     onCalendarClick: () -> Unit,
     onChartClick: () -> Unit,
     onGameClick: () -> Unit,

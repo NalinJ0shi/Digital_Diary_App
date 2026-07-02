@@ -1,4 +1,4 @@
-package com.example.digitaldiary.secondaryscreen
+package com.example.digitaldiary.trash
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -21,9 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import app.rive.runtime.kotlin.RiveAnimationView
-import com.example.digitaldiary.miscellaneousBS.CustomBottomNavBar
-import com.example.digitaldiary.miscellaneousBS.UniversalBackgroundWrapper
-import com.example.digitaldiary.database.DiaryEntry
+import com.example.digitaldiary.UniversalBackgroundWrapper
+import com.example.digitaldiary.DiaryEntry
 import com.nalin.my_digitaldiary.R
 import kotlinx.coroutines.delay
 

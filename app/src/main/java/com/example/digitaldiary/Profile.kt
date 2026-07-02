@@ -1,7 +1,6 @@
-package com.example.digitaldiary.screens
+package com.example.digitaldiary
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,19 +17,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.digitaldiary.miscellaneousBS.AppDesignTokens
-import com.example.digitaldiary.miscellaneousBS.CustomBottomNavBar
-import com.example.digitaldiary.miscellaneousBS.UniversalBackgroundWrapper
-import com.example.digitaldiary.miscellaneousBS.UniversalDesignCard
 import androidx.compose.ui.platform.LocalContext
 import com.nalin.my_digitaldiary.R
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.example.digitaldiary.openPlayStoreForReview
 
 @Composable
 fun ProfileScreen(
     riveResId: Int,
-    themeProfile: com.example.digitaldiary.miscellaneousBS.AppThemeProfile,
+    themeProfile: AppThemeProfile,
     entriesCount: Int,
     plantsCount: Int,
     onToggleTheme: (String) -> Unit,
@@ -270,7 +264,7 @@ fun ProfileScreen(
                                         tint = Color.Gray
                                     )
                                     Text(
-                                        text = "Write a review",
+                                        text = "Privacy Policy",
                                         fontWeight = FontWeight.Bold,
                                         color = Color.DarkGray,
                                         fontSize = 18.sp

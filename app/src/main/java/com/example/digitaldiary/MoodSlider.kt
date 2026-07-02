@@ -1,8 +1,9 @@
-package com.example.digitaldiary.screens
+package com.example.digitaldiary
 
 import com.nalin.my_digitaldiary.R
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -16,7 +17,6 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import app.rive.runtime.kotlin.RiveAnimationView
-import com.example.digitaldiary.database.DiaryEntry
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
@@ -223,7 +223,7 @@ fun MoodSliderScreen(
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = Color.White
                     ),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
+                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
                 ) {
                     Text("Cancel")
                 }
@@ -253,7 +253,7 @@ fun MoodSliderScreen(
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = Color.White
                 ),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.4f))
             ) {
                 Text("Cancel")
             }
