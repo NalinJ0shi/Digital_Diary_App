@@ -102,17 +102,7 @@ fun ChartScreen(
     }
 
     UniversalBackgroundWrapper(themeProfile = themeProfile){
-        IconButton(
-            onClick = onBack,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(start = 16.dp, top = 40.dp)
-        ) {Icon(
-                painter = painterResource(id = R.drawable.potted_plant),
-                contentDescription = "Navigate to Garden",
-                tint = Color(0xFFFFFFFF),
-                modifier = Modifier.size(32.dp)
-            )}
+
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {

@@ -60,19 +60,7 @@ fun ProfileScreen(
                             .padding(start = 16.dp, top = 46.dp, end = 16.dp),
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            onClick = onBack,
-                            modifier = Modifier.minimumInteractiveComponentSize()
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.potted_plant),
-                                contentDescription = "Go Home",
-                                modifier = Modifier.size(32.dp),
-                                tint = primaryGreenColor
-                            )
-                        }
-                    }
+                    ) {}
 
                     Column(
                         modifier = Modifier
@@ -88,7 +76,7 @@ fun ProfileScreen(
                         //My Records
                         Text(
                             text = "My records",
-                            fontSize = 23.sp,
+                            fontSize = 33.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Gray
                         )

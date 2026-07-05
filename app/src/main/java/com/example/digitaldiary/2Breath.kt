@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -149,16 +148,7 @@ fun ExerciseCarouselView(
                 .padding(start = 16.dp, top = 16.dp, end = 16.dp),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    painter = painterResource(id = R.drawable.potted_plant),
-                    contentDescription = "Navigate to Garden",
-                    tint = Color(0xFFFFFFFF),
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        }
+        ) {}
 
         Spacer(modifier = Modifier.weight(0.5f))
 
