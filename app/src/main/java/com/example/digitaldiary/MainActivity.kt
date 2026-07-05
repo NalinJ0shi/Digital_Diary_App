@@ -21,9 +21,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import app.rive.runtime.kotlin.core.Rive
-import com.example.digitaldiary.trash.GardenScreen
 import com.example.digitaldiary.screens.YellowScreen
-import com.example.digitaldiary.trash.PlantCollectionScreen
 import com.example.digitaldiary.ui.theme.AppGlobalGradient
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -98,65 +96,6 @@ fun DiaryAppNavigation() {
     {
         composable("yellow_screen") {
             YellowScreen()
-        }
-
-        composable("home") {
-            UniversalBackgroundWrapper(themeProfile = currentThemeProfile) {
-                GardenScreen(
-                    entries = entries,
-                    streakCount = streakCount,
-                    canAdd = true,
-                    isDarkMode = currentThemeProfile == AppDesignTokens.OceanTheme,
-                    currentPlantTier = currentPlantTier,
-                    onUnlockPlant = { tier -> diaryViewModel.unlockNewPlant(tier + 1) },
-                    // Handles the blind toggle layout click on the Garden dashboard view
-                    onToggleTheme = {
-                        val targetKey = if (currentThemeProfile == AppDesignTokens.ForestTheme) "ocean" else "forest"
-                        currentThemeProfile = if (targetKey == "ocean") AppDesignTokens.OceanTheme else AppDesignTokens.ForestTheme
-                        sharedPreferences.edit().putString("selected_theme", targetKey).apply()
-                    },
-                    onAddEntry = { navController.navigate("mood_screen") },
-                    onOpenCalendar = {
-                        navController.navigate("calendar_screen") {
-                            popUpTo("home") { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    onNavigateToChart = {
-                        navController.navigate("chart_screen") {
-                            popUpTo("home") { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    onNavigateToGame = {
-                        navController.navigate("game_screen") {
-                            popUpTo("home") { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    onNavigateToProfile = {
-                        navController.navigate("profile_screen") {
-                            popUpTo("home") { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    onEditEntry = { entry ->
-                        navController.navigate("mood_screen?timestamp=${entry.timestamp}")
-                    },
-                    onDeleteEntry = { entry -> diaryViewModel.delete(entry) }
-                )
-            }
-        }
-
-        composable("plant_collection") {
-            PlantCollectionScreen(
-                viewModel = diaryViewModel,
-                onBack = { navController.popBackStack() }
-            )
         }
 
         composable(
@@ -307,12 +246,12 @@ fun DiaryAppNavigation() {
         }
 
         composable("profile_screen") {
+            val notesCount = entries.count { it.content.isNotBlank() }
             ProfileScreen(
                 themeProfile = currentThemeProfile,
                 riveResId = currentThemeProfile.navBarRiveResId,
                 entriesCount = entries.size,
-                plantsCount = unlockedPlants.size + 1,
-                // FIXED & FUTURE-PROOF LAMBDA: Safely maps incoming explicit card string requests
+                plantsCount = notesCount,
                 onToggleTheme = { themeKey ->
                     currentThemeProfile = when (themeKey) {
                         "ocean" -> AppDesignTokens.OceanTheme
@@ -352,7 +291,7 @@ fun DiaryAppNavigation() {
                 },
                 onProfileClick = {  },
                 onAddEntry = { navController.navigate("mood_screen") },
-                onNavigateToPlantCollection = { navController.navigate("plant_collection") },
+                onNavigateToPlantCollection = {  },
                 onNavigateToInvite = { navController.navigate("yellow_screen") }
             )
         }

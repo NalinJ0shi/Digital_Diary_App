@@ -1,5 +1,6 @@
 package com.example.digitaldiary
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -17,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.net.Uri
 import androidx.compose.ui.platform.LocalContext
 import com.nalin.my_digitaldiary.R
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -124,7 +126,7 @@ fun ProfileScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(110.dp),
-                                onClick = onNavigateToPlantCollection
+                                onClick = { /* Action disabled as we discarded the plant library navigation */ }
                             ) {
                                 Column(
                                     modifier = Modifier.fillMaxSize(),
@@ -132,14 +134,14 @@ fun ProfileScreen(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Text(
-                                        text = plantsCount.toString(),
+                                        text = plantsCount.toString(), // This parameter now receives the notesCount value from MainActivity
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 28.sp,
                                         color = AppDesignTokens.primaryText
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = "Plants",
+                                        text = "Notes", // Updated UI display name
                                         color = Color.Gray,
                                         fontSize = 14.sp
                                     )
@@ -284,7 +286,14 @@ fun ProfileScreen(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            IconButton(onClick = { /* Social 1 */ }) {
+                            IconButton(onClick = {
+                                val intent = Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://www.behance.net/primenalinjoshi")
+                                )
+                                context.startActivity(intent)
+                            })
+                            {
                                 Icon(
                                     painter = painterResource(id = R.drawable.behance_logo),
                                     contentDescription = "Social 1",
@@ -293,7 +302,11 @@ fun ProfileScreen(
                                 )
                             }
                             Spacer(modifier = Modifier.width(16.dp))
-                            IconButton(onClick = { /* Social 2 */ }) {
+                            IconButton(onClick = {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.instagram.com/mon00nono0o/"))
+                                context.startActivity(intent)
+                            })
+                            {
                                 Icon(
                                     painter = painterResource(id = R.drawable.instagram_logo),
                                     contentDescription = "Social 2",
@@ -302,7 +315,11 @@ fun ProfileScreen(
                                 )
                             }
                             Spacer(modifier = Modifier.width(16.dp))
-                            IconButton(onClick = { /* Social 3 */ }) {
+                            IconButton(onClick = {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("www.linkedin.com/in"))
+                                context.startActivity(intent)
+                            })
+                            {
                                 Icon(
                                     painter = painterResource(id = R.drawable.linkedin_logo),
                                     contentDescription = "Social 3",

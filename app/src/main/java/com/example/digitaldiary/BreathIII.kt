@@ -100,7 +100,8 @@ fun FourSevenEightBreathingScreen(
                     .fillMaxSize()
                     .padding(innerPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            )
+            {
                 Spacer(modifier = Modifier.weight(1f))
 
                 // Interactive Progress Track
@@ -178,7 +179,7 @@ fun FourSevenEightBreathingScreen(
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                // Dynamic UI prompt text
+                // the breath in breath out text
                 Text(
                     text = currentPhase.text,
                     style = MaterialTheme.typography.bodyLarge.copy(
@@ -188,8 +189,9 @@ fun FourSevenEightBreathingScreen(
                     ),
                     color = Color(0xFF475569)
                 )
-
                 Spacer(modifier = Modifier.weight(1f))
+
+                //the back icon
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
