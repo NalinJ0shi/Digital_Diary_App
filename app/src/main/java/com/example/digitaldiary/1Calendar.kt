@@ -110,12 +110,6 @@ fun CalendarScreen(
             containerColor = Color.Transparent,
             topBar = {
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    Icon(
-                            painter = painterResource(id = R.drawable.potted_plant),
-                            contentDescription = "Navigate to Garden",
-                            modifier = Modifier.size(32.dp),
-                            tint = Color(0xFFFFFFFF)
-                        )
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()

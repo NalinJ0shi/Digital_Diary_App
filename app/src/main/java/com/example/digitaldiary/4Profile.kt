@@ -154,12 +154,6 @@ fun ProfileScreen(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.potted_plant),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(24.dp),
-                                        tint = Color.Gray
-                                    )
                                     Text(
                                         text = "Theme",
                                         fontWeight = FontWeight.Bold,
